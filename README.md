@@ -6,7 +6,9 @@ Sync Strava activities, normalize and aggregate them, and generate GitHub-style 
 - Note: The GitHub Pages site is optimized for responsive desktop/mobile viewing.
 
 <!-- HEATMAPS:START -->
-![Run 2026](heatmaps/Run/2026.svg)
+Preview:
+
+![All Workouts 2025](heatmaps/AllWorkouts/2025.svg)
 <!-- HEATMAPS:END -->
 
 ## Strava App Setup

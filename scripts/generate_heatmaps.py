@@ -19,6 +19,8 @@ AGG_PATH = os.path.join("data", "daily_aggregates.json")
 ACTIVITIES_PATH = os.path.join("data", "activities_normalized.json")
 README_PATH = "README.md"
 SITE_DATA_PATH = os.path.join("site", "data.json")
+README_PREVIEW_TYPE = "AllWorkouts"
+README_PREVIEW_YEAR = 2025
 
 CELL = 12
 GAP = 2
@@ -31,6 +33,7 @@ LABEL_COLOR = "#cbd5e1"
 TEXT_COLOR = "#e5e7eb"
 BG_COLOR = "#0f172a"
 STROKE_COLOR = "#0f172a"
+ALL_WORKOUTS_ACCENT = "#b967ff"
 
 
 def _year_range_from_config(config: Dict) -> List[int]:
@@ -140,6 +143,26 @@ def _type_totals(aggregates_years: Dict) -> Dict[str, int]:
     return totals
 
 
+def _combine_year_entries(year_data: Dict[str, Dict[str, Dict]]) -> Dict[str, Dict]:
+    combined: Dict[str, Dict] = {}
+    for entries in (year_data or {}).values():
+        for date_str, entry in (entries or {}).items():
+            if date_str not in combined:
+                combined[date_str] = {
+                    "count": 0,
+                    "distance": 0.0,
+                    "moving_time": 0.0,
+                    "elevation_gain": 0.0,
+                    "activity_ids": [],
+                }
+            bucket = combined[date_str]
+            bucket["count"] += int(entry.get("count", 0))
+            bucket["distance"] += float(entry.get("distance", 0.0))
+            bucket["moving_time"] += float(entry.get("moving_time", 0.0))
+            bucket["elevation_gain"] += float(entry.get("elevation_gain", 0.0))
+    return combined
+
+
 def _svg_for_year(
     year: int,
     entries: Dict[str, Dict],
@@ -229,16 +252,15 @@ def _svg_for_year(
     return "\n".join(lines) + "\n"
 
 
-def _readme_section(types: List[str], years_desc: List[int], type_meta: Dict[str, Dict[str, str]]) -> str:
-    if not types or not years_desc:
-        return "\n"
-    preview_type = types[0]
-    preview_year = years_desc[0]
-    preview_label = type_meta.get(preview_type, {}).get("label", preview_type)
-    return f"![{preview_label} {preview_year}](heatmaps/{preview_type}/{preview_year}.svg)\n"
+def _readme_section() -> str:
+    return (
+        "Preview:\n\n"
+        f"![All Workouts {README_PREVIEW_YEAR}]"
+        f"(heatmaps/{README_PREVIEW_TYPE}/{README_PREVIEW_YEAR}.svg)\n"
+    )
 
 
-def _update_readme(types: List[str], years_desc: List[int], type_meta: Dict[str, Dict[str, str]]) -> None:
+def _update_readme() -> None:
     if not os.path.exists(README_PATH):
         return
     with open(README_PATH, "r", encoding="utf-8") as f:
@@ -246,7 +268,7 @@ def _update_readme(types: List[str], years_desc: List[int], type_meta: Dict[str,
 
     start_tag = "<!-- HEATMAPS:START -->"
     end_tag = "<!-- HEATMAPS:END -->"
-    section = _readme_section(types, years_desc, type_meta)
+    section = _readme_section()
 
     if start_tag in content and end_tag in content:
         before, rest = content.split(start_tag, 1)
@@ -313,8 +335,19 @@ def generate():
             with open(path, "w", encoding="utf-8") as f:
                 f.write(svg)
 
-    years_desc = list(reversed(years))
-    _update_readme(types, years_desc, type_meta)
+    preview_dir = os.path.join("heatmaps", README_PREVIEW_TYPE)
+    ensure_dir(preview_dir)
+    preview_entries = _combine_year_entries(aggregate_years.get(str(README_PREVIEW_YEAR), {}))
+    preview_svg = _svg_for_year(
+        README_PREVIEW_YEAR,
+        preview_entries,
+        units,
+        _color_scale(ALL_WORKOUTS_ACCENT),
+    )
+    with open(os.path.join(preview_dir, f"{README_PREVIEW_YEAR}.svg"), "w", encoding="utf-8") as f:
+        f.write(preview_svg)
+
+    _update_readme()
 
     site_payload = {
         "generated_at": utc_now().isoformat(),
