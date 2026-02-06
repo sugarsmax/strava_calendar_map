@@ -70,6 +70,18 @@ No local clone is required for this setup. You can run everything from GitHub Ac
    - generate SVGs in `heatmaps/`
    - build `site/data.json`
 
+### Activity Type Note
+
+This repo currently features `Run`, `Ride`, and `WeightTraining` by default (see [`activities.types` in `config.yaml`](config.yaml)).
+
+In this source repo (`aspain/git-sweaty`), non-featured activity types are excluded by default because [`activities.include_all_types`](config.yaml) is `false`.
+
+In forks running through [`.github/workflows/sync.yml`](.github/workflows/sync.yml), `config.local.yaml` is written with `activities.include_all_types: true`, so all activity types in that athlete's Strava history are included by default (for example, `Swim` and `Snowboard`).
+
+With [`activities.group_other_types`](config.yaml) set to `true` (default), many raw Strava types are automatically grouped into categories (for example, `Snowboard` -> `WinterSports`) using mappings in [`scripts/activity_types.py`](scripts/activity_types.py).
+
+To manually filter activity types in a fork, set `activities.include_all_types: false` and customize [`activities.types`](config.yaml).
+
 ## Configuration (Optional)
 
 Everything in this section is optional. Defaults work without changes.

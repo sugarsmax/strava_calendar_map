@@ -49,6 +49,8 @@ jobs:
             client_id: "${{ secrets.STRAVA_CLIENT_ID }}"
             client_secret: "${{ secrets.STRAVA_CLIENT_SECRET }}"
             refresh_token: "${{ secrets.STRAVA_REFRESH_TOKEN }}"
+          activities:
+            include_all_types: ${{ github.repository != 'aspain/git-sweaty' }}
           CONFIG
 
       - name: Run pipeline
