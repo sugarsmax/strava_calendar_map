@@ -18,7 +18,6 @@ const summary = document.getElementById("summary");
 const updated = document.getElementById("updated");
 const repoLink = document.querySelector(".repo-link");
 const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
-const isStatsPage = Boolean(stats) && !heatmaps;
 
 function inferGitHubRepoFromLocation(loc) {
   const host = String(loc.hostname || "").toLowerCase();
@@ -652,6 +651,24 @@ function getTypeYearTotals(payload, type, years) {
   return totals;
 }
 
+function getTypesYearTotals(payload, types, years) {
+  if (types.length === 1) {
+    return getTypeYearTotals(payload, types[0], years);
+  }
+  const totals = new Map();
+  years.forEach((year) => {
+    const yearData = payload.aggregates?.[String(year)] || {};
+    let total = 0;
+    types.forEach((type) => {
+      Object.values(yearData?.[type] || {}).forEach((entry) => {
+        total += entry.count || 0;
+      });
+    });
+    totals.set(year, total);
+  });
+  return totals;
+}
+
 function trimOldestEmptyYears(years, yearTotals) {
   if (!years.length) return [];
   const yearsAsc = years.slice().sort((a, b) => a - b);
@@ -670,13 +687,26 @@ function trimOldestEmptyYears(years, yearTotals) {
   return years.filter((year) => year >= firstActiveYear);
 }
 
-function getVisibleYearsForType(payload, type, years) {
+function getVisibleYearsForTypes(payload, types, years, showAllYears) {
   const sortedYears = years.slice().sort((a, b) => b - a);
-  if (type === "all") {
+  if (showAllYears) {
     return sortedYears;
   }
-  const yearTotals = getTypeYearTotals(payload, type, sortedYears);
+  if (!types.length) {
+    return sortedYears;
+  }
+  const yearTotals = getTypesYearTotals(payload, types, sortedYears);
   return trimOldestEmptyYears(sortedYears, yearTotals);
+}
+
+function getFrequencyColor(types, allYearsSelected) {
+  if (types.length === 1) {
+    return getColors(types[0])[4];
+  }
+  if (allYearsSelected) {
+    return MULTI_TYPE_COLOR;
+  }
+  return types.length ? getColors(types[0])[4] : MULTI_TYPE_COLOR;
 }
 
 function buildStatRow() {
@@ -706,7 +736,7 @@ function buildStatPanel(title, subtitle) {
   return { panel, body };
 }
 
-function buildStatsOverview(payload, types, years, selectedType) {
+function buildStatsOverview(payload, types, years, color) {
   const card = document.createElement("div");
   card.className = "card more-stats";
 
@@ -724,7 +754,6 @@ function buildStatsOverview(payload, types, years, selectedType) {
   facts.className = "more-stats-facts";
 
   const yearsDesc = years.slice().sort((a, b) => b - a);
-  const color = selectedType === "all" ? MULTI_TYPE_COLOR : getColors(selectedType)[4];
   const emptyColor = DEFAULT_COLORS[0];
 
   const dayMatrix = yearsDesc.map(() => new Array(7).fill(0));
@@ -1039,11 +1068,10 @@ function calculateStreaks(activeDates) {
   return { longest, latest: current };
 }
 
-function renderStats(payload, types, years, selectedType) {
+function renderStats(payload, types, years, color) {
   if (!stats) return;
   stats.innerHTML = "";
 
-  const color = selectedType === "all" ? MULTI_TYPE_COLOR : getColors(selectedType)[4];
   const yearsDesc = years.slice().sort((a, b) => b - a);
   const yearIndex = new Map();
   yearsDesc.forEach((year, index) => {
@@ -1264,55 +1292,163 @@ async function init() {
 
   let resizeTimer = null;
 
-  let selectedType = "all";
-  let selectedYear = "all";
+  let allTypesMode = true;
+  let selectedTypes = new Set();
+  let allYearsMode = true;
+  let selectedYears = new Set();
+  let currentVisibleYears = payload.years.slice().sort((a, b) => b - a);
 
-  function updateButtonState(container, value) {
+  function areAllTypesSelected() {
+    return allTypesMode;
+  }
+
+  function areAllYearsSelected() {
+    return allYearsMode;
+  }
+
+  function selectedTypesList() {
+    if (areAllTypesSelected()) {
+      return payload.types.slice();
+    }
+    return payload.types.filter((type) => selectedTypes.has(type));
+  }
+
+  function selectedYearsList(visibleYears) {
+    if (areAllYearsSelected()) {
+      return visibleYears.slice();
+    }
+    return visibleYears.filter((year) => selectedYears.has(Number(year)));
+  }
+
+  function updateButtonState(container, selectedValues, isAllSelected, normalizeValue) {
     if (!container) return;
     container.querySelectorAll(".filter-button").forEach((button) => {
-      button.classList.toggle("active", button.dataset.value === value);
+      const rawValue = String(button.dataset.value || "");
+      const value = normalizeValue ? normalizeValue(rawValue) : rawValue;
+      const isActive = rawValue === "all"
+        ? isAllSelected
+        : (!isAllSelected && selectedValues.has(value));
+      button.classList.toggle("active", isActive);
     });
   }
 
-  function update() {
-    const types = selectedType === "all" ? payload.types : [selectedType];
-    const visibleYears = getVisibleYearsForType(payload, selectedType, payload.years);
-    if (selectedYear !== "all" && !visibleYears.includes(Number(selectedYear))) {
-      selectedYear = "all";
+  function toggleType(value) {
+    if (value === "all") {
+      allTypesMode = true;
+      selectedTypes.clear();
+      return;
     }
+    if (!payload.types.includes(value)) return;
+    if (allTypesMode) {
+      allTypesMode = false;
+      selectedTypes = new Set([value]);
+      return;
+    }
+    if (selectedTypes.has(value)) {
+      selectedTypes.delete(value);
+      if (!selectedTypes.size) {
+        allTypesMode = true;
+      }
+      return;
+    }
+    selectedTypes.add(value);
+  }
+
+  function toggleYear(value) {
+    if (value === "all") {
+      allYearsMode = true;
+      selectedYears.clear();
+      return;
+    }
+    const year = Number(value);
+    if (!Number.isFinite(year) || !currentVisibleYears.includes(year)) return;
+    if (allYearsMode) {
+      allYearsMode = false;
+      selectedYears = new Set([year]);
+      return;
+    }
+    if (selectedYears.has(year)) {
+      selectedYears.delete(year);
+      if (!selectedYears.size) {
+        allYearsMode = true;
+      }
+      return;
+    }
+    selectedYears.add(year);
+  }
+
+  function getTypeSelectValue() {
+    if (areAllTypesSelected()) return "all";
+    if (selectedTypes.size === 1) {
+      return payload.types.find((type) => selectedTypes.has(type)) || "all";
+    }
+    return "all";
+  }
+
+  function getYearSelectValue(visibleYears) {
+    if (areAllYearsSelected()) return "all";
+    if (selectedYears.size === 1) {
+      const year = Array.from(selectedYears)[0];
+      return visibleYears.includes(year) ? String(year) : "all";
+    }
+    return "all";
+  }
+
+  function update() {
+    const allTypesSelected = areAllTypesSelected();
+    const types = selectedTypesList();
+    const visibleYears = getVisibleYearsForTypes(payload, types, payload.years, allTypesSelected);
+    currentVisibleYears = visibleYears.slice();
+    if (!areAllYearsSelected()) {
+      const visibleSet = new Set(visibleYears.map(Number));
+      Array.from(selectedYears).forEach((year) => {
+        if (!visibleSet.has(Number(year))) {
+          selectedYears.delete(year);
+        }
+      });
+      if (!selectedYears.size) {
+        allYearsMode = true;
+      }
+    }
+    const allYearsSelected = areAllYearsSelected();
     const yearOptions = [
       { value: "all", label: "All Years" },
       ...visibleYears.map((year) => ({ value: String(year), label: String(year) })),
     ];
     renderButtons(yearButtons, yearOptions, (value) => {
-      selectedYear = value;
+      toggleYear(value);
       update();
     });
     renderSelect(yearSelect, yearOptions);
-    const years = isStatsPage
-      ? visibleYears.slice()
-      : (selectedYear === "all" ? visibleYears.slice() : [Number(selectedYear)]);
+    const years = selectedYearsList(visibleYears);
+    if (!years.length) {
+      allYearsMode = true;
+      selectedYears.clear();
+      years.push(...visibleYears);
+    }
     years.sort((a, b) => b - a);
+    const frequencyColor = getFrequencyColor(types, allYearsSelected);
+    const showCombinedTypes = types.length > 1;
 
-    updateButtonState(typeButtons, selectedType);
-    updateButtonState(yearButtons, selectedYear);
-    if (typeSelect) typeSelect.value = selectedType;
-    if (yearSelect) yearSelect.value = selectedYear;
+    updateButtonState(typeButtons, selectedTypes, allTypesSelected);
+    updateButtonState(yearButtons, selectedYears, allYearsSelected, (v) => Number(v));
+    if (typeSelect) typeSelect.value = getTypeSelectValue();
+    if (yearSelect) yearSelect.value = getYearSelectValue(visibleYears);
 
     if (heatmaps) {
       heatmaps.innerHTML = "";
-      const showMoreStats = selectedYear === "all";
-      if (selectedType === "all") {
+      const showMoreStats = allYearsSelected;
+      if (showCombinedTypes) {
         const section = document.createElement("div");
         section.className = "type-section";
         const header = document.createElement("div");
         header.className = "type-header";
-        header.textContent = "All Workouts";
+        header.textContent = allTypesSelected ? "All Workouts" : "Selected Workouts";
         section.appendChild(header);
         const list = document.createElement("div");
         list.className = "type-list";
         if (showMoreStats) {
-          list.appendChild(buildStatsOverview(payload, types, years, selectedType));
+          list.appendChild(buildStatsOverview(payload, types, years, frequencyColor));
         }
         years.forEach((year) => {
           const yearData = payload.aggregates?.[String(year)] || {};
@@ -1349,11 +1485,11 @@ async function init() {
           const list = document.createElement("div");
           list.className = "type-list";
           const yearTotals = getTypeYearTotals(payload, type, years);
-          const cardYears = selectedYear === "all"
+          const cardYears = allYearsSelected
             ? trimOldestEmptyYears(years, yearTotals)
             : years.slice();
           if (showMoreStats) {
-            list.appendChild(buildStatsOverview(payload, [type], cardYears, selectedType));
+            list.appendChild(buildStatsOverview(payload, [type], cardYears, frequencyColor));
           }
           cardYears.forEach((year) => {
             const aggregates = payload.aggregates?.[String(year)]?.[type] || {};
@@ -1372,29 +1508,29 @@ async function init() {
       }
     }
 
-    renderStats(payload, types, years, selectedType);
+    renderStats(payload, types, years, frequencyColor);
 
-    const showTypeBreakdown = selectedType === "all";
-    const showActiveDays = selectedType === "all" && Boolean(heatmaps);
+    const showTypeBreakdown = types.length > 1;
+    const showActiveDays = types.length > 1 && Boolean(heatmaps);
     const hideDistanceElevation = shouldHideDistanceElevation(payload, types, years);
     buildSummary(payload, types, years, showTypeBreakdown, showActiveDays, hideDistanceElevation);
   }
 
   renderButtons(typeButtons, typeOptions, (value) => {
-    selectedType = value;
+    toggleType(value);
     update();
   });
   renderSelect(typeSelect, typeOptions);
 
   if (typeSelect) {
     typeSelect.addEventListener("change", () => {
-      selectedType = typeSelect.value;
+      toggleType(typeSelect.value);
       update();
     });
   }
   if (yearSelect) {
     yearSelect.addEventListener("change", () => {
-      selectedYear = yearSelect.value;
+      toggleYear(yearSelect.value);
       update();
     });
   }
