@@ -2,7 +2,7 @@
 
 Sync Strava activities, normalize and aggregate them, and generate GitHub-style heatmaps per workout type/year. Populates an interactive, free GitHub Pages–hosted dashboard, automatically refreshed daily.
 
-- Live site: View the Interactive [Activity Dashboard](https://aspain.github.io/git-sweaty/)
+- View the Interactive [Activity Dashboard](https://aspain.github.io/git-sweaty/)
 - Once setup is complete, this dashboard link will automatically update to link to your own GitHub Pages URL.
 
 <!-- HEATMAPS:START -->
