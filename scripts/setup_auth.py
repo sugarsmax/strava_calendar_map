@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import argparse
 import getpass
+import html
 import http.server
 import secrets
 import shutil
@@ -19,6 +20,7 @@ import socketserver
 import subprocess
 import sys
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import json
@@ -29,6 +31,7 @@ from typing import Optional
 
 TOKEN_ENDPOINT = "https://www.strava.com/oauth/token"
 AUTHORIZE_ENDPOINT = "https://www.strava.com/oauth/authorize"
+CALLBACK_PATH = "/exchange_token"
 
 
 @dataclass
@@ -47,6 +50,10 @@ class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):
 
     def do_GET(self) -> None:  # noqa: N802
         parsed = urllib.parse.urlparse(self.path)
+        if parsed.path != CALLBACK_PATH:
+            self.send_error(404, "Not Found")
+            return
+
         query = urllib.parse.parse_qs(parsed.query)
         state = query.get("state", [""])[0]
         code = query.get("code", [""])[0]
@@ -65,10 +72,11 @@ class OAuthCallbackHandler(http.server.BaseHTTPRequestHandler):
         if self.__class__.result.error:
             message = f"Authorization failed: {self.__class__.result.error}"
 
+        safe_message = html.escape(message, quote=True)
         body = (
             "<!doctype html><html><head><meta charset='utf-8'>"
             "<title>Strava Auth</title></head><body>"
-            f"<p>{message}</p></body></html>"
+            f"<p>{safe_message}</p></body></html>"
         ).encode("utf-8")
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
@@ -113,10 +121,21 @@ def _assert_gh_ready(repo: Optional[str]) -> None:
 
 
 def _set_secret(name: str, value: str, repo: Optional[str]) -> None:
-    cmd = ["gh", "secret", "set", name, "--body", value]
+    cmd = ["gh", "secret", "set", name]
     if repo:
         cmd.extend(["--repo", repo])
-    subprocess.run(cmd, check=True)
+    try:
+        subprocess.run(
+            cmd,
+            input=value,
+            text=True,
+            check=True,
+            capture_output=True,
+        )
+    except subprocess.CalledProcessError as exc:
+        stderr = (exc.stderr or "").strip()
+        detail = f": {stderr.splitlines()[0]}" if stderr else ""
+        raise RuntimeError(f"Failed to set GitHub secret {name}{detail}") from None
 
 
 def _authorize_and_get_code(
@@ -178,13 +197,19 @@ def _exchange_code_for_tokens(client_id: str, client_secret: str, code: str) -> 
         method="POST",
         headers={"Content-Type": "application/x-www-form-urlencoded"},
     )
-    with urllib.request.urlopen(request, timeout=30) as response:
-        body = response.read().decode("utf-8")
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            body = response.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        raise RuntimeError(f"Strava token exchange failed with HTTP status {exc.code}.") from None
+    except urllib.error.URLError as exc:
+        reason = getattr(exc, "reason", "unknown network error")
+        raise RuntimeError(f"Strava token exchange request failed: {reason}.") from None
 
     try:
         response_payload = json.loads(body)
-    except json.JSONDecodeError as exc:
-        raise RuntimeError(f"Unexpected token response payload: {body[:200]}") from exc
+    except json.JSONDecodeError:
+        raise RuntimeError("Unexpected token response format from Strava.") from None
 
     refresh_token = response_payload.get("refresh_token")
     if not refresh_token:
@@ -197,7 +222,14 @@ def parse_args() -> argparse.Namespace:
         description="Bootstrap Strava OAuth and store required GitHub Actions secrets."
     )
     parser.add_argument("--client-id", default=None, help="Strava client ID.")
-    parser.add_argument("--client-secret", default=None, help="Strava client secret.")
+    parser.add_argument(
+        "--client-secret",
+        default=None,
+        help=(
+            "Strava client secret. Supported for convenience, but interactive prompt is safer "
+            "because command-line arguments may be visible to local process inspection."
+        ),
+    )
     parser.add_argument(
         "--repo",
         default=None,
@@ -226,6 +258,18 @@ def parse_args() -> argparse.Namespace:
 def main() -> int:
     args = parse_args()
 
+    if args.port < 1 or args.port > 65535:
+        raise ValueError("--port must be between 1 and 65535.")
+    if args.timeout <= 0:
+        raise ValueError("--timeout must be a positive number of seconds.")
+
+    if args.client_secret:
+        print(
+            "Warning: passing --client-secret can expose the value via shell history/process inspection. "
+            "Prompted input is safer.",
+            file=sys.stderr,
+        )
+
     client_id = _prompt(args.client_id, "STRAVA_CLIENT_ID")
     client_secret = _prompt(args.client_secret, "STRAVA_CLIENT_SECRET", secret=True)
     if not client_id or not client_secret:
@@ -233,7 +277,7 @@ def main() -> int:
 
     _assert_gh_ready(args.repo)
 
-    redirect_uri = f"http://localhost:{args.port}/exchange_token"
+    redirect_uri = f"http://localhost:{args.port}{CALLBACK_PATH}"
     code = _authorize_and_get_code(
         client_id=client_id,
         redirect_uri=redirect_uri,
