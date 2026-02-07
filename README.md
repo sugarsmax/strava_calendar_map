@@ -13,11 +13,52 @@ Preview:
 
 ## Quick Start
 
-No local clone is required for this setup. You can run everything from GitHub Actions. Clone locally only if you want to customize or run the scripts yourself.
+### Option 1 (Recommended): Run the setup script
+
+This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) auth.
+
+1. Fork this repo to your account: [Fork this repository](../../fork)
+2. Clone your fork and `cd` into it:
+
+   ```bash
+   git clone https://github.com/<your-username>/<repo-name>.git
+   cd <repo-name>
+   ```
+3. Create a [Strava API application](https://www.strava.com/settings/api). Set **Authorization Callback Domain** to `localhost`, then copy:
+   - `STRAVA_CLIENT_ID`
+   - `STRAVA_CLIENT_SECRET`
+4. Make sure GitHub CLI is authenticated:
+
+   ```bash
+   gh auth login
+   ```
+
+5. Run:
+
+   ```bash
+   python3 scripts/setup_auth.py --client-id STRAVA_CLIENT_ID
+   ```
+
+   When prompted, paste `STRAVA_CLIENT_SECRET` (it is hidden input).
+
+   The script will:
+   - open Strava OAuth in your browser
+   - capture the callback code locally
+   - exchange it for a refresh token
+   - set `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, and `STRAVA_REFRESH_TOKEN` via `gh secret set`
+6. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
+   - Under **Build and deployment**, set **Source** to **GitHub Actions**.
+7. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
+   - If GitHub shows an **Enable workflows** button in [Actions](../../actions), click it first.
+   - Go to [Actions](../../actions) → [Sync Strava Heatmaps](../../actions/workflows/sync.yml) → **Run workflow**.
+   - The same workflow is also scheduled in `.github/workflows/sync.yml` (daily at `06:00 UTC`).
+8. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
+
+### Option 2: Manual setup (no local clone required)
 
 1. Fork this repo to your account: [Fork this repository](../../fork)
 
-2. Create a Strava API application at [Strava API Settings](https://www.strava.com/settings/api). Set **Authorization Callback Domain** to `localhost`, then copy:
+2. Create a [Strava API application](https://www.strava.com/settings/api). Set **Authorization Callback Domain** to `localhost`, then copy:
    - `STRAVA_CLIENT_ID`
    - `STRAVA_CLIENT_SECRET`
 
@@ -63,12 +104,13 @@ No local clone is required for this setup. You can run everything from GitHub Ac
    - The same workflow is also scheduled in `.github/workflows/sync.yml` (daily at `06:00 UTC`).
 
 7. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
-   This workflow will:
-   - sync raw activities into `activities/raw/` (local-only; not committed)
-   - normalize + merge into `data/activities_normalized.json` (persisted history)
-   - aggregate into `data/daily_aggregates.json`
-   - generate SVGs in `heatmaps/`
-   - build `site/data.json`
+
+Both options run the same workflow, which will:
+- sync raw activities into `activities/raw/` (local-only; not committed)
+- normalize + merge into `data/activities_normalized.json` (persisted history)
+- aggregate into `data/daily_aggregates.json`
+- generate SVGs in `heatmaps/`
+- build `site/data.json`
 
 ## Activity Type Note
 
