@@ -533,7 +533,7 @@
       }
 
       .more-stats {
-        --more-stats-col-gap: clamp(20px, 3vw, 32px);
+        --more-stats-col-gap: clamp(16px, 2.4vw, 24px);
         --more-stats-base-shift: 6px;
         --more-stats-followup-shift: 6px;
         --axis-gap: 8px;
@@ -582,16 +582,16 @@
       }
 
       .more-stats-facts {
-        display: flex;
-        flex-direction: column;
-        align-items: stretch;
+        display: grid;
+        grid-template-columns: repeat(2, max-content);
         gap: 8px;
         grid-column: 2;
         grid-row: 2;
         width: max-content;
         max-width: 100%;
-        align-self: stretch;
-        justify-content: space-between;
+        align-self: start;
+        align-content: start;
+        justify-content: start;
         justify-self: end;
       }
 
@@ -1159,9 +1159,8 @@
           margin-top: 0;
         }
         .more-stats-facts {
-          display: flex;
-          flex-direction: row;
-          flex-wrap: nowrap;
+          display: grid;
+          grid-template-columns: repeat(2, max-content);
           grid-column: 1;
           grid-row: 3;
           gap: 8px;
@@ -1169,7 +1168,7 @@
           align-self: start;
           justify-self: start;
           justify-content: flex-start;
-          align-items: stretch;
+          align-items: start;
           align-content: flex-start;
           width: max-content;
           max-width: 100%;

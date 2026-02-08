@@ -259,6 +259,13 @@ function formatLocalDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+function weekOfYear(date) {
+  const yearStart = new Date(date.getFullYear(), 0, 1);
+  const start = sundayOnOrBefore(yearStart);
+  const msPerWeek = 1000 * 60 * 60 * 24 * 7;
+  return Math.floor((date - start) / msPerWeek) + 1;
+}
+
 function hexToRgb(hex) {
   const cleaned = hex.replace("#", "");
   if (cleaned.length !== 6) return null;
@@ -962,6 +969,7 @@ function buildStatsOverview(payload, types, years, color) {
   const monthBreakdowns = yearsDesc.map(() => (
     Array.from({ length: 12 }, () => ({}))
   ));
+  const weekTotals = new Array(54).fill(0);
 
   yearsDesc.forEach((year, row) => {
     types.forEach((type) => {
@@ -972,8 +980,12 @@ function buildStatsOverview(payload, types, years, color) {
         const date = new Date(`${dateStr}T00:00:00`);
         const dayIndex = date.getDay();
         const monthIndex = date.getMonth();
+        const weekIndex = weekOfYear(date);
         dayMatrix[row][dayIndex] += count;
         monthMatrix[row][monthIndex] += count;
+        if (weekIndex >= 1 && weekIndex < weekTotals.length) {
+          weekTotals[weekIndex] += count;
+        }
         const dayBucket = dayBreakdowns[row][dayIndex];
         const monthBucket = monthBreakdowns[row][monthIndex];
         dayBucket[type] = (dayBucket[type] || 0) + count;
@@ -1097,7 +1109,7 @@ function buildStatsOverview(payload, types, years, color) {
   const bestDayIndex = dayTotals.reduce((best, value, index) => (
     value > dayTotals[best] ? index : best
   ), 0);
-  const bestDayLabel = `${DAYS[bestDayIndex]} (${dayTotals[bestDayIndex]} ${dayTotals[bestDayIndex] === 1 ? "activity" : "activities"})`;
+  const bestDayLabel = `${DAYS[bestDayIndex]} (${dayTotals[bestDayIndex]})`;
 
   const monthTotals = monthMatrix.reduce(
     (acc, row) => row.map((value, index) => acc[index] + value),
@@ -1106,27 +1118,44 @@ function buildStatsOverview(payload, types, years, color) {
   const bestMonthIndex = monthTotals.reduce((best, value, index) => (
     value > monthTotals[best] ? index : best
   ), 0);
-  const bestMonthLabel = `${MONTHS[bestMonthIndex]} (${monthTotals[bestMonthIndex]} ${monthTotals[bestMonthIndex] === 1 ? "activity" : "activities"})`;
+  const bestMonthLabel = `${MONTHS[bestMonthIndex]} (${monthTotals[bestMonthIndex]})`;
 
   const bestHourIndex = hourTotals.reduce((best, value, index) => (
     value > hourTotals[best] ? index : best
   ), 0);
   const bestHourLabel = activities.length
-    ? `${formatHourLabel(bestHourIndex)} (${hourTotals[bestHourIndex]} ${hourTotals[bestHourIndex] === 1 ? "activity" : "activities"})`
+    ? `${formatHourLabel(bestHourIndex)} (${hourTotals[bestHourIndex]})`
     : "Not enough time data yet";
 
-  const columns = [
+  const bestWeekIndex = weekTotals.reduce((best, value, index) => (
+    index === 0 ? best : (value > weekTotals[best] ? index : best)
+  ), 1);
+  const bestWeekCount = weekTotals[bestWeekIndex] || 0;
+  const bestWeekLabel = bestWeekCount > 0
+    ? `Week ${bestWeekIndex} (${bestWeekCount})`
+    : "Not enough data yet";
+
+  const graphColumns = [
     { panel: dayPanel.panel, label: "Most active day", value: bestDayLabel },
     { panel: monthPanel.panel, label: "Most Active Month", value: bestMonthLabel },
     { panel: hourPanel.panel, label: "Peak hour", value: bestHourLabel },
   ];
 
-  columns.forEach((item) => {
+  graphColumns.forEach((item) => {
     const col = document.createElement("div");
     col.className = "more-stats-col";
     col.appendChild(item.panel);
     graphs.appendChild(col);
+  });
 
+  const factItems = [
+    { label: "Most active day", value: bestDayLabel },
+    { label: "Most Active Month", value: bestMonthLabel },
+    { label: "Peak hour", value: bestHourLabel },
+    { label: "Most active week", value: bestWeekLabel },
+  ];
+
+  factItems.forEach((item) => {
     const factCard = document.createElement("div");
     factCard.className = "card-stat more-stats-fact-card";
     const label = document.createElement("div");
