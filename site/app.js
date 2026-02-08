@@ -478,49 +478,6 @@ function alignFrequencyFactsToYearCardEdge() {
   });
 }
 
-function alignYearStatsToFrequencyEdge() {
-  if (!heatmaps) return;
-
-  const allYearStats = Array.from(
-    heatmaps.querySelectorAll(".labeled-card-row-year .year-card .card-stats.side-stats-column"),
-  );
-  allYearStats.forEach((statsColumn) => {
-    statsColumn.style.transform = "";
-  });
-
-  const desktop = window.matchMedia("(min-width: 721px)").matches;
-  if (!desktop) return;
-
-  heatmaps.querySelectorAll(".type-list").forEach((list) => {
-    const frequencyCard = list.querySelector(".labeled-card-row-frequency .more-stats");
-    const frequencyFacts = list.querySelector(
-      ".labeled-card-row-frequency .more-stats .more-stats-facts.side-stats-column",
-    );
-    if (!frequencyCard || !frequencyFacts) return;
-
-    const frequencyStacked = frequencyCard.classList.contains("more-stats-stacked");
-    if (frequencyStacked) return;
-
-    const targetLeft = frequencyFacts.getBoundingClientRect().left;
-    if (!Number.isFinite(targetLeft)) return;
-
-    list.querySelectorAll(".labeled-card-row-year .year-card").forEach((yearCard) => {
-      const statsColumn = yearCard.querySelector(".card-stats.side-stats-column");
-      if (!statsColumn) return;
-      const yearStacked = yearCard.classList.contains("year-card-stacked");
-      if (yearStacked !== frequencyStacked) return;
-
-      const currentLeft = statsColumn.getBoundingClientRect().left;
-      if (!Number.isFinite(currentLeft)) return;
-
-      const shift = Math.round(targetLeft - currentLeft);
-      if (shift !== 0) {
-        statsColumn.style.transform = `translateX(${shift}px)`;
-      }
-    });
-  });
-}
-
 function applyDesktopStatsRightInset() {
   if (!heatmaps) return;
   const desktop = window.matchMedia("(min-width: 721px)").matches;
@@ -596,7 +553,6 @@ function alignStackedStatsToYAxisLabels() {
     resetStackedStatsOffset(statsColumn);
   });
 
-  alignYearStatsToFrequencyEdge();
   applyDesktopStatsRightInset();
 }
 
