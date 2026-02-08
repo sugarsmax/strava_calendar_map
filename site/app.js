@@ -80,67 +80,18 @@ function resetStackedStatsOffset(statsColumn) {
   statsColumn.style.maxWidth = "";
 }
 
-let textMeasureProbe = null;
+function applyStackedStatsOffset(statsColumn, anchorElement) {
+  if (!statsColumn || !anchorElement) return;
 
-function ensureTextMeasureProbe() {
-  if (textMeasureProbe && textMeasureProbe.isConnected) {
-    return textMeasureProbe;
-  }
-  const probe = document.createElement("span");
-  probe.setAttribute("aria-hidden", "true");
-  probe.style.position = "fixed";
-  probe.style.visibility = "hidden";
-  probe.style.pointerEvents = "none";
-  probe.style.whiteSpace = "pre";
-  probe.style.left = "-9999px";
-  probe.style.top = "0";
-  document.body.appendChild(probe);
-  textMeasureProbe = probe;
-  return probe;
-}
-
-function getRenderedTextLeft(el) {
-  if (!el) return 0;
-  const rect = el.getBoundingClientRect();
-  const style = window.getComputedStyle(el);
-  const rawText = (el.textContent || "").trim();
-  if (!rawText) return rect.left;
-
-  const probe = ensureTextMeasureProbe();
-  probe.style.font = style.font;
-  probe.style.letterSpacing = style.letterSpacing;
-  probe.style.fontKerning = style.fontKerning;
-  probe.style.fontVariant = style.fontVariant;
-  probe.style.fontFeatureSettings = style.fontFeatureSettings;
-  probe.style.fontVariationSettings = style.fontVariationSettings;
-  probe.textContent = rawText;
-  const textWidth = probe.getBoundingClientRect().width;
-
-  const padLeft = parseFloat(style.paddingLeft) || 0;
-  const padRight = parseFloat(style.paddingRight) || 0;
-  const contentLeft = rect.left + padLeft;
-  const contentRight = rect.right - padRight;
-  const contentWidth = Math.max(0, contentRight - contentLeft);
-  const align = style.textAlign;
-
-  if (align === "right" || align === "end") {
-    return contentRight - textWidth;
-  }
-  if (align === "center" || align === "-webkit-center") {
-    return contentLeft + (contentWidth - textWidth) / 2;
-  }
-  return contentLeft;
-}
-
-function applyStackedStatsOffset(statsColumn, anchorLabel) {
-  if (!statsColumn || !anchorLabel) return;
-
-  // Measure the real rendered left edge of the label text against a zero-offset stats column.
+  // Align the first stat card edge (not just the container) to the graph block's left edge.
   statsColumn.style.marginLeft = "0px";
   statsColumn.style.maxWidth = "100%";
-  const baseLeft = statsColumn.getBoundingClientRect().left;
-  const labelLeft = getRenderedTextLeft(anchorLabel);
-  const offset = Math.max(0, labelLeft - baseLeft);
+  const firstStatCard = statsColumn.querySelector(".card-stat, .more-stats-fact-card");
+  const baseLeft = firstStatCard
+    ? firstStatCard.getBoundingClientRect().left
+    : statsColumn.getBoundingClientRect().left;
+  const anchorLeft = anchorElement.getBoundingClientRect().left;
+  const offset = Math.max(0, anchorLeft - baseLeft);
 
   statsColumn.style.marginLeft = `${offset}px`;
   statsColumn.style.maxWidth = `calc(100% - ${offset}px)`;
@@ -246,10 +197,8 @@ function alignFrequencyGraphsToYearCardEdge() {
     frequencyCard.style.setProperty("--more-stats-third-col-shift", "0px");
     if (!desktop) return;
 
-    const firstGraph = frequencyCard.querySelector(".more-stats-grid > .more-stats-col:nth-child(1)");
-    const secondGraph = frequencyCard.querySelector(".more-stats-grid > .more-stats-col:nth-child(2)");
     const thirdGraph = frequencyCard.querySelector(".more-stats-grid > .more-stats-col:nth-child(3)");
-    if (!firstGraph || !secondGraph || !thirdGraph) return;
+    if (!thirdGraph) return;
 
     let referenceRow = row.nextElementSibling;
     while (referenceRow && !referenceRow.classList.contains("labeled-card-row-year")) {
@@ -262,27 +211,9 @@ function alignFrequencyGraphsToYearCardEdge() {
     const targetRight = referenceYearGraph.getBoundingClientRect().right;
     const delta = Math.round(targetRight - thirdRight);
 
-    let secondShift = Math.round(delta / 2);
-    let thirdShift = delta;
-    const minGap = 4;
-
-    if (delta < 0) {
-      const firstRect = firstGraph.getBoundingClientRect();
-      const secondRect = secondGraph.getBoundingClientRect();
-      const thirdRect = thirdGraph.getBoundingClientRect();
-
-      const minSecondShift = Math.ceil((firstRect.right + minGap) - secondRect.left);
-      secondShift = Math.max(secondShift, minSecondShift);
-
-      const minThirdShift = Math.ceil((secondRect.right + secondShift + minGap) - thirdRect.left);
-      thirdShift = Math.max(thirdShift, minThirdShift);
-    }
-
-    const cardOverflow = Math.ceil(frequencyCard.scrollWidth - frequencyCard.clientWidth);
-    if (cardOverflow > 0 && delta > 0) {
-      secondShift -= Math.ceil(cardOverflow / 2);
-      thirdShift -= cardOverflow;
-    }
+    // Never shift columns left during resize transitions; allow horizontal scrolling instead.
+    const secondShift = Math.max(0, Math.round(delta / 2));
+    const thirdShift = Math.max(0, delta);
 
     frequencyCard.style.setProperty("--more-stats-second-col-shift", `${secondShift}px`);
     frequencyCard.style.setProperty("--more-stats-third-col-shift", `${thirdShift}px`);
@@ -325,7 +256,6 @@ function alignFrequencyFactsToYearCardEdge() {
 
 function alignStackedStatsToYAxisLabels() {
   if (!heatmaps) return;
-  const useYearStackedOffset = window.matchMedia("(min-width: 901px)").matches;
   normalizeSummaryStatCardWidths();
   alignFrequencyTitleGapToYearGap();
   alignFrequencyGraphsToYearCardEdge();
@@ -334,12 +264,8 @@ function alignStackedStatsToYAxisLabels() {
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
     const heatmapArea = card.querySelector(".heatmap-area");
     const statsColumn = card.querySelector(".card-stats.side-stats-column");
-    const anchorLabel = card.querySelector(".day-col .day-label");
-    if (!heatmapArea || !statsColumn || !anchorLabel) return;
-    if (!useYearStackedOffset) {
-      resetStackedStatsOffset(statsColumn);
-      return;
-    }
+    const anchorGrid = card.querySelector(".grid");
+    if (!heatmapArea || !statsColumn || !anchorGrid) return;
 
     const heatmapBottom = heatmapArea.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
@@ -348,14 +274,14 @@ function alignStackedStatsToYAxisLabels() {
       resetStackedStatsOffset(statsColumn);
       return;
     }
-    applyStackedStatsOffset(statsColumn, anchorLabel);
+    applyStackedStatsOffset(statsColumn, anchorGrid);
   });
 
   heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const graphBody = card.querySelector(".more-stats-body");
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
-    const anchorLabel = card.querySelector(".axis-day-col .day-label");
-    if (!graphBody || !statsColumn || !anchorLabel) return;
+    const anchorGrid = card.querySelector(".axis-matrix-grid");
+    if (!graphBody || !statsColumn || !anchorGrid) return;
 
     const graphBottom = graphBody.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
@@ -364,7 +290,7 @@ function alignStackedStatsToYAxisLabels() {
       resetStackedStatsOffset(statsColumn);
       return;
     }
-    applyStackedStatsOffset(statsColumn, anchorLabel);
+    applyStackedStatsOffset(statsColumn, anchorGrid);
   });
 }
 
