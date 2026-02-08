@@ -286,9 +286,9 @@ function alignStackedStatsToYAxisLabels() {
     const anchorLabel = card.querySelector(".day-col .day-label");
     if (!heatmapArea || !statsColumn || !anchorLabel) return;
 
-    const heatmapTop = heatmapArea.getBoundingClientRect().top;
+    const heatmapBottom = heatmapArea.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
-    const isStacked = statsTop > heatmapTop + 1;
+    const isStacked = statsTop >= heatmapBottom - 1;
     if (!isStacked) {
       resetStackedStatsOffset(statsColumn);
       return;
@@ -302,9 +302,9 @@ function alignStackedStatsToYAxisLabels() {
     const anchorLabel = card.querySelector(".axis-day-col .day-label");
     if (!graphBody || !statsColumn || !anchorLabel) return;
 
-    const graphTop = graphBody.getBoundingClientRect().top;
+    const graphBottom = graphBody.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
-    const isStacked = statsTop > graphTop + 1;
+    const isStacked = statsTop >= graphBottom - 1;
     if (!isStacked) {
       resetStackedStatsOffset(statsColumn);
       return;
