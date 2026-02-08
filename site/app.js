@@ -81,7 +81,6 @@ function resetStackedStatsOffset(statsColumn) {
 }
 
 let frequencyLastViewportWidth = window.innerWidth;
-let frequencyStackLocks = new Map();
 
 function applyStackedStatsOffset(statsColumn, anchorElement) {
   if (!statsColumn || !anchorElement) return;
@@ -196,18 +195,19 @@ function syncFrequencyStackingMode() {
   const desktop = window.matchMedia("(min-width: 721px)").matches;
   const viewportWidth = window.innerWidth;
   const narrowing = viewportWidth <= frequencyLastViewportWidth;
-  const nextLocks = new Map();
 
   const cards = Array.from(heatmaps.querySelectorAll(".more-stats"));
-  cards.forEach((card, index) => {
+  cards.forEach((card) => {
     const body = card.querySelector(".more-stats-body");
     const facts = card.querySelector(".more-stats-facts.side-stats-column");
     if (!body || !facts) return;
+    const wasLocked = card.dataset.stackedLock === "1";
 
     card.style.setProperty("--more-stats-facts-shift", "0px");
     card.style.setProperty("--more-stats-second-col-shift", "0px");
     card.style.setProperty("--more-stats-third-col-shift", "0px");
     card.classList.remove("more-stats-stacked");
+    card.dataset.stackedLock = "0";
     if (!desktop) {
       return;
     }
@@ -216,17 +216,20 @@ function syncFrequencyStackingMode() {
     const requiredWidth = Math.ceil(body.scrollWidth + sideGap + facts.scrollWidth);
     const availableWidth = Math.floor(card.clientWidth);
     const needsStack = requiredWidth > availableWidth;
-    const wasLocked = frequencyStackLocks.get(index) === true;
+    const bodyRect = body.getBoundingClientRect();
+    const factsRect = facts.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const overlapsGraph = factsRect.left < bodyRect.right + 8;
+    const overflowsCard = factsRect.right > cardRect.right - 1;
+    const stackedByFlow = factsRect.top >= bodyRect.bottom - 1;
     const keepLocked = wasLocked && narrowing;
-    const shouldStack = needsStack || keepLocked;
+    const shouldStack = needsStack || overlapsGraph || overflowsCard || stackedByFlow || keepLocked;
 
     if (shouldStack) {
       card.classList.add("more-stats-stacked");
-      nextLocks.set(index, true);
+      card.dataset.stackedLock = "1";
     }
   });
-
-  frequencyStackLocks = nextLocks;
   frequencyLastViewportWidth = viewportWidth;
 }
 
