@@ -207,6 +207,8 @@ function syncFrequencyStackingMode() {
     card.style.setProperty("--more-stats-facts-shift", "0px");
     card.style.setProperty("--more-stats-second-col-shift", "0px");
     card.style.setProperty("--more-stats-third-col-shift", "0px");
+    facts.style.width = "";
+    facts.style.maxWidth = "";
     card.classList.remove("more-stats-stacked");
     if (!desktop) {
       return;
@@ -273,16 +275,17 @@ function alignFrequencyFactsToYearCardEdge() {
   heatmaps.querySelectorAll(".labeled-card-row-frequency").forEach((row) => {
     const frequencyCard = row.querySelector(".more-stats");
     if (!frequencyCard) return;
-    if (frequencyCard.classList.contains("more-stats-stacked")) {
-      frequencyCard.style.setProperty("--more-stats-facts-shift", "0px");
-      return;
-    }
-
-    frequencyCard.style.setProperty("--more-stats-facts-shift", "0px");
-    if (!desktop) return;
-
     const factsColumn = frequencyCard.querySelector(".more-stats-facts.side-stats-column");
     if (!factsColumn) return;
+
+    factsColumn.style.width = "";
+    factsColumn.style.maxWidth = "";
+    frequencyCard.style.setProperty("--more-stats-facts-shift", "0px");
+
+    if (frequencyCard.classList.contains("more-stats-stacked")) {
+      return;
+    }
+    if (!desktop) return;
 
     let referenceRow = row.nextElementSibling;
     while (referenceRow && !referenceRow.classList.contains("labeled-card-row-year")) {
@@ -291,16 +294,16 @@ function alignFrequencyFactsToYearCardEdge() {
     const referenceStats = referenceRow?.querySelector(".card.year-card .card-stats.side-stats-column");
     if (!referenceStats) return;
 
+    const targetWidth = Math.ceil(referenceStats.getBoundingClientRect().width);
+    if (targetWidth > 0) {
+      factsColumn.style.width = `${targetWidth}px`;
+      factsColumn.style.maxWidth = `${targetWidth}px`;
+    }
+
     const factsLeft = factsColumn.getBoundingClientRect().left;
     const targetLeft = referenceStats.getBoundingClientRect().left;
-    let shift = Math.round(targetLeft - factsLeft);
-
+    const shift = Math.round(targetLeft - factsLeft);
     frequencyCard.style.setProperty("--more-stats-facts-shift", `${shift}px`);
-    const overflow = Math.ceil(frequencyCard.scrollWidth - frequencyCard.clientWidth);
-    if (overflow > 0) {
-      shift -= overflow;
-      frequencyCard.style.setProperty("--more-stats-facts-shift", `${shift}px`);
-    }
   });
 }
 
