@@ -85,23 +85,6 @@ let frequencyStackLocks = new Map();
 let yearLastViewportWidth = window.innerWidth;
 let yearStackLocks = new Map();
 
-function applyStackedStatsOffset(statsColumn, anchorElement) {
-  if (!statsColumn || !anchorElement) return;
-
-  // Align the first stat card edge (not just the container) to the graph block's left edge.
-  statsColumn.style.marginLeft = "0px";
-  statsColumn.style.maxWidth = "100%";
-  const firstStatCard = statsColumn.querySelector(".card-stat, .more-stats-fact-card");
-  const baseLeft = firstStatCard
-    ? firstStatCard.getBoundingClientRect().left
-    : statsColumn.getBoundingClientRect().left;
-  const anchorLeft = anchorElement.getBoundingClientRect().left;
-  const offset = Math.max(0, anchorLeft - baseLeft);
-
-  statsColumn.style.marginLeft = `${offset}px`;
-  statsColumn.style.maxWidth = `calc(100% - ${offset}px)`;
-}
-
 function normalizeSummaryStatCardWidths() {
   if (!heatmaps) return;
 
@@ -423,24 +406,23 @@ function alignStackedStatsToYAxisLabels() {
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
     const heatmapArea = card.querySelector(".heatmap-area");
     const statsColumn = card.querySelector(".card-stats.side-stats-column");
-    const anchorGrid = card.querySelector(".grid");
-    if (!heatmapArea || !statsColumn || !anchorGrid) return;
+    if (!heatmapArea || !statsColumn) return;
 
     const heatmapBottom = heatmapArea.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
     const isStacked = statsTop >= heatmapBottom - 1;
-    if (!isStacked) {
+    // Keep stacked stats fixed to CSS left pinning; no dynamic horizontal nudges.
+    if (isStacked) {
       resetStackedStatsOffset(statsColumn);
       return;
     }
-    applyStackedStatsOffset(statsColumn, anchorGrid);
+    resetStackedStatsOffset(statsColumn);
   });
 
   heatmaps.querySelectorAll(".more-stats").forEach((card) => {
     const graphBody = card.querySelector(".more-stats-body");
     const statsColumn = card.querySelector(".more-stats-facts.side-stats-column");
-    const anchorGrid = card.querySelector(".axis-matrix-grid");
-    if (!graphBody || !statsColumn || !anchorGrid) return;
+    if (!graphBody || !statsColumn) return;
     if (card.classList.contains("more-stats-stacked")) {
       // In stacked mode, keep facts naturally pinned to the left column start.
       resetStackedStatsOffset(statsColumn);
@@ -450,11 +432,12 @@ function alignStackedStatsToYAxisLabels() {
     const graphBottom = graphBody.getBoundingClientRect().bottom;
     const statsTop = statsColumn.getBoundingClientRect().top;
     const isStacked = statsTop >= graphBottom - 1;
-    if (!isStacked) {
+    if (isStacked) {
+      // CSS handles stacked positioning; avoid resize-dependent JS drift.
       resetStackedStatsOffset(statsColumn);
       return;
     }
-    applyStackedStatsOffset(statsColumn, anchorGrid);
+    resetStackedStatsOffset(statsColumn);
   });
 
   alignYearStatsToFrequencyEdge();
