@@ -187,7 +187,7 @@ function alignFrequencyTitleGapToYearGap() {
 
 function alignFrequencyGraphsToYearCardEdge() {
   if (!heatmaps) return;
-  const desktop = window.matchMedia("(min-width: 721px)").matches;
+  const desktop = window.matchMedia("(min-width: 901px)").matches;
 
   heatmaps.querySelectorAll(".labeled-card-row-frequency").forEach((row) => {
     const frequencyCard = row.querySelector(".more-stats");
@@ -222,7 +222,7 @@ function alignFrequencyGraphsToYearCardEdge() {
 
 function alignFrequencyFactsToYearCardEdge() {
   if (!heatmaps) return;
-  const desktop = window.matchMedia("(min-width: 721px)").matches;
+  const desktop = window.matchMedia("(min-width: 901px)").matches;
 
   heatmaps.querySelectorAll(".labeled-card-row-frequency").forEach((row) => {
     const frequencyCard = row.querySelector(".more-stats");
