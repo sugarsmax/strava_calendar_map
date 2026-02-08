@@ -12,3 +12,6 @@ activities/raw/
 
 # OS
 .DS_Store
+
+# Local notes
+ISSUE_FIX_LOG.md
