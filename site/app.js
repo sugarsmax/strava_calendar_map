@@ -291,7 +291,6 @@ function normalizeSummaryStatCardWidths() {
 
 function alignFrequencyTitleGapToYearGap() {
   if (!heatmaps) return;
-  const desktop = window.matchMedia("(min-width: 721px)").matches;
 
   const referenceYearCard = heatmaps.querySelector(".year-card");
   if (!referenceYearCard) return;
@@ -310,14 +309,94 @@ function alignFrequencyTitleGapToYearGap() {
     if (!title || !firstLabel || !body) return;
 
     body.style.marginTop = "0px";
-    if (desktop && !frequencyCard.classList.contains("more-stats-stacked")) {
-      return;
-    }
     const currentGap = firstLabel.getBoundingClientRect().top - title.getBoundingClientRect().bottom;
     if (!Number.isFinite(currentGap)) return;
 
     const correction = Math.round(currentGap - targetGap);
     body.style.marginTop = `${-correction}px`;
+  });
+}
+
+function alignCardTitlesToYAxisLabels() {
+  if (!heatmaps) return;
+  const cards = Array.from(heatmaps.querySelectorAll(".year-card, .more-stats"));
+  cards.forEach((card) => {
+    const title = card.querySelector(".card-title.labeled-card-title");
+    if (!title) return;
+
+    const labels = card.classList.contains("more-stats")
+      ? Array.from(card.querySelectorAll(".more-stats-body .axis-day-col .axis-y-label"))
+      : Array.from(card.querySelectorAll(".heatmap-area .day-col .day-label"));
+    if (!labels.length) {
+      title.style.marginLeft = "";
+      return;
+    }
+
+    const offset = getLeftMostLabelOffset(card, labels);
+    if (!Number.isFinite(offset)) {
+      title.style.marginLeft = "";
+      return;
+    }
+    title.style.marginLeft = `${Math.max(0, Math.round(offset))}px`;
+  });
+}
+
+function applyDynamicCardContentNudge() {
+  if (!heatmaps) return;
+  const desktop = window.matchMedia("(min-width: 721px)").matches;
+
+  const allCards = Array.from(heatmaps.querySelectorAll(".year-card, .more-stats"));
+  allCards.forEach((card) => {
+    card.style.setProperty("--stats-column-nudge", "0px");
+  });
+  if (!desktop) return;
+
+  const computeMetrics = (card) => {
+    const labels = card.classList.contains("more-stats")
+      ? Array.from(card.querySelectorAll(".more-stats-body .axis-day-col .axis-y-label"))
+      : Array.from(card.querySelectorAll(".heatmap-area .day-col .day-label"));
+    const statsColumn = card.classList.contains("more-stats")
+      ? card.querySelector(".more-stats-facts.side-stats-column")
+      : card.querySelector(".card-stats.side-stats-column");
+    const contentLeft = getContentBoxLeft(card);
+    const contentRight = getContentBoxRight(card);
+    const labelLeft = getLeftMostLabelEdge(labels);
+    const statsRight = statsColumn?.getBoundingClientRect().right;
+    if (
+      !Number.isFinite(contentLeft)
+      || !Number.isFinite(contentRight)
+      || !Number.isFinite(labelLeft)
+      || !Number.isFinite(statsRight)
+    ) {
+      return null;
+    }
+    return {
+      leftSpace: Math.max(0, labelLeft - contentLeft),
+      rightSpace: Math.max(0, contentRight - statsRight),
+    };
+  };
+
+  heatmaps.querySelectorAll(".type-list").forEach((list) => {
+    const candidates = Array.from(
+      list.querySelectorAll(".labeled-card-row-year .year-card, .labeled-card-row-frequency .more-stats"),
+    ).filter((card) => (
+      !card.classList.contains("year-card-stacked")
+      && !card.classList.contains("more-stats-stacked")
+    ));
+    if (!candidates.length) return;
+
+    const referenceCard = candidates.find((card) => card.classList.contains("year-card")) || candidates[0];
+    const metrics = computeMetrics(referenceCard);
+    if (!metrics) return;
+
+    const shift = (metrics.leftSpace - metrics.rightSpace) / 2;
+    const clamped = Math.max(-metrics.rightSpace, Math.min(metrics.leftSpace, shift));
+    const nudge = Math.round(clamped);
+    if (!Number.isFinite(nudge)) return;
+
+    candidates.forEach((card) => {
+      card.style.setProperty("--stats-column-nudge", `${nudge}px`);
+    });
   });
 }
 
@@ -602,11 +681,14 @@ function alignStackedStatsToYAxisLabels() {
   syncYearStackingMode();
   syncSectionStackingMode();
   alignFrequencyTitleGapToYearGap();
+  applyDynamicCardContentNudge();
+  alignCardTitlesToYAxisLabels();
   syncFrequencyStackingMode();
   syncYearStackingMode();
   syncSectionStackingMode();
   alignFrequencyGraphsToYearCardEdge();
   alignFrequencyFactsToYearCardEdge();
+  alignCardTitlesToYAxisLabels();
 
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
     const body = card.querySelector(".card-body");

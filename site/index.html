@@ -455,7 +455,7 @@
       }
 
       .labeled-card-row-frequency .card-title.labeled-card-title {
-        margin-bottom: max(0px, calc(var(--labeled-card-title-gap) - 2px));
+        margin-bottom: var(--labeled-card-title-gap);
       }
 
       .card-body {
@@ -1016,7 +1016,7 @@
 
       @media (min-width: 721px) {
         :root {
-          --stats-column-nudge: 22px;
+          --stats-column-nudge: 0px;
         }
         .labeled-card-row .card {
           margin: 0;
