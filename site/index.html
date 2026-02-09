@@ -323,6 +323,10 @@
         padding: 16px;
         box-shadow: var(--shadow);
         text-align: center;
+
+        display: grid;
+        grid-template-rows: auto 1fr;
+        align-items: center;
       }
 
       .summary-card-action {
@@ -361,9 +365,9 @@
 
       .summary-type {
         position: relative;
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        gap: 8px;
+        justify-content: center;
         font-size: clamp(16px, 1.9vw, 20px);
         font-weight: 600;
         line-height: 1.1;
