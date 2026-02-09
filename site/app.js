@@ -6,6 +6,7 @@ let TYPE_META = {};
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 const typeButtons = document.getElementById("typeButtons");
 const yearButtons = document.getElementById("yearButtons");
@@ -668,11 +669,18 @@ function formatLocalDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
+function localDayNumber(date) {
+  return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / MS_PER_DAY);
+}
+
+function weekIndexFromSundayStart(date, start) {
+  return Math.floor((localDayNumber(date) - localDayNumber(start)) / 7);
+}
+
 function weekOfYear(date) {
   const yearStart = new Date(date.getFullYear(), 0, 1);
   const start = sundayOnOrBefore(yearStart);
-  const msPerWeek = 1000 * 60 * 60 * 24 * 7;
-  return Math.floor((date - start) / msPerWeek) + 1;
+  return weekIndexFromSundayStart(date, start) + 1;
 }
 
 function hexToRgb(hex) {
@@ -963,7 +971,7 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
 
   for (let month = 0; month < 12; month += 1) {
     const monthStart = new Date(year, month, 1);
-    const weekIndex = Math.floor((monthStart - start) / (1000 * 60 * 60 * 24 * 7));
+    const weekIndex = weekIndexFromSundayStart(monthStart, start);
     const monthLabel = document.createElement("div");
     monthLabel.className = "month-label";
     monthLabel.textContent = MONTHS[month];
@@ -985,7 +993,7 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
       activity_ids: [],
     };
 
-    const weekIndex = Math.floor((day - start) / (1000 * 60 * 60 * 24 * 7));
+    const weekIndex = weekIndexFromSundayStart(day, start);
     const row = day.getDay(); // Sunday=0
 
     const cell = document.createElement("div");
