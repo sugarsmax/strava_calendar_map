@@ -1,7 +1,6 @@
 # Workout --> GitHub Heatmap Dashboard
 
 Sync Strava activities, normalize and aggregate them, and generate GitHub-style heatmaps per workout type/year. Populates an interactive, free GitHub Pages-hosted dashboard, automatically refreshed daily.
-Generated data is stored on a dedicated `dashboard-data` branch so `main` stays fork-sync friendly.
 
 - View the Interactive [Activity Dashboard](https://aspain.github.io/git-sweaty/)
 - Once setup is complete, this dashboard link will automatically update to your own GitHub Pages URL.
@@ -120,7 +119,7 @@ Both options run the same workflow, which will:
 ## Fork Sync Best Practice
 
 - To pull in new updates and features from the original repo, use GitHub's **Sync fork** button on your fork's `main` branch.
-- This project is set up to make upstream syncs much less likely to hit merge conflicts from personal dashboard data.
+- Strava activity data is stored on a dedicated `dashboard-data` branch which deploys your data to the dashboard, but doesn't commit to the repo - so `main` stays fork-sync friendly.
 - After syncing, run [Sync Strava Heatmaps](../../actions/workflows/sync.yml) if you want your dashboard refreshed immediately.
 
 ## Activity Type Note
