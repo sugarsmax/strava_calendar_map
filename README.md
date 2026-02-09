@@ -98,7 +98,7 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    - Secret name: `STRAVA_CLIENT_SECRET`
       - Secret value: The `Client Secret` value from step 2 above
    - Secret name: `STRAVA_REFRESH_TOKEN` (
-      - Secret value: The `code` value from the step 3 OAuth exchange above)
+      - Secret value: The `refresh_token` value from the step 3 OAuth exchange above)
 
 5. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
