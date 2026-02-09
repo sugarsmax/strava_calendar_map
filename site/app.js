@@ -3,6 +3,7 @@ const MULTI_TYPE_COLOR = "#b967ff";
 const STAT_HEAT_COLOR = "#05ffa1";
 const FALLBACK_VAPORWAVE = ["#f15bb5", "#fee440", "#00bbf9", "#00f5d4", "#9b5de5", "#fb5607", "#ffbe0b", "#72efdd"];
 let TYPE_META = {};
+let OTHER_BUCKET = "OtherSports";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -839,6 +840,132 @@ function formatHourLabel(hour) {
   return `${hour12}${suffix}`;
 }
 
+function isOtherSportsType(type) {
+  return String(type || "") === String(OTHER_BUCKET || "OtherSports");
+}
+
+function getActivitySubtypeLabel(activity) {
+  const rawSubtype = activity?.subtype || activity?.raw_type;
+  const value = String(rawSubtype || "").trim();
+  if (!value) return "";
+  if (isOtherSportsType(activity?.type) && value === String(activity?.type || "")) {
+    return "";
+  }
+  return TYPE_META[value]?.label || prettifyType(value);
+}
+
+function createTooltipBreakdown() {
+  return {
+    typeCounts: {},
+    otherSubtypeCounts: {},
+  };
+}
+
+function addTooltipBreakdownCount(breakdown, activityType, subtypeLabel) {
+  if (!breakdown) return;
+  if (isOtherSportsType(activityType) && subtypeLabel) {
+    breakdown.otherSubtypeCounts[subtypeLabel] = (breakdown.otherSubtypeCounts[subtypeLabel] || 0) + 1;
+    return;
+  }
+  breakdown.typeCounts[activityType] = (breakdown.typeCounts[activityType] || 0) + 1;
+}
+
+function sortBreakdownEntries(counts) {
+  return Object.entries(counts || {})
+    .filter(([, count]) => count > 0)
+    .sort((a, b) => {
+      if (b[1] !== a[1]) return b[1] - a[1];
+      return String(a[0]).localeCompare(String(b[0]));
+    });
+}
+
+function formatTooltipBreakdown(total, breakdown, types) {
+  const lines = [`Total: ${total} ${total === 1 ? "activity" : "activities"}`];
+  const typeCounts = breakdown?.typeCounts || {};
+  const subtypeEntries = sortBreakdownEntries(breakdown?.otherSubtypeCounts || {});
+  const showTypeBreakdown = types.length > 1;
+
+  if (!showTypeBreakdown && !subtypeEntries.length) {
+    return lines.join("\n");
+  }
+
+  if (showTypeBreakdown) {
+    types.forEach((type) => {
+      const isOtherType = isOtherSportsType(type);
+      if (isOtherType && subtypeEntries.length && (typeCounts[type] || 0) <= 0) {
+        return;
+      }
+      const count = typeCounts[type] || 0;
+      if (count > 0) {
+        lines.push(`${displayType(type)}: ${count}`);
+      }
+    });
+  }
+
+  subtypeEntries.forEach(([subtype, count]) => {
+    lines.push(`${subtype}: ${count}`);
+  });
+
+  return lines.join("\n");
+}
+
+function buildCombinedTypeLabelsByDate(payload, types, years) {
+  const detailsByDate = {};
+  const activities = getFilteredActivities(payload, types, years);
+
+  activities.forEach((activity) => {
+    const dateStr = String(activity.date || "");
+    if (!dateStr) return;
+    if (!detailsByDate[dateStr]) {
+      detailsByDate[dateStr] = {
+        normalTypes: new Set(),
+        otherSubtypeLabels: new Set(),
+        hasOtherSports: false,
+      };
+    }
+    const details = detailsByDate[dateStr];
+    const activityType = String(activity.type || "");
+    if (isOtherSportsType(activityType)) {
+      details.hasOtherSports = true;
+      const subtype = getActivitySubtypeLabel(activity);
+      if (subtype) {
+        details.otherSubtypeLabels.add(`${subtype} subtype`);
+      }
+      return;
+    }
+    details.normalTypes.add(activityType);
+  });
+
+  const orderedTypes = Array.isArray(types) ? types : [];
+  const result = {};
+
+  Object.entries(detailsByDate).forEach(([dateStr, details]) => {
+    const labels = [];
+    orderedTypes.forEach((type) => {
+      if (!isOtherSportsType(type) && details.normalTypes.has(type)) {
+        labels.push(displayType(type));
+      }
+    });
+
+    const extraTypes = Array.from(details.normalTypes)
+      .filter((type) => !isOtherSportsType(type) && !orderedTypes.includes(type))
+      .map((type) => displayType(type))
+      .sort((a, b) => a.localeCompare(b));
+    labels.push(...extraTypes);
+
+    const subtypeLabels = Array.from(details.otherSubtypeLabels).sort((a, b) => a.localeCompare(b));
+    if (subtypeLabels.length) {
+      labels.push(...subtypeLabels);
+    } else if (details.hasOtherSports) {
+      labels.push(displayType(OTHER_BUCKET));
+    }
+
+    result[dateStr] = labels;
+  });
+
+  return result;
+}
+
 function buildSummary(payload, types, years, showTypeBreakdown, showActiveDays, hideDistanceElevation, onTypeCardSelect) {
   summary.innerHTML = "";
 
@@ -1016,8 +1143,13 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
 
     const showDistanceElevation = (entry.distance || 0) > 0 || (entry.elevation_gain || 0) > 0;
 
-    if (type === "all" && entry.types && entry.types.length) {
-      lines.push(`Types: ${entry.types.map(displayType).join(", ")}`);
+    if (type === "all") {
+      const typeLabels = options.typeLabelsByDate?.[dateStr];
+      if (Array.isArray(typeLabels) && typeLabels.length) {
+        lines.push(`Types: ${typeLabels.join(", ")}`);
+      } else if (entry.types && entry.types.length) {
+        lines.push(`Types: ${entry.types.map(displayType).join(", ")}`);
+      }
     }
 
     if (showDistanceElevation) {
@@ -1376,14 +1508,20 @@ function buildStatsOverview(payload, types, years, color) {
       const dateStr = String(activity.date || "");
       const date = new Date(`${dateStr}T00:00:00`);
       const year = Number(activity.year);
-      const hourValue = Number(activity.hour);
-      const hasHour = Number.isFinite(hourValue) && hourValue >= 0 && hourValue <= 23;
+      const rawHour = activity.hour;
+      const hourValue = Number(rawHour);
+      const hasHour = rawHour !== null
+        && rawHour !== undefined
+        && Number.isFinite(hourValue)
+        && hourValue >= 0
+        && hourValue <= 23;
       if (!yearIndex.has(year) || Number.isNaN(date.getTime())) {
         return null;
       }
       return {
         date,
         type: activity.type,
+        subtype: getActivitySubtypeLabel(activity),
         year,
         dayIndex: date.getDay(),
         monthIndex: date.getMonth(),
@@ -1393,25 +1531,14 @@ function buildStatsOverview(payload, types, years, color) {
     })
     .filter(Boolean);
 
-  const formatBreakdown = (total, breakdown) => {
-    const lines = [`Total: ${total} ${total === 1 ? "activity" : "activities"}`];
-    if (types.length > 1) {
-      types.forEach((type) => {
-        const count = breakdown[type] || 0;
-        if (count > 0) {
-          lines.push(`${displayType(type)}: ${count}`);
-        }
-      });
-    }
-    return lines.join("\n");
-  };
+  const formatBreakdown = (total, breakdown) => formatTooltipBreakdown(total, breakdown, types);
 
   const dayDisplayLabels = ["Sun", "", "", "Wed", "", "", "Sat"];
   const monthDisplayLabels = ["Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", ""];
 
   const buildZeroedMatrix = (columns) => yearsDesc.map(() => new Array(columns).fill(0));
   const buildBreakdownMatrix = (columns) => yearsDesc.map(() => (
-    Array.from({ length: columns }, () => ({}))
+    Array.from({ length: columns }, () => createTooltipBreakdown())
   ));
 
   const buildFrequencyData = (filterFn) => {
@@ -1441,14 +1568,14 @@ function buildStatsOverview(payload, types, years, color) {
 
       const dayBucket = dayBreakdowns[row][activity.dayIndex];
       const monthBucket = monthBreakdowns[row][activity.monthIndex];
-      dayBucket[activity.type] = (dayBucket[activity.type] || 0) + 1;
-      monthBucket[activity.type] = (monthBucket[activity.type] || 0) + 1;
+      addTooltipBreakdownCount(dayBucket, activity.type, activity.subtype);
+      addTooltipBreakdownCount(monthBucket, activity.type, activity.subtype);
 
       if (Number.isFinite(activity.hour)) {
         hourActivityCount += 1;
         hourMatrix[row][activity.hour] += 1;
         const hourBucket = hourBreakdowns[row][activity.hour];
-        hourBucket[activity.type] = (hourBucket[activity.type] || 0) + 1;
+        addTooltipBreakdownCount(hourBucket, activity.type, activity.subtype);
       }
     });
 
@@ -1811,30 +1938,57 @@ function renderStats(payload, types, years, color) {
 
   const dayMatrix = yearsDesc.map(() => new Array(7).fill(0));
   const dayBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 7 }, () => ({}))
+    Array.from({ length: 7 }, () => createTooltipBreakdown())
   ));
   const monthMatrix = yearsDesc.map(() => new Array(12).fill(0));
   const monthBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 12 }, () => ({}))
+    Array.from({ length: 12 }, () => createTooltipBreakdown())
+  ));
+  const hourMatrix = yearsDesc.map(() => new Array(24).fill(0));
+  const hourBreakdowns = yearsDesc.map(() => (
+    Array.from({ length: 24 }, () => createTooltipBreakdown())
   ));
 
-  yearsDesc.forEach((year, row) => {
-    types.forEach((type) => {
-      const entries = payload.aggregates?.[String(year)]?.[type] || {};
-      Object.entries(entries).forEach(([dateStr, entry]) => {
-        const count = entry.count || 0;
-        if (count <= 0) return;
-        const date = new Date(`${dateStr}T00:00:00`);
-        const dayIndex = date.getDay();
-        const monthIndex = date.getMonth();
-        dayMatrix[row][dayIndex] += count;
-        monthMatrix[row][monthIndex] += count;
-        const dayBucket = dayBreakdowns[row][dayIndex];
-        const monthBucket = monthBreakdowns[row][monthIndex];
-        dayBucket[type] = (dayBucket[type] || 0) + count;
-        monthBucket[type] = (monthBucket[type] || 0) + count;
-      });
-    });
+  const activities = getFilteredActivities(payload, types, yearsDesc)
+    .map((activity) => {
+      const dateStr = String(activity.date || "");
+      const date = new Date(`${dateStr}T00:00:00`);
+      const year = Number(activity.year);
+      const rawHour = activity.hour;
+      const hourValue = Number(rawHour);
+      const hasHour = rawHour !== null
+        && rawHour !== undefined
+        && Number.isFinite(hourValue)
+        && hourValue >= 0
+        && hourValue <= 23;
+      if (!yearIndex.has(year) || Number.isNaN(date.getTime())) {
+        return null;
+      }
+      return {
+        date,
+        type: activity.type,
+        subtype: getActivitySubtypeLabel(activity),
+        year,
+        dayIndex: date.getDay(),
+        monthIndex: date.getMonth(),
+        hour: hasHour ? hourValue : null,
+      };
+    })
+    .filter(Boolean);
+
+  activities.forEach((activity) => {
+    const row = yearIndex.get(activity.year);
+    if (row === undefined) return;
+
+    dayMatrix[row][activity.dayIndex] += 1;
+    monthMatrix[row][activity.monthIndex] += 1;
+    addTooltipBreakdownCount(dayBreakdowns[row][activity.dayIndex], activity.type, activity.subtype);
+    addTooltipBreakdownCount(monthBreakdowns[row][activity.monthIndex], activity.type, activity.subtype);
+
+    if (Number.isFinite(activity.hour)) {
+      hourMatrix[row][activity.hour] += 1;
+      addTooltipBreakdownCount(hourBreakdowns[row][activity.hour], activity.type, activity.subtype);
+    }
   });
   const dayTotals = dayMatrix.reduce(
     (acc, row) => row.map((value, index) => acc[index] + value),
@@ -1845,16 +1999,7 @@ function renderStats(payload, types, years, color) {
   ), 0);
   const bestDayLabel = `${DAYS[bestDayIndex]} (${dayTotals[bestDayIndex]} ${dayTotals[bestDayIndex] === 1 ? "activity" : "activities"})`;
 
-  const formatBreakdown = (total, breakdown) => {
-    const lines = [`Total: ${total} ${total === 1 ? "activity" : "activities"}`];
-    types.forEach((type) => {
-      const count = breakdown[type] || 0;
-      if (count > 0) {
-        lines.push(`${displayType(type)}: ${count}`);
-      }
-    });
-    return lines.join("\n");
-  };
+  const formatBreakdown = (total, breakdown) => formatTooltipBreakdown(total, breakdown, types);
 
   const row1 = buildStatRow();
   const dayPanel = buildStatPanel("Activity Frequency by Day of Week");
@@ -1908,23 +2053,6 @@ function renderStats(payload, types, years, color) {
   row2.appendChild(buildFactBox(`Busiest month: ${bestMonthLabel}`));
   stats.appendChild(row2);
 
-  const hourMatrix = yearsDesc.map(() => new Array(24).fill(0));
-  const hourBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 24 }, () => ({}))
-  ));
-  const activities = getFilteredActivities(payload, types, yearsDesc);
-  activities.forEach((activity) => {
-    const row = yearIndex.get(Number(activity.year));
-    if (row === undefined) return;
-    const hour = Number(activity.hour);
-    if (Number.isFinite(hour) && hour >= 0 && hour <= 23) {
-      hourMatrix[row][hour] += 1;
-      const bucket = hourBreakdowns[row][hour];
-      const type = activity.type;
-      bucket[type] = (bucket[type] || 0) + 1;
-    }
-  });
-
   const hourTotals = hourMatrix.reduce(
     (acc, row) => row.map((value, index) => acc[index] + value),
     new Array(24).fill(0),
@@ -1972,6 +2100,7 @@ async function init() {
   const resp = await fetch("data.json");
   const payload = await resp.json();
   TYPE_META = payload.type_meta || {};
+  OTHER_BUCKET = String(payload.other_bucket || "OtherSports");
   (payload.types || []).forEach((type) => {
     if (!TYPE_META[type]) {
       TYPE_META[type] = { label: prettifyType(type), accent: fallbackColor(type) };
@@ -2304,6 +2433,7 @@ async function init() {
         const cardYears = allYearsSelected
           ? trimOldestEmptyYears(years, yearTotals)
           : years.slice();
+        const typeLabelsByDate = buildCombinedTypeLabelsByDate(payload, types, cardYears);
         const emptyLabel = types.map((type) => displayType(type)).join(" + ");
         if (showMoreStats) {
           list.appendChild(
@@ -2333,7 +2463,10 @@ async function init() {
               year,
               aggregates,
               payload.units || { distance: "mi", elevation: "ft" },
-              { colorForEntry },
+              {
+                colorForEntry,
+                typeLabelsByDate,
+              },
             )
             : buildEmptyYearCard("all", year, emptyLabel);
           list.appendChild(buildLabeledCardRow(String(year), card, "year"));

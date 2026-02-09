@@ -39,7 +39,7 @@ def _normalize_activity(activity: Dict, type_aliases: Dict[str, str]) -> Dict:
     date_str = dt.strftime("%Y-%m-%d")
     year = dt.year
 
-    raw_type = activity.get("type") or "Unknown"
+    raw_type = str(activity.get("type") or "Unknown")
     activity_type = type_aliases.get(raw_type, raw_type)
 
     return {
@@ -47,6 +47,7 @@ def _normalize_activity(activity: Dict, type_aliases: Dict[str, str]) -> Dict:
         "start_date_local": start_date_local,
         "date": date_str,
         "year": year,
+        "raw_type": raw_type,
         "type": activity_type,
         "distance": float(activity.get("distance", 0.0)),
         "moving_time": float(activity.get("moving_time", 0.0)),
@@ -114,8 +115,11 @@ def normalize() -> List[Dict]:
         if item.get("id") is not None and item.get("date")
     ]
     for item in items:
+        raw_type = str(item.get("raw_type") or item.get("type") or other_bucket)
+        item["raw_type"] = raw_type
+        source_type = type_aliases.get(raw_type, raw_type)
         item["type"] = normalize_activity_type(
-            item.get("type"),
+            source_type,
             featured_types=featured_types,
             group_other_types=group_other_types,
             other_bucket=other_bucket,

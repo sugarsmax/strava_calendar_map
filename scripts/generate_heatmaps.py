@@ -128,17 +128,19 @@ def _load_activities() -> List[Dict]:
         date_str = item.get("date")
         year = item.get("year")
         activity_type = item.get("type")
+        subtype = item.get("raw_type") or activity_type
         start_date_local = item.get("start_date_local")
-        if not date_str or year is None or not activity_type or not start_date_local:
+        if not date_str or year is None or not activity_type or not subtype or not start_date_local:
             continue
         try:
             hour = _parse_hour(start_date_local)
         except Exception:
-            continue
+            hour = None
         activities.append({
             "date": date_str,
             "year": int(year),
             "type": activity_type,
+            "subtype": str(subtype),
             "hour": hour,
         })
     return activities
@@ -314,6 +316,7 @@ def generate():
     config = load_config()
     activities_cfg = config.get("activities", {}) or {}
     featured_types = featured_types_from_config(activities_cfg)
+    other_bucket = str(activities_cfg.get("other_bucket", "OtherSports"))
 
     units = config.get("units", {})
     units = {
@@ -357,6 +360,7 @@ def generate():
         "generated_at": utc_now().isoformat(),
         "years": years,
         "types": types,
+        "other_bucket": other_bucket,
         "type_meta": type_meta,
         "aggregates": aggregate_years,
         "units": units,
