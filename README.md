@@ -38,12 +38,12 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 6. Run:
 
    ```bash
-   python3 scripts/setup_auth.py --client-id STRAVA_CLIENT_ID
+   python3 scripts/setup_auth.py --client-id CLIENT_ID
    ```
 
-   When prompted, paste your `Client Secret` value (it is hidden input).
+   When prompted, paste your `Client Secret` value (it is hidden input) and press enter.
 
-   The script will:
+   The script will automatically:
    - open Strava OAuth in your browser
    - capture the callback code locally
    - exchange it for a refresh token
@@ -85,18 +85,21 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 
    ```bash
    curl -X POST https://www.strava.com/oauth/token \
-     -d client_id=CLIENT_ID \
-     -d client_secret=CLIENT_SECRET \
-     -d code=THE_CODE_FROM_THE_URL \
+     -d client_id=CLIENT_ID_FROM_STEP_2 \
+     -d client_secret=CLIENT_SECRET_FROM_STEP_2 \
+     -d code=CODE_FROM_THE_URL_IN_STEP_3 \
      -d grant_type=authorization_code
    ```
 
    Copy the `refresh_token` from the response.
 
 4. Add GitHub secrets (repo → [Settings → Secrets and variables → Actions](../../settings/secrets/actions)):
-   - `STRAVA_CLIENT_ID` (the `Client ID` value from step 2 above)
-   - `STRAVA_CLIENT_SECRET` (the `Client Secret` value from step 2 above)
-   - `STRAVA_REFRESH_TOKEN` (from the step 3 OAuth exchange above)
+   - Secret name: `STRAVA_CLIENT_ID`
+      - Secret value: The `Client ID` value from step 2 above
+   - Secret name: `STRAVA_CLIENT_SECRET`
+      - Secret value: The `Client Secret` value from step 2 above
+   - Secret name: `STRAVA_REFRESH_TOKEN` (
+      - Secret value: The `code` value from the step 3 OAuth exchange above)
 
 5. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
