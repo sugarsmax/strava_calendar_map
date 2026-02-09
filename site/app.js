@@ -602,11 +602,11 @@ function alignStackedStatsToYAxisLabels() {
   syncYearStackingMode();
   syncSectionStackingMode();
   alignFrequencyTitleGapToYearGap();
-  alignFrequencyGraphsToYearCardEdge();
-  alignFrequencyFactsToYearCardEdge();
   syncFrequencyStackingMode();
   syncYearStackingMode();
   syncSectionStackingMode();
+  alignFrequencyGraphsToYearCardEdge();
+  alignFrequencyFactsToYearCardEdge();
 
   heatmaps.querySelectorAll(".year-card").forEach((card) => {
     const body = card.querySelector(".card-body");
