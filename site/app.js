@@ -776,18 +776,7 @@ function displayType(type) {
 }
 
 function summaryTypeTitle(type) {
-  const label = displayType(type);
-  const normalized = label.trim().toLowerCase();
-  if (normalized === "ride") {
-    return "Rides";
-  }
-  if (normalized === "run") {
-    return "Runs";
-  }
-  if (normalized === "weight training") {
-    return "Weight Trainings";
-  }
-  return label;
+  return displayType(type);
 }
 
 function formatActivitiesTitle(types) {
@@ -1378,39 +1367,31 @@ function buildStatsOverview(payload, types, years, color) {
 
   const yearsDesc = years.slice().sort((a, b) => b - a);
   const emptyColor = DEFAULT_COLORS[0];
-
-  const dayMatrix = yearsDesc.map(() => new Array(7).fill(0));
-  const dayBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 7 }, () => ({}))
-  ));
-  const monthMatrix = yearsDesc.map(() => new Array(12).fill(0));
-  const monthBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 12 }, () => ({}))
-  ));
-  const weekTotals = new Array(54).fill(0);
-
-  yearsDesc.forEach((year, row) => {
-    types.forEach((type) => {
-      const entries = payload.aggregates?.[String(year)]?.[type] || {};
-      Object.entries(entries).forEach(([dateStr, entry]) => {
-        const count = entry.count || 0;
-        if (count <= 0) return;
-        const date = new Date(`${dateStr}T00:00:00`);
-        const dayIndex = date.getDay();
-        const monthIndex = date.getMonth();
-        const weekIndex = weekOfYear(date);
-        dayMatrix[row][dayIndex] += count;
-        monthMatrix[row][monthIndex] += count;
-        if (weekIndex >= 1 && weekIndex < weekTotals.length) {
-          weekTotals[weekIndex] += count;
-        }
-        const dayBucket = dayBreakdowns[row][dayIndex];
-        const monthBucket = monthBreakdowns[row][monthIndex];
-        dayBucket[type] = (dayBucket[type] || 0) + count;
-        monthBucket[type] = (monthBucket[type] || 0) + count;
-      });
-    });
+  const yearIndex = new Map();
+  yearsDesc.forEach((year, index) => {
+    yearIndex.set(Number(year), index);
   });
+  const activities = getFilteredActivities(payload, types, yearsDesc)
+    .map((activity) => {
+      const dateStr = String(activity.date || "");
+      const date = new Date(`${dateStr}T00:00:00`);
+      const year = Number(activity.year);
+      const hourValue = Number(activity.hour);
+      const hasHour = Number.isFinite(hourValue) && hourValue >= 0 && hourValue <= 23;
+      if (!yearIndex.has(year) || Number.isNaN(date.getTime())) {
+        return null;
+      }
+      return {
+        date,
+        type: activity.type,
+        year,
+        dayIndex: date.getDay(),
+        monthIndex: date.getMonth(),
+        weekIndex: weekOfYear(date),
+        hour: hasHour ? hourValue : null,
+      };
+    })
+    .filter(Boolean);
 
   const formatBreakdown = (total, breakdown) => {
     const lines = [`Total: ${total} ${total === 1 ? "activity" : "activities"}`];
@@ -1428,157 +1409,247 @@ function buildStatsOverview(payload, types, years, color) {
   const dayDisplayLabels = ["Sun", "", "", "Wed", "", "", "Sat"];
   const monthDisplayLabels = ["Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", ""];
 
-  const dayPanel = buildStatPanel("");
-  dayPanel.body.appendChild(
-    buildYearMatrix(
-      yearsDesc,
-      dayDisplayLabels,
+  const buildZeroedMatrix = (columns) => yearsDesc.map(() => new Array(columns).fill(0));
+  const buildBreakdownMatrix = (columns) => yearsDesc.map(() => (
+    Array.from({ length: columns }, () => ({}))
+  ));
+
+  const buildFrequencyData = (filterFn) => {
+    const dayMatrix = buildZeroedMatrix(7);
+    const dayBreakdowns = buildBreakdownMatrix(7);
+    const monthMatrix = buildZeroedMatrix(12);
+    const monthBreakdowns = buildBreakdownMatrix(12);
+    const hourMatrix = buildZeroedMatrix(24);
+    const hourBreakdowns = buildBreakdownMatrix(24);
+    const weekTotals = new Array(54).fill(0);
+    let activityCount = 0;
+    let hourActivityCount = 0;
+
+    activities.forEach((activity) => {
+      if (typeof filterFn === "function" && !filterFn(activity)) {
+        return;
+      }
+      const row = yearIndex.get(activity.year);
+      if (row === undefined) return;
+
+      activityCount += 1;
+      dayMatrix[row][activity.dayIndex] += 1;
+      monthMatrix[row][activity.monthIndex] += 1;
+      if (activity.weekIndex >= 1 && activity.weekIndex < weekTotals.length) {
+        weekTotals[activity.weekIndex] += 1;
+      }
+
+      const dayBucket = dayBreakdowns[row][activity.dayIndex];
+      const monthBucket = monthBreakdowns[row][activity.monthIndex];
+      dayBucket[activity.type] = (dayBucket[activity.type] || 0) + 1;
+      monthBucket[activity.type] = (monthBucket[activity.type] || 0) + 1;
+
+      if (Number.isFinite(activity.hour)) {
+        hourActivityCount += 1;
+        hourMatrix[row][activity.hour] += 1;
+        const hourBucket = hourBreakdowns[row][activity.hour];
+        hourBucket[activity.type] = (hourBucket[activity.type] || 0) + 1;
+      }
+    });
+
+    const dayTotals = dayMatrix.reduce(
+      (acc, row) => row.map((value, index) => acc[index] + value),
+      new Array(7).fill(0),
+    );
+    const monthTotals = monthMatrix.reduce(
+      (acc, row) => row.map((value, index) => acc[index] + value),
+      new Array(12).fill(0),
+    );
+    const hourTotals = hourMatrix.reduce(
+      (acc, row) => row.map((value, index) => acc[index] + value),
+      new Array(24).fill(0),
+    );
+
+    return {
+      activityCount,
+      hourActivityCount,
       dayMatrix,
-      color,
-      {
-        rotateLabels: false,
-        tooltipLabels: DAYS,
-        cssScope: card,
-        emptyColor,
-        tooltipFormatter: (year, label, value, row, col) => {
-          const breakdown = dayBreakdowns[row][col] || {};
-          return `${year} · ${label}\n${formatBreakdown(value, breakdown)}`;
-        },
-      },
-    ),
-  );
+      dayBreakdowns,
+      monthMatrix,
+      monthBreakdowns,
+      hourMatrix,
+      hourBreakdowns,
+      weekTotals,
+      dayTotals,
+      monthTotals,
+      hourTotals,
+    };
+  };
+
+  const baseData = buildFrequencyData();
+
+  const dayPanel = buildStatPanel("");
 
   const monthPanel = buildStatPanel("");
-  monthPanel.body.appendChild(
-    buildYearMatrix(
-      yearsDesc,
-      monthDisplayLabels,
-      monthMatrix,
-      color,
-      {
-        rotateLabels: false,
-        tooltipLabels: MONTHS,
-        cssScope: card,
-        emptyColor,
-        tooltipFormatter: (year, label, value, row, col) => {
-          const breakdown = monthBreakdowns[row][col] || {};
-          return `${year} · ${label}\n${formatBreakdown(value, breakdown)}`;
-        },
-      },
-    ),
-  );
-
-  const hourMatrix = yearsDesc.map(() => new Array(24).fill(0));
-  const hourBreakdowns = yearsDesc.map(() => (
-    Array.from({ length: 24 }, () => ({}))
-  ));
-  const activities = getFilteredActivities(payload, types, yearsDesc);
-  const yearIndex = new Map();
-  yearsDesc.forEach((year, index) => {
-    yearIndex.set(Number(year), index);
-  });
-  activities.forEach((activity) => {
-    const row = yearIndex.get(Number(activity.year));
-    if (row === undefined) return;
-    const hour = Number(activity.hour);
-    if (!Number.isFinite(hour) || hour < 0 || hour > 23) return;
-    hourMatrix[row][hour] += 1;
-    const bucket = hourBreakdowns[row][hour];
-    const type = activity.type;
-    bucket[type] = (bucket[type] || 0) + 1;
-  });
-
-  const hourTotals = hourMatrix.reduce(
-    (acc, row) => row.map((value, index) => acc[index] + value),
-    new Array(24).fill(0),
-  );
-  const hourLabels = hourTotals.map((_, hour) => (hour % 3 === 0 ? formatHourLabel(hour) : ""));
-  const hourTooltipLabels = hourTotals.map((_, hour) => `${formatHourLabel(hour)} (${hour}:00)`);
 
   const hourPanel = buildStatPanel("");
-  if (activities.length) {
-    hourPanel.body.appendChild(
+
+  const bestDayIndex = baseData.dayTotals.reduce((best, value, index) => (
+    value > baseData.dayTotals[best] ? index : best
+  ), 0);
+  const bestDayLabel = `${DAYS[bestDayIndex]} (${baseData.dayTotals[bestDayIndex]})`;
+
+  const bestMonthIndex = baseData.monthTotals.reduce((best, value, index) => (
+    value > baseData.monthTotals[best] ? index : best
+  ), 0);
+  const bestMonthLabel = `${MONTHS[bestMonthIndex]} (${baseData.monthTotals[bestMonthIndex]})`;
+
+  const bestHourIndex = baseData.hourTotals.reduce((best, value, index) => (
+    value > baseData.hourTotals[best] ? index : best
+  ), 0);
+  const bestHourLabel = baseData.hourActivityCount > 0
+    ? `${formatHourLabel(bestHourIndex)} (${baseData.hourTotals[bestHourIndex]})`
+    : "Not enough time data yet";
+
+  const bestWeekIndex = baseData.weekTotals.reduce((best, value, index) => (
+    index === 0 ? best : (value > baseData.weekTotals[best] ? index : best)
+  ), 1);
+  const bestWeekCount = baseData.weekTotals[bestWeekIndex] || 0;
+  const bestWeekLabel = bestWeekCount > 0
+    ? `Week ${bestWeekIndex} (${bestWeekCount})`
+    : "Not enough data yet";
+
+  const graphColumns = [dayPanel.panel, monthPanel.panel, hourPanel.panel];
+
+  graphColumns.forEach((panel) => {
+    const col = document.createElement("div");
+    col.className = "more-stats-col";
+    col.appendChild(panel);
+    graphs.appendChild(col);
+  });
+
+  const factItems = [
+    {
+      key: "most-active-day",
+      label: "Most active day",
+      value: bestDayLabel,
+      filter: (activity) => activity.dayIndex === bestDayIndex,
+      filterable: baseData.activityCount > 0,
+    },
+    {
+      key: "most-active-month",
+      label: "Most Active Month",
+      value: bestMonthLabel,
+      filter: (activity) => activity.monthIndex === bestMonthIndex,
+      filterable: baseData.activityCount > 0,
+    },
+    {
+      key: "peak-hour",
+      label: "Peak hour",
+      value: bestHourLabel,
+      filter: (activity) => Number.isFinite(activity.hour) && activity.hour === bestHourIndex,
+      filterable: baseData.hourActivityCount > 0,
+    },
+    {
+      key: "most-active-week",
+      label: "Most active week",
+      value: bestWeekLabel,
+      filter: (activity) => activity.weekIndex === bestWeekIndex,
+      filterable: bestWeekCount > 0,
+    },
+  ];
+
+  let activeFactKey = null;
+  const factButtons = new Map();
+
+  const renderFactButtonState = () => {
+    factItems.forEach((item) => {
+      const button = factButtons.get(item.key);
+      if (!button) return;
+      const active = activeFactKey === item.key;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  };
+
+  const renderFrequencyGraphs = () => {
+    const activeFact = factItems.find((item) => item.key === activeFactKey) || null;
+    const matrixData = buildFrequencyData(activeFact?.filter);
+
+    dayPanel.body.innerHTML = "";
+    dayPanel.body.appendChild(
       buildYearMatrix(
         yearsDesc,
-        hourLabels,
-        hourMatrix,
+        dayDisplayLabels,
+        matrixData.dayMatrix,
         color,
         {
-          tooltipLabels: hourTooltipLabels,
+          rotateLabels: false,
+          tooltipLabels: DAYS,
           cssScope: card,
           emptyColor,
           tooltipFormatter: (year, label, value, row, col) => {
-            const breakdown = hourBreakdowns[row][col] || {};
+            const breakdown = matrixData.dayBreakdowns[row][col] || {};
             return `${year} · ${label}\n${formatBreakdown(value, breakdown)}`;
           },
         },
       ),
     );
-  } else {
+
+    monthPanel.body.innerHTML = "";
+    monthPanel.body.appendChild(
+      buildYearMatrix(
+        yearsDesc,
+        monthDisplayLabels,
+        matrixData.monthMatrix,
+        color,
+        {
+          rotateLabels: false,
+          tooltipLabels: MONTHS,
+          cssScope: card,
+          emptyColor,
+          tooltipFormatter: (year, label, value, row, col) => {
+            const breakdown = matrixData.monthBreakdowns[row][col] || {};
+            return `${year} · ${label}\n${formatBreakdown(value, breakdown)}`;
+          },
+        },
+      ),
+    );
+
+    hourPanel.body.innerHTML = "";
+    if (matrixData.hourActivityCount > 0) {
+      const hourLabels = matrixData.hourTotals.map((_, hour) => (hour % 3 === 0 ? formatHourLabel(hour) : ""));
+      const hourTooltipLabels = matrixData.hourTotals.map((_, hour) => `${formatHourLabel(hour)} (${hour}:00)`);
+      hourPanel.body.appendChild(
+        buildYearMatrix(
+          yearsDesc,
+          hourLabels,
+          matrixData.hourMatrix,
+          color,
+          {
+            tooltipLabels: hourTooltipLabels,
+            cssScope: card,
+            emptyColor,
+            tooltipFormatter: (year, label, value, row, col) => {
+              const breakdown = matrixData.hourBreakdowns[row][col] || {};
+              return `${year} · ${label}\n${formatBreakdown(value, breakdown)}`;
+            },
+          },
+        ),
+      );
+      return;
+    }
+
     const fallback = document.createElement("div");
     fallback.className = "stat-subtitle";
     fallback.textContent = "Time-of-day stats require activity timestamps.";
     hourPanel.body.appendChild(fallback);
-  }
-  const dayTotals = dayMatrix.reduce(
-    (acc, row) => row.map((value, index) => acc[index] + value),
-    new Array(7).fill(0),
-  );
-  const bestDayIndex = dayTotals.reduce((best, value, index) => (
-    value > dayTotals[best] ? index : best
-  ), 0);
-  const bestDayLabel = `${DAYS[bestDayIndex]} (${dayTotals[bestDayIndex]})`;
-
-  const monthTotals = monthMatrix.reduce(
-    (acc, row) => row.map((value, index) => acc[index] + value),
-    new Array(12).fill(0),
-  );
-  const bestMonthIndex = monthTotals.reduce((best, value, index) => (
-    value > monthTotals[best] ? index : best
-  ), 0);
-  const bestMonthLabel = `${MONTHS[bestMonthIndex]} (${monthTotals[bestMonthIndex]})`;
-
-  const bestHourIndex = hourTotals.reduce((best, value, index) => (
-    value > hourTotals[best] ? index : best
-  ), 0);
-  const bestHourLabel = activities.length
-    ? `${formatHourLabel(bestHourIndex)} (${hourTotals[bestHourIndex]})`
-    : "Not enough time data yet";
-
-  const bestWeekIndex = weekTotals.reduce((best, value, index) => (
-    index === 0 ? best : (value > weekTotals[best] ? index : best)
-  ), 1);
-  const bestWeekCount = weekTotals[bestWeekIndex] || 0;
-  const bestWeekLabel = bestWeekCount > 0
-    ? `Week ${bestWeekIndex} (${bestWeekCount})`
-    : "Not enough data yet";
-
-  const graphColumns = [
-    { panel: dayPanel.panel, label: "Most active day", value: bestDayLabel },
-    { panel: monthPanel.panel, label: "Most Active Month", value: bestMonthLabel },
-    { panel: hourPanel.panel, label: "Peak hour", value: bestHourLabel },
-  ];
-
-  graphColumns.forEach((item) => {
-    const col = document.createElement("div");
-    col.className = "more-stats-col";
-    col.appendChild(item.panel);
-    graphs.appendChild(col);
-  });
-
-  const factItems = [
-    { key: "most-active-day", label: "Most active day", value: bestDayLabel },
-    { key: "most-active-month", label: "Most Active Month", value: bestMonthLabel },
-    { key: "peak-hour", label: "Peak hour", value: bestHourLabel },
-    { key: "most-active-week", label: "Most active week", value: bestWeekLabel },
-  ];
+  };
 
   factItems.forEach((item) => {
-    const factCard = document.createElement("div");
-    factCard.className = "card-stat more-stats-fact-card";
+    const factCard = document.createElement("button");
+    factCard.type = "button";
+    factCard.className = "card-stat more-stats-fact-card more-stats-fact-button";
     if (item.key) {
       factCard.classList.add(`fact-${item.key}`);
     }
+    factCard.disabled = !item.filterable;
+    factCard.setAttribute("aria-pressed", "false");
     const label = document.createElement("div");
     label.className = "card-stat-label";
     label.textContent = item.label;
@@ -1587,8 +1658,20 @@ function buildStatsOverview(payload, types, years, color) {
     value.textContent = item.value;
     factCard.appendChild(label);
     factCard.appendChild(value);
+    if (item.filterable) {
+      factCard.addEventListener("click", () => {
+        activeFactKey = activeFactKey === item.key ? null : item.key;
+        renderFactButtonState();
+        renderFrequencyGraphs();
+        requestAnimationFrame(alignStackedStatsToYAxisLabels);
+      });
+    }
+    factButtons.set(item.key, factCard);
     facts.appendChild(factCard);
   });
+
+  renderFactButtonState();
+  renderFrequencyGraphs();
 
   body.appendChild(graphs);
   card.appendChild(body);
