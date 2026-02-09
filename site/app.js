@@ -831,7 +831,8 @@ function formatDistance(meters, units) {
 function formatDuration(seconds) {
   const minutes = Math.round(seconds / 60);
   if (minutes >= 60) {
-    return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
+    const hours = Math.floor(minutes / 60);
+    return `${formatNumber(hours, 0)}h ${minutes % 60}m`;
   }
   return `${minutes}m`;
 }
