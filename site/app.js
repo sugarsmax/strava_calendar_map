@@ -797,6 +797,53 @@ function formatActivitiesTitle(types) {
   return `${types.map((type) => displayType(type)).join(" + ")} Activities`;
 }
 
+function pluralizeLabel(label) {
+  if (/(s|x|z|ch|sh)$/i.test(label)) return `${label}es`;
+  if (/[^aeiou]y$/i.test(label)) return `${label.slice(0, -1)}ies`;
+  return `${label}s`;
+}
+
+function getTypeCountNouns(type) {
+  if (!type || type === "all") {
+    return { singular: "activity", plural: "activities" };
+  }
+
+  const meta = TYPE_META[type] || {};
+  const singularMeta = String(meta.count_singular || meta.singular || "").trim().toLowerCase();
+  const pluralMeta = String(meta.count_plural || meta.plural || "").trim().toLowerCase();
+  if (singularMeta && pluralMeta) {
+    return { singular: singularMeta, plural: pluralMeta };
+  }
+
+  const baseLabel = String(singularMeta || meta.label || prettifyType(type)).trim().toLowerCase();
+  if (!baseLabel) {
+    return { singular: "activity", plural: "activities" };
+  }
+  if (pluralMeta) {
+    return { singular: baseLabel, plural: pluralMeta };
+  }
+
+  if (isOtherSportsType(type) || baseLabel.includes(" ") || /(ing|ion)$/i.test(baseLabel)) {
+    return {
+      singular: `${baseLabel} activity`,
+      plural: `${baseLabel} activities`,
+    };
+  }
+
+  return {
+    singular: baseLabel,
+    plural: pluralizeLabel(baseLabel),
+  };
+}
+
+function formatActivityCountLabel(count, types = []) {
+  if (Array.isArray(types) && types.length === 1) {
+    const nouns = getTypeCountNouns(types[0]);
+    return `${count} ${count === 1 ? nouns.singular : nouns.plural}`;
+  }
+  return `${count} ${count === 1 ? "activity" : "activities"}`;
+}
+
 function fallbackColor(type) {
   if (!type) return FALLBACK_VAPORWAVE[0];
   let index = 0;
@@ -890,7 +937,7 @@ function sortBreakdownEntries(counts) {
 }
 
 function formatTooltipBreakdown(total, breakdown, types) {
-  const lines = [`Total: ${total} ${total === 1 ? "activity" : "activities"}`];
+  const lines = [`Total: ${formatActivityCountLabel(total, types)}`];
   const typeCounts = breakdown?.typeCounts || {};
   const subtypeEntries = sortBreakdownEntries(breakdown?.otherSubtypeCounts || {});
   const showTypeBreakdown = types.length > 1;
@@ -1160,7 +1207,7 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
 
     const lines = [
       dateStr,
-      `${entry.count} ${entry.count === 1 ? "activity" : "activities"}`,
+      formatActivityCountLabel(entry.count, type === "all" ? [] : [type]),
     ];
 
     const showDistanceElevation = (entry.distance || 0) > 0 || (entry.elevation_gain || 0) > 0;
