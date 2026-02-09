@@ -2363,8 +2363,7 @@ async function init() {
 
   function toggleTypeFromSummaryCard(type) {
     if (!payload.types.includes(type)) return;
-    const isSummarySelectionActive = summaryTypeCardSelection === type
-      && !allTypesMode
+    const isSummarySelectionActive = !allTypesMode
       && selectedTypes.size === 1
       && selectedTypes.has(type);
     if (isSummarySelectionActive) {
@@ -2533,11 +2532,9 @@ async function init() {
     const frequencyCardColor = getActivityFrequencyCardColor(types);
     const showCombinedTypes = types.length > 1;
     const allAvailableTypesSelected = types.length === payload.types.length;
-    const activeSummaryTypeCard = summaryTypeCardSelection
-      && !allTypesSelected
+    const activeSummaryTypeCard = !allTypesSelected
       && types.length === 1
-      && types.includes(summaryTypeCardSelection)
-      ? summaryTypeCardSelection
+      ? types[0]
       : null;
 
     updateButtonState(typeButtons, selectedTypes, allTypesSelected);
