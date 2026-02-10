@@ -145,7 +145,16 @@ def _load_token_cache() -> Dict:
 
 
 def _save_token_cache(payload: Dict) -> None:
-    write_json(TOKEN_CACHE, payload)
+    cache_payload = {
+        "access_token": payload.get("access_token"),
+        "expires_at": payload.get("expires_at"),
+    }
+    write_json(TOKEN_CACHE, cache_payload)
+    try:
+        os.chmod(TOKEN_CACHE, 0o600)
+    except OSError:
+        # Best-effort hardening; continue even if platform/FS permissions differ.
+        pass
 
 
 def _load_athlete_fingerprint() -> Optional[str]:
@@ -441,7 +450,15 @@ def _write_activity(activity: Dict) -> bool:
     activity_id = activity.get("id")
     if not activity_id:
         return False
-    path = os.path.join(RAW_DIR, f"{activity_id}.json")
+    activity_id_str = str(activity_id).strip()
+    if not activity_id_str:
+        return False
+    if activity_id_str in {".", ".."}:
+        return False
+    if "/" in activity_id_str or "\\" in activity_id_str or ".." in activity_id_str:
+        return False
+
+    path = os.path.join(RAW_DIR, f"{activity_id_str}.json")
     if os.path.exists(path):
         try:
             existing = read_json(path)
