@@ -568,20 +568,22 @@
         padding-left: calc(var(--heatmap-axis-col) + var(--axis-gap));
       }
 
-      .card-empty-year-stat {
+      .card-empty-year .card-empty-year-stat {
         width: max-content;
-        max-width: 100%;
+        max-width: none;
         min-height: 0;
         padding: 6px 10px;
+        align-items: flex-start;
+        text-align: left;
       }
 
-      .card-empty-year-stat .card-stat-label {
+      .card-empty-year .card-empty-year-stat .card-stat-label {
         margin-bottom: 0;
         white-space: nowrap;
         text-transform: none;
       }
 
-      .card-empty-year-stat .card-stat-value {
+      .card-empty-year .card-empty-year-stat .card-stat-value {
         display: none;
       }
 
