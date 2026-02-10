@@ -2021,6 +2021,7 @@ async function init() {
 
   function toggleTypeFromSummaryCard(type) {
     toggleType(type);
+    finalizeTypeSelection();
   }
 
   function toggleYear(value) {
