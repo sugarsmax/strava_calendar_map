@@ -133,7 +133,7 @@ def normalize() -> List[Dict]:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Normalize raw Strava activities")
-    args = parser.parse_args()
+    parser.parse_args()
 
     ensure_dir("data")
     items = normalize()

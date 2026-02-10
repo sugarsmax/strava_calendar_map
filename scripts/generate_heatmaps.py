@@ -330,7 +330,7 @@ def generate():
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Generate SVG heatmaps")
-    args = parser.parse_args()
+    parser.parse_args()
     generate()
     print("Generated heatmaps")
     return 0

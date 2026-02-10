@@ -57,7 +57,7 @@ def aggregate():
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Aggregate normalized activities by day/type/year")
-    args = parser.parse_args()
+    parser.parse_args()
 
     ensure_dir("data")
     output = aggregate()
