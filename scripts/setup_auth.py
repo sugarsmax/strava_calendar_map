@@ -8,8 +8,6 @@ This script performs:
 3) GitHub secret updates via `gh secret set`.
 """
 
-from __future__ import annotations
-
 import argparse
 import getpass
 import html
