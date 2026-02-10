@@ -17,9 +17,7 @@ from utils import (
 
 AGG_PATH = os.path.join("data", "daily_aggregates.json")
 ACTIVITIES_PATH = os.path.join("data", "activities_normalized.json")
-README_PATH = "README.md"
 SITE_DATA_PATH = os.path.join("site", "data.json")
-README_PREVIEW_IMAGE_PATH = os.path.join("site", "readme-preview.png")
 
 CELL = 12
 GAP = 2
@@ -270,43 +268,6 @@ def _svg_for_year(
     return "\n".join(lines) + "\n"
 
 
-def _readme_section() -> str:
-    return (
-        "Preview:\n\n"
-        "![Dashboard Preview]"
-        f"({README_PREVIEW_IMAGE_PATH})\n"
-    )
-
-
-def _update_readme() -> None:
-    if not os.path.exists(README_PATH):
-        return
-    with open(README_PATH, "r", encoding="utf-8") as f:
-        content = f.read()
-
-    start_tag = "<!-- HEATMAPS:START -->"
-    end_tag = "<!-- HEATMAPS:END -->"
-    section = _readme_section()
-
-    if start_tag in content and end_tag in content:
-        before, rest = content.split(start_tag, 1)
-        _, after = rest.split(end_tag, 1)
-        new_content = before + start_tag + "\n" + section + end_tag + after
-    else:
-        new_content = content.rstrip() + "\n\n" + start_tag + "\n" + section + end_tag + "\n"
-
-    updated_tag_start = "<!-- UPDATED:START -->"
-    updated_tag_end = "<!-- UPDATED:END -->"
-    updated_value = utc_now().strftime("%Y-%m-%d %H:%M UTC")
-    if updated_tag_start in new_content and updated_tag_end in new_content:
-        before, rest = new_content.split(updated_tag_start, 1)
-        _, after = rest.split(updated_tag_end, 1)
-        new_content = before + updated_tag_start + updated_value + updated_tag_end + after
-
-    with open(README_PATH, "w", encoding="utf-8") as f:
-        f.write(new_content)
-
-
 def _write_site_data(payload: Dict) -> None:
     ensure_dir("site")
     write_json(SITE_DATA_PATH, payload)
@@ -354,8 +315,6 @@ def generate():
             with open(path, "w", encoding="utf-8") as f:
                 f.write(svg)
 
-    _update_readme()
-
     site_payload = {
         "generated_at": utc_now().isoformat(),
         "years": years,
@@ -370,10 +329,10 @@ def generate():
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Generate SVG heatmaps and README section")
+    parser = argparse.ArgumentParser(description="Generate SVG heatmaps")
     args = parser.parse_args()
     generate()
-    print("Generated heatmaps and README section")
+    print("Generated heatmaps")
     return 0
 
 
