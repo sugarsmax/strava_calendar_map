@@ -650,6 +650,10 @@ function buildSummary(
     "summary-center-two-types",
     "summary-center-three-types",
     "summary-center-four-types",
+    "summary-center-tail-one",
+    "summary-center-tail-two",
+    "summary-center-tail-three",
+    "summary-center-tail-four",
   );
 
   const totals = {
@@ -730,9 +734,15 @@ function buildSummary(
   });
 
   if (showTypeBreakdown && visibleTypeCardsList.length) {
+    const typeCardCount = visibleTypeCardsList.length;
+    const centerTailCards = typeCardCount > 5 ? typeCardCount % 5 : 0;
     summary.classList.toggle("summary-center-two-types", visibleTypeCardsList.length === 2);
     summary.classList.toggle("summary-center-three-types", visibleTypeCardsList.length === 3);
     summary.classList.toggle("summary-center-four-types", visibleTypeCardsList.length === 4);
+    summary.classList.toggle("summary-center-tail-one", centerTailCards === 1);
+    summary.classList.toggle("summary-center-tail-two", centerTailCards === 2);
+    summary.classList.toggle("summary-center-tail-three", centerTailCards === 3);
+    summary.classList.toggle("summary-center-tail-four", centerTailCards === 4);
 
     visibleTypeCardsList.forEach((type) => {
       const typeCard = document.createElement("button");
