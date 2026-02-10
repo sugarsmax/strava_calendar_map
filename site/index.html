@@ -332,7 +332,8 @@
       .summary {
         display: grid;
         gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 220px));
+        justify-content: center;
       }
 
       .summary-card {
@@ -347,6 +348,7 @@
         grid-template-rows: auto 1fr;
         align-items: center;
         justify-items: center; /* prevents full-width stretch that moves the dot left */
+        width: 100%;
       }
 
       .summary-card-action {
@@ -743,6 +745,25 @@
       .more-stats.more-stats-stacked .more-stats-fact-card .card-stat-label,
       .more-stats.more-stats-stacked .more-stats-fact-card .card-stat-value {
         white-space: nowrap;
+      }
+
+      @media (min-width: 901px) {
+        .year-card:not(.year-card-stacked) .card-body,
+        .more-stats:not(.more-stats-stacked) {
+          justify-content: center;
+        }
+      }
+
+      @media (min-width: 1200px) {
+        .summary.summary-center-three-types .summary-type-card:nth-last-child(3) {
+          grid-column: 2;
+        }
+        .summary.summary-center-three-types .summary-type-card:nth-last-child(2) {
+          grid-column: 3;
+        }
+        .summary.summary-center-three-types .summary-type-card:nth-last-child(1) {
+          grid-column: 4;
+        }
       }
 
       .heatmap-area {

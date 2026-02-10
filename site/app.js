@@ -650,6 +650,7 @@ function buildSummary(
   onTypeCardHoverReset,
 ) {
   summary.innerHTML = "";
+  summary.classList.remove("summary-center-three-types");
 
   const totals = {
     count: 0,
@@ -726,10 +727,13 @@ function buildSummary(
   });
 
   if (showTypeBreakdown) {
+    const shouldCenterThreeTypes = typeCardsList.length === 3;
+    summary.classList.toggle("summary-center-three-types", shouldCenterThreeTypes);
+
     typeCardsList.forEach((type) => {
       const typeCard = document.createElement("button");
       typeCard.type = "button";
-      typeCard.className = "summary-card summary-card-action";
+      typeCard.className = "summary-card summary-card-action summary-type-card";
       const isActiveTypeCard = Boolean(activeTypeCards && activeTypeCards.has(type));
       typeCard.classList.toggle("active", isActiveTypeCard);
       if (!isActiveTypeCard && hoverClearedType === type) {
