@@ -650,7 +650,11 @@ function buildSummary(
   onTypeCardHoverReset,
 ) {
   summary.innerHTML = "";
-  summary.classList.remove("summary-center-three-types");
+  summary.classList.remove(
+    "summary-center-two-types",
+    "summary-center-three-types",
+    "summary-center-four-types",
+  );
 
   const totals = {
     count: 0,
@@ -663,7 +667,10 @@ function buildSummary(
   const typeCardsList = Array.isArray(typeCardTypes) && typeCardTypes.length
     ? typeCardTypes.slice()
     : types.slice();
-  const typeCardSet = new Set(typeCardsList);
+  const visibleTypeCardsList = typeCardsList.length > 1
+    ? typeCardsList
+    : [];
+  const typeCardSet = new Set(visibleTypeCardsList);
   const activeDays = new Set();
 
   Object.entries(payload.aggregates || {}).forEach(([year, yearData]) => {
@@ -726,11 +733,12 @@ function buildSummary(
     summary.appendChild(el);
   });
 
-  if (showTypeBreakdown) {
-    const shouldCenterThreeTypes = typeCardsList.length === 3;
-    summary.classList.toggle("summary-center-three-types", shouldCenterThreeTypes);
+  if (showTypeBreakdown && visibleTypeCardsList.length) {
+    summary.classList.toggle("summary-center-two-types", visibleTypeCardsList.length === 2);
+    summary.classList.toggle("summary-center-three-types", visibleTypeCardsList.length === 3);
+    summary.classList.toggle("summary-center-four-types", visibleTypeCardsList.length === 4);
 
-    typeCardsList.forEach((type) => {
+    visibleTypeCardsList.forEach((type) => {
       const typeCard = document.createElement("button");
       typeCard.type = "button";
       typeCard.className = "summary-card summary-card-action summary-type-card";

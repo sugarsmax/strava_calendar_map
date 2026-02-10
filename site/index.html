@@ -769,6 +769,15 @@
       }
 
       @media (min-width: 1200px) {
+        .summary.summary-center-two-types .summary-type-card:nth-last-child(2) {
+          grid-column: 2;
+        }
+        .summary.summary-center-two-types .summary-type-card:nth-last-child(1) {
+          grid-column: 3;
+        }
+        .summary.summary-center-two-types .summary-type-card {
+          transform: translateX(calc((var(--summary-card-max-width) + var(--summary-grid-gap)) / 2));
+        }
         .summary.summary-center-three-types .summary-type-card:nth-last-child(3) {
           grid-column: 2;
         }
@@ -777,6 +786,21 @@
         }
         .summary.summary-center-three-types .summary-type-card:nth-last-child(1) {
           grid-column: 4;
+        }
+        .summary.summary-center-four-types .summary-type-card:nth-last-child(4) {
+          grid-column: 1;
+        }
+        .summary.summary-center-four-types .summary-type-card:nth-last-child(3) {
+          grid-column: 2;
+        }
+        .summary.summary-center-four-types .summary-type-card:nth-last-child(2) {
+          grid-column: 3;
+        }
+        .summary.summary-center-four-types .summary-type-card:nth-last-child(1) {
+          grid-column: 4;
+        }
+        .summary.summary-center-four-types .summary-type-card {
+          transform: translateX(calc((var(--summary-card-max-width) + var(--summary-grid-gap)) / 2));
         }
       }
 
