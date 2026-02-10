@@ -190,13 +190,9 @@ function buildSectionLayoutPlan(list) {
     const requiredWidth = Math.ceil(mainWidth + sideGap + statsWidth);
     const availableWidth = Math.floor(getElementContentWidth(card));
     const overflow = requiredWidth - availableWidth;
-    const baseTolerance = desktopLike
+    const tolerance = desktopLike
       ? readCssVar("--stack-overflow-tolerance-desktop", 0, card)
       : 0;
-    const adaptiveDesktopTolerance = desktopLike
-      ? Math.ceil(statsWidth * 0.6)
-      : 0;
-    const tolerance = Math.max(baseTolerance, adaptiveDesktopTolerance);
     if (overflow > tolerance) {
       shouldStackSection = true;
     }
