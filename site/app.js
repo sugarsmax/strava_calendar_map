@@ -1015,7 +1015,10 @@ function buildEmptyYearCard(type, year, labelOverride) {
   const body = document.createElement("div");
   body.className = "card-empty-year-body";
   const label = labelOverride || displayType(type);
-  const emptyMessage = `no ${String(label).toLowerCase()} activities`;
+  const normalizedLabel = String(label).trim().toLowerCase();
+  const emptyMessage = normalizedLabel.endsWith(" activities") || normalizedLabel.endsWith(" activity")
+    ? `no ${normalizedLabel}`
+    : `no ${normalizedLabel} activities`;
 
   const emptyStat = buildSideStatCard("No activity", emptyMessage, {
     className: "card-stat card-empty-year-stat",
@@ -1023,6 +1026,16 @@ function buildEmptyYearCard(type, year, labelOverride) {
   body.appendChild(emptyStat);
   card.appendChild(body);
   return card;
+}
+
+function buildEmptySelectionCard(types, years) {
+  const selectedTypes = Array.isArray(types) ? types.filter(Boolean) : [];
+  const label = selectedTypes.length
+    ? selectedTypes.map((type) => displayType(type)).join(" + ")
+    : "activities";
+  const year = Array.isArray(years) && years.length ? years[0] : 0;
+  const fallbackType = selectedTypes[0] || "all";
+  return buildEmptyYearCard(fallbackType, year, label);
 }
 
 function buildLabeledCardRow(label, card, kind) {
@@ -1318,6 +1331,9 @@ function buildStatsOverview(payload, types, years, color) {
   };
 
   const baseData = buildFrequencyData();
+  if (baseData.activityCount <= 0) {
+    return buildEmptySelectionCard(types, yearsDesc);
+  }
 
   const dayPanel = buildStatPanel("");
 
@@ -1690,6 +1706,11 @@ function renderStats(payload, types, years, color) {
       };
     })
     .filter(Boolean);
+
+  if (!activities.length) {
+    stats.appendChild(buildEmptySelectionCard(types, yearsDesc));
+    return;
+  }
 
   activities.forEach((activity) => {
     const row = yearIndex.get(activity.year);
