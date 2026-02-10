@@ -1796,10 +1796,48 @@ function renderStats(payload, types, years, color) {
   stats.appendChild(row3);
 }
 
+function renderLoadError(error) {
+  const detail = error && typeof error.message === "string" && error.message
+    ? error.message
+    : "Unexpected error.";
+
+  if (updated) {
+    updated.textContent = "Last updated: unavailable";
+  }
+  if (summary) {
+    summary.innerHTML = "";
+  }
+  if (!heatmaps) {
+    return;
+  }
+
+  heatmaps.innerHTML = "";
+  const card = document.createElement("div");
+  card.className = "card";
+
+  const title = document.createElement("div");
+  title.className = "card-title";
+  title.textContent = "Dashboard unavailable";
+
+  const body = document.createElement("div");
+  body.className = "stat-subtitle";
+  body.textContent = `Could not load dashboard data. ${detail}`;
+
+  card.appendChild(title);
+  card.appendChild(body);
+  heatmaps.appendChild(card);
+}
+
 async function init() {
   syncRepoLink();
   const resp = await fetch("data.json");
+  if (!resp.ok) {
+    throw new Error(`Failed to load data.json (${resp.status})`);
+  }
   const payload = await resp.json();
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Invalid dashboard data format.");
+  }
   TYPE_META = payload.type_meta || {};
   OTHER_BUCKET = String(payload.other_bucket || "OtherSports");
   (payload.types || []).forEach((type) => {
@@ -2395,4 +2433,5 @@ async function init() {
 
 init().catch((error) => {
   console.error(error);
+  renderLoadError(error);
 });

@@ -70,6 +70,12 @@ jobs:
       - name: Configure Pages
         uses: actions/configure-pages@v5
 
+      - name: Stamp app asset version
+        run: |
+          set -euo pipefail
+          version="${GITHUB_SHA::12}"
+          sed -i "s|__APP_VERSION__|${version}|g" site/index.html
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
