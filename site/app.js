@@ -451,7 +451,7 @@ function formatActivityCountLabel(count, types = []) {
     const nouns = getTypeCountNouns(types[0]);
     return `${count} ${count === 1 ? nouns.singular : nouns.plural}`;
   }
-  return `${count} ${count === 1 ? "activity" : "activities"}`;
+  return `${count} ${count === 1 ? "Activity" : "Activities"}`;
 }
 
 function fallbackColor(type) {
@@ -909,7 +909,6 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
       const typeBreakdown = options.typeBreakdownsByDate?.[dateStr];
       const breakdownLines = formatTypeBreakdownLines(typeBreakdown, options.selectedTypes || []);
       if (breakdownLines.length) {
-        lines.push("Types:");
         lines.push(...breakdownLines);
       } else {
         const typeLabels = options.typeLabelsByDate?.[dateStr];
