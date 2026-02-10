@@ -37,8 +37,8 @@
         --frequency-graph-gap-base: clamp(10px, 1.4vw, 14px);
         --labeled-card-padding-top: 12px;
         --labeled-card-title-gap: 6px;
-        --summary-card-max-width: 220px;
-        --summary-grid-gap: 16px;
+        --summary-card-max-width: 208px;
+        --summary-grid-gap: 14px;
         --summary-desktop-columns: 5;
         --dashboard-content-rail-width: calc(
           (var(--summary-desktop-columns) * var(--summary-card-max-width)) +
@@ -341,7 +341,7 @@
       .summary {
         display: grid;
         gap: var(--summary-grid-gap);
-        grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), var(--summary-card-max-width)));
+        grid-template-columns: repeat(auto-fit, minmax(min(190px, 100%), var(--summary-card-max-width)));
         justify-content: center;
         width: min(100%, var(--dashboard-content-rail-width));
         margin-inline: auto;
