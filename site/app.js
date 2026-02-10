@@ -174,6 +174,7 @@ function buildSectionLayoutPlan(list) {
 
   let shouldStackSection = false;
   const viewportWidth = window.innerWidth;
+  const desktopLike = window.matchMedia("(min-width: 901px)").matches;
   cards.forEach((card) => {
     const statsColumn = card.classList.contains("more-stats")
       ? card.querySelector(".more-stats-facts.side-stats-column")
@@ -188,10 +189,15 @@ function buildSectionLayoutPlan(list) {
     const sideGap = readCssVar("--stats-column-gap", 12, card);
     const requiredWidth = Math.ceil(mainWidth + sideGap + statsWidth);
     const availableWidth = Math.floor(getElementContentWidth(card));
-    const desktopTolerance = viewportWidth >= 1024
+    const overflow = requiredWidth - availableWidth;
+    const baseTolerance = desktopLike
       ? readCssVar("--stack-overflow-tolerance-desktop", 0, card)
       : 0;
-    if (requiredWidth > (availableWidth + desktopTolerance)) {
+    const adaptiveDesktopTolerance = desktopLike
+      ? Math.ceil(statsWidth * 0.6)
+      : 0;
+    const tolerance = Math.max(baseTolerance, adaptiveDesktopTolerance);
+    if (overflow > tolerance) {
       shouldStackSection = true;
     }
   });
