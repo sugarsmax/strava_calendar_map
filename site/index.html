@@ -356,10 +356,16 @@
         transition: border-color 0.15s ease, box-shadow 0.15s ease;
       }
 
-      .summary-card-action:hover,
       .summary-card-action.active {
         border-color: var(--accent);
         box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      }
+
+      @media (hover: hover) and (pointer: fine) {
+        .summary-card-action:hover {
+          border-color: var(--accent);
+          box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+        }
       }
 
       .summary-card-action:focus-visible {
