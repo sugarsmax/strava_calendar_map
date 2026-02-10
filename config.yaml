@@ -24,7 +24,7 @@ rate_limits:
 activities:
   types:
     - Run
-    - Ride
+    # - Ride
     # - WeightTraining
   include_all_types: true   # include all Strava activity types by default
   group_other_types: true   # when true, map non-featured types into smart buckets
