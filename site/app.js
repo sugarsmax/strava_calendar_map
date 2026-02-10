@@ -530,11 +530,10 @@ function createTooltipBreakdown() {
 
 function addTooltipBreakdownCount(breakdown, activityType, subtypeLabel) {
   if (!breakdown) return;
+  breakdown.typeCounts[activityType] = (breakdown.typeCounts[activityType] || 0) + 1;
   if (isOtherSportsType(activityType) && subtypeLabel) {
     breakdown.otherSubtypeCounts[subtypeLabel] = (breakdown.otherSubtypeCounts[subtypeLabel] || 0) + 1;
-    return;
   }
-  breakdown.typeCounts[activityType] = (breakdown.typeCounts[activityType] || 0) + 1;
 }
 
 function sortBreakdownEntries(counts) {
@@ -546,33 +545,49 @@ function sortBreakdownEntries(counts) {
     });
 }
 
-function formatTooltipBreakdown(total, breakdown, types) {
-  const lines = [`Total: ${formatActivityCountLabel(total, types)}`];
+function formatTypeBreakdownLines(breakdown, types) {
+  const lines = [];
   const typeCounts = breakdown?.typeCounts || {};
   const subtypeEntries = sortBreakdownEntries(breakdown?.otherSubtypeCounts || {});
-  const showTypeBreakdown = types.length > 1;
-
-  if (!showTypeBreakdown && !subtypeEntries.length) {
-    return lines.join("\n");
-  }
+  const selectedTypes = Array.isArray(types) ? types : [];
+  const showTypeBreakdown = selectedTypes.length > 1;
+  let otherSportsLineRendered = false;
 
   if (showTypeBreakdown) {
-    types.forEach((type) => {
-      const isOtherType = isOtherSportsType(type);
-      if (isOtherType && subtypeEntries.length && (typeCounts[type] || 0) <= 0) {
-        return;
-      }
+    selectedTypes.forEach((type) => {
       const count = typeCounts[type] || 0;
-      if (count > 0) {
-        lines.push(`${displayType(type)}: ${count}`);
-      }
+      if (count <= 0) return;
+      const otherType = isOtherSportsType(type);
+      lines.push(`${displayType(type)}: ${count}`);
+      if (!otherType || !subtypeEntries.length) return;
+      otherSportsLineRendered = true;
+      subtypeEntries.forEach(([subtype, subtypeCount]) => {
+        lines.push(`  - ${subtype}: ${subtypeCount}`);
+      });
     });
   }
 
-  subtypeEntries.forEach(([subtype, count]) => {
-    lines.push(`${subtype}: ${count}`);
-  });
+  if (subtypeEntries.length && !otherSportsLineRendered) {
+    const otherTotal = typeCounts[OTHER_BUCKET]
+      || subtypeEntries.reduce((sum, [, count]) => sum + count, 0);
+    if (otherTotal > 0) {
+      lines.push(`${displayType(OTHER_BUCKET)}: ${otherTotal}`);
+    }
+    subtypeEntries.forEach(([subtype, count]) => {
+      lines.push(`  - ${subtype}: ${count}`);
+    });
+  }
 
+  return lines;
+}
+
+function formatTooltipBreakdown(total, breakdown, types) {
+  const lines = [`Total: ${formatActivityCountLabel(total, types)}`];
+  const detailLines = formatTypeBreakdownLines(breakdown, types);
+  if (!detailLines.length) {
+    return lines.join("\n");
+  }
+  lines.push(...detailLines);
   return lines.join("\n");
 }
 
@@ -631,6 +646,26 @@ function buildCombinedTypeLabelsByDate(payload, types, years) {
   });
 
   return result;
+}
+
+function buildCombinedTypeBreakdownsByDate(payload, types, years) {
+  const activities = getFilteredActivities(payload, types, years);
+  const breakdownsByDate = {};
+
+  activities.forEach((activity) => {
+    const dateStr = String(activity.date || "");
+    if (!dateStr) return;
+    if (!breakdownsByDate[dateStr]) {
+      breakdownsByDate[dateStr] = createTooltipBreakdown();
+    }
+    addTooltipBreakdownCount(
+      breakdownsByDate[dateStr],
+      String(activity.type || ""),
+      getActivitySubtypeLabel(activity),
+    );
+  });
+
+  return breakdownsByDate;
 }
 
 function buildSummary(
@@ -871,11 +906,18 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
     const showDistanceElevation = (entry.distance || 0) > 0 || (entry.elevation_gain || 0) > 0;
 
     if (type === "all") {
-      const typeLabels = options.typeLabelsByDate?.[dateStr];
-      if (Array.isArray(typeLabels) && typeLabels.length) {
-        lines.push(`Types: ${typeLabels.join(", ")}`);
-      } else if (entry.types && entry.types.length) {
-        lines.push(`Types: ${entry.types.map(displayType).join(", ")}`);
+      const typeBreakdown = options.typeBreakdownsByDate?.[dateStr];
+      const breakdownLines = formatTypeBreakdownLines(typeBreakdown, options.selectedTypes || []);
+      if (breakdownLines.length) {
+        lines.push("Types:");
+        lines.push(...breakdownLines);
+      } else {
+        const typeLabels = options.typeLabelsByDate?.[dateStr];
+        if (Array.isArray(typeLabels) && typeLabels.length) {
+          lines.push(`Types: ${typeLabels.join(", ")}`);
+        } else if (entry.types && entry.types.length) {
+          lines.push(`Types: ${entry.types.map(displayType).join(", ")}`);
+        }
       }
     }
 
@@ -2022,6 +2064,7 @@ async function init() {
         const yearTotals = getTypesYearTotals(payload, types, years);
         const cardYears = years.slice();
         const typeLabelsByDate = buildCombinedTypeLabelsByDate(payload, types, cardYears);
+        const typeBreakdownsByDate = buildCombinedTypeBreakdownsByDate(payload, types, cardYears);
         const emptyLabel = types.map((type) => displayType(type)).join(" + ");
         if (showMoreStats) {
           list.appendChild(
@@ -2053,6 +2096,8 @@ async function init() {
               payload.units || { distance: "mi", elevation: "ft" },
               {
                 colorForEntry,
+                selectedTypes: types,
+                typeBreakdownsByDate,
                 typeLabelsByDate,
               },
             )
