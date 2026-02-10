@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Tuple
 
 import requests
 
+from activity_types import featured_types_from_config
 from utils import ensure_dir, load_config, read_json, utc_now, write_json
 
 TOKEN_CACHE = ".strava_token.json"
@@ -251,6 +252,34 @@ def _start_after_ts(config: Dict) -> int:
         # Default: no lower bound, so Strava backfill can reach all available history.
         return 0
     return _lookback_after_ts(int(lookback_years))
+
+
+def _activity_scope(config: Dict) -> Dict:
+    activities_cfg = config.get("activities", {}) or {}
+    include_all_types = bool(activities_cfg.get("include_all_types", True))
+    scope = {"include_all_types": include_all_types}
+    if include_all_types:
+        return scope
+
+    featured_types = sorted({str(item) for item in featured_types_from_config(activities_cfg)})
+    type_aliases = {
+        str(source): str(target)
+        for source, target in (activities_cfg.get("type_aliases", {}) or {}).items()
+    }
+    group_aliases = {
+        str(source): str(target)
+        for source, target in (activities_cfg.get("group_aliases", {}) or {}).items()
+    }
+    scope.update(
+        {
+            "featured_types": featured_types,
+            "group_other_types": bool(activities_cfg.get("group_other_types", True)),
+            "other_bucket": str(activities_cfg.get("other_bucket", "OtherSports")),
+            "type_aliases": dict(sorted(type_aliases.items())),
+            "group_aliases": dict(sorted(group_aliases.items())),
+        }
+    )
+    return scope
 
 
 def _activity_start_ts(activity: Dict) -> Optional[int]:
@@ -513,6 +542,7 @@ def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
     )
     per_page = int(config.get("sync", {}).get("per_page", 200))
     after = _start_after_ts(config)
+    activity_scope = _activity_scope(config)
     recent_days = int(config.get("sync", {}).get("recent_days", 7))
     resume_backfill = bool(config.get("sync", {}).get("resume_backfill", True))
 
@@ -544,6 +574,9 @@ def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
         if state_after != after:
             print("Backfill boundary changed; restarting cursor.")
             state = {}
+    if state and state.get("activity_scope") != activity_scope:
+        print("Activity scope changed; restarting backfill cursor.")
+        state = {}
     if state and state.get("completed"):
         skip_backfill = True
     elif state and state.get("after") == after and state.get("next_before") is not None:
@@ -616,6 +649,7 @@ def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
                 "rate_limited": rate_limited,
                 "last_run_utc": utc_now().isoformat(),
             }
+        state_update["activity_scope"] = activity_scope
         _save_state(state_update)
 
     total_fetched = total + int(recent_summary.get("fetched", 0))
