@@ -1147,34 +1147,8 @@ function getTypesYearTotals(payload, types, years) {
   return totals;
 }
 
-function trimOldestEmptyYears(years, yearTotals) {
-  if (!years.length) return [];
-  const yearsAsc = years.slice().sort((a, b) => a - b);
-  let firstActiveYear = null;
-  yearsAsc.forEach((year) => {
-    if (firstActiveYear !== null) return;
-    if ((yearTotals.get(year) || 0) > 0) {
-      firstActiveYear = year;
-    }
-  });
-
-  if (firstActiveYear === null) {
-    return [years[0]];
-  }
-
-  return years.filter((year) => year >= firstActiveYear);
-}
-
-function getVisibleYearsForTypes(payload, types, years, showAllYears) {
-  const sortedYears = years.slice().sort((a, b) => b - a);
-  if (showAllYears) {
-    return sortedYears;
-  }
-  if (!types.length) {
-    return sortedYears;
-  }
-  const yearTotals = getTypesYearTotals(payload, types, sortedYears);
-  return trimOldestEmptyYears(sortedYears, yearTotals);
+function getVisibleYears(years) {
+  return years.slice().sort((a, b) => b - a);
 }
 
 function getFrequencyColor(types, allYearsSelected) {
@@ -2127,7 +2101,7 @@ async function init() {
     const keepYearMenuOpen = Boolean(options.keepYearMenuOpen);
     const allTypesSelected = areAllTypesSelected();
     const types = selectedTypesList();
-    const visibleYears = getVisibleYearsForTypes(payload, types, payload.years, allTypesSelected);
+    const visibleYears = getVisibleYears(payload.years);
     currentVisibleYears = visibleYears.slice();
     if (!areAllYearsSelected()) {
       const visibleSet = new Set(visibleYears.map(Number));
@@ -2225,9 +2199,7 @@ async function init() {
         const list = document.createElement("div");
         list.className = "type-list";
         const yearTotals = getTypesYearTotals(payload, types, years);
-        const cardYears = allYearsSelected
-          ? trimOldestEmptyYears(years, yearTotals)
-          : years.slice();
+        const cardYears = years.slice();
         const typeLabelsByDate = buildCombinedTypeLabelsByDate(payload, types, cardYears);
         const emptyLabel = types.map((type) => displayType(type)).join(" + ");
         if (showMoreStats) {
@@ -2280,9 +2252,7 @@ async function init() {
           const list = document.createElement("div");
           list.className = "type-list";
           const yearTotals = getTypeYearTotals(payload, type, years);
-          const cardYears = allYearsSelected
-            ? trimOldestEmptyYears(years, yearTotals)
-            : years.slice();
+          const cardYears = years.slice();
           if (showMoreStats) {
             list.appendChild(
               buildLabeledCardRow(
