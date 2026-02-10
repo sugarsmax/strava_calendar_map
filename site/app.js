@@ -263,12 +263,6 @@ function alignStackedStatsToYAxisLabels() {
   plans.forEach((plan) => {
     applySectionLayoutPlan(plan);
   });
-
-  if (window.matchMedia("(max-width: 900px)").matches) {
-    heatmaps.querySelectorAll(".card").forEach((card) => {
-      card.scrollLeft = 0;
-    });
-  }
 }
 
 function sundayOnOrBefore(d) {
@@ -1940,6 +1934,8 @@ async function init() {
   }
 
   let resizeTimer = null;
+  let lastViewportWidth = window.innerWidth;
+  let lastIsNarrowLayout = window.matchMedia("(max-width: 900px)").matches;
 
   let allTypesMode = true;
   let selectedTypes = new Set();
@@ -2399,6 +2395,15 @@ async function init() {
       window.clearTimeout(resizeTimer);
     }
     resizeTimer = window.setTimeout(() => {
+      const width = window.innerWidth;
+      const isNarrowLayout = window.matchMedia("(max-width: 900px)").matches;
+      const widthChanged = Math.abs(width - lastViewportWidth) >= 1;
+      const layoutModeChanged = isNarrowLayout !== lastIsNarrowLayout;
+      if (!widthChanged && !layoutModeChanged) {
+        return;
+      }
+      lastViewportWidth = width;
+      lastIsNarrowLayout = isNarrowLayout;
       update();
     }, 150);
   });
