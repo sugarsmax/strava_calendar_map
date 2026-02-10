@@ -77,6 +77,7 @@
       .card,
       .card-body,
       .more-stats,
+      .more-stats-layout,
       .more-stats-body {
         min-width: 0;
       }
@@ -618,12 +619,18 @@
         --label-row-height: var(--heatmap-label-row-height);
         --label-gap: 0px;
         --label-gap-rotated: 10px;
+      }
+
+      .more-stats-layout {
         display: grid;
         grid-template-columns: var(--card-graph-rail-width) max-content;
         column-gap: var(--stats-column-gap);
         row-gap: 0;
         align-items: center;
         justify-content: start;
+        grid-column: 1;
+        grid-row: 2;
+        min-width: 0;
       }
 
       .more-stats > .labeled-card-title {
@@ -634,7 +641,7 @@
       .more-stats-body {
         display: block;
         grid-column: 1;
-        grid-row: 2;
+        grid-row: 1;
         width: max-content;
         align-self: center;
       }
@@ -662,7 +669,7 @@
         grid-template-columns: repeat(2, max-content);
         gap: var(--side-stat-gap);
         grid-column: 2;
-        grid-row: 2;
+        grid-row: 1;
         width: max-content;
         max-width: 100%;
         align-self: center;
@@ -733,15 +740,15 @@
         white-space: nowrap;
       }
 
-      .more-stats.more-stats-stacked {
+      .more-stats.more-stats-stacked .more-stats-layout {
         grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
+        grid-template-rows: auto auto;
         row-gap: 0;
       }
 
       .more-stats.more-stats-stacked .more-stats-body {
         grid-column: 1;
-        grid-row: 2;
+        grid-row: 1;
       }
 
       .more-stats.more-stats-stacked .more-stats-facts {
@@ -749,7 +756,7 @@
         flex-direction: row;
         flex-wrap: nowrap;
         grid-column: 1;
-        grid-row: 3;
+        grid-row: 2;
         gap: var(--side-stat-gap);
         margin-left: calc(var(--axis-width) + var(--axis-gap));
         margin-top: 12px;
@@ -775,7 +782,7 @@
 
       @media (min-width: 901px) {
         .year-card:not(.year-card-stacked) .card-body,
-        .more-stats:not(.more-stats-stacked) {
+        .more-stats:not(.more-stats-stacked) .more-stats-layout {
           justify-content: center;
         }
       }

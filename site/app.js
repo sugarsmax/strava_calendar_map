@@ -1215,6 +1215,8 @@ function buildStatPanel(title, subtitle) {
 function buildStatsOverview(payload, types, years, color) {
   const card = document.createElement("div");
   card.className = "card more-stats";
+  const layout = document.createElement("div");
+  layout.className = "more-stats-layout";
 
   const body = document.createElement("div");
   body.className = "more-stats-body";
@@ -1536,8 +1538,9 @@ function buildStatsOverview(payload, types, years, color) {
   renderFrequencyGraphs();
 
   body.appendChild(graphs);
-  card.appendChild(body);
-  card.appendChild(facts);
+  layout.appendChild(body);
+  layout.appendChild(facts);
+  card.appendChild(layout);
   return card;
 }
 
