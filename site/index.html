@@ -33,6 +33,7 @@
         --label-gap-rotated: 10px;
         --stats-column-gap: 12px;
         --side-stat-gap: 8px;
+        --stack-overflow-tolerance-desktop: 28px;
         --frequency-graph-gap-base: clamp(10px, 1.4vw, 14px);
         --labeled-card-padding-top: 12px;
         --labeled-card-title-gap: 6px;
@@ -479,7 +480,7 @@
         row-gap: 0;
         column-gap: var(--stats-column-gap);
         align-items: center;
-        justify-content: center;
+        justify-content: start;
       }
 
       .card-stats {
@@ -607,7 +608,7 @@
         column-gap: var(--stats-column-gap);
         row-gap: 0;
         align-items: center;
-        justify-content: center;
+        justify-content: start;
       }
 
       .more-stats > .labeled-card-title {

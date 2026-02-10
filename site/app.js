@@ -173,6 +173,7 @@ function buildSectionLayoutPlan(list) {
   ];
 
   let shouldStackSection = false;
+  const viewportWidth = window.innerWidth;
   cards.forEach((card) => {
     const statsColumn = card.classList.contains("more-stats")
       ? card.querySelector(".more-stats-facts.side-stats-column")
@@ -187,7 +188,10 @@ function buildSectionLayoutPlan(list) {
     const sideGap = readCssVar("--stats-column-gap", 12, card);
     const requiredWidth = Math.ceil(mainWidth + sideGap + statsWidth);
     const availableWidth = Math.floor(getElementContentWidth(card));
-    if (requiredWidth > availableWidth) {
+    const desktopTolerance = viewportWidth >= 1024
+      ? readCssVar("--stack-overflow-tolerance-desktop", 0, card)
+      : 0;
+    if (requiredWidth > (availableWidth + desktopTolerance)) {
       shouldStackSection = true;
     }
   });
@@ -257,6 +261,12 @@ function alignStackedStatsToYAxisLabels() {
   plans.forEach((plan) => {
     applySectionLayoutPlan(plan);
   });
+
+  if (window.matchMedia("(max-width: 900px)").matches) {
+    heatmaps.querySelectorAll(".card").forEach((card) => {
+      card.scrollLeft = 0;
+    });
+  }
 }
 
 function sundayOnOrBefore(d) {
