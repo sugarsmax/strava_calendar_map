@@ -1889,9 +1889,9 @@ async function init() {
         : (!isAllSelected && selectedValues.has(normalized));
       const isChecked = isAllSelected || isActive;
 
-      const row = document.createElement("button");
-      row.type = "button";
+      const row = document.createElement("div");
       row.className = "filter-menu-option";
+      row.setAttribute("role", "button");
       if (isActive) {
         row.classList.add("active");
       }
