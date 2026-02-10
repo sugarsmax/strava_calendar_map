@@ -557,7 +557,7 @@
       }
 
       .card-empty-year {
-        --card-empty-body-height: calc(var(--side-stat-card-min-height, 56px) + 10px);
+        --card-empty-body-height: 0px;
       }
 
       .card-empty-year-body {
@@ -569,16 +569,20 @@
       }
 
       .card-empty-year-stat {
-        width: var(--side-stat-card-width, max-content);
+        width: max-content;
+        max-width: 100%;
+        min-height: 0;
+        padding: 6px 10px;
       }
 
       .card-empty-year-stat .card-stat-label {
+        margin-bottom: 0;
         white-space: nowrap;
+        text-transform: none;
       }
 
       .card-empty-year-stat .card-stat-value {
-        white-space: normal;
-        line-height: 1.2;
+        display: none;
       }
 
       .card-stat {
@@ -908,25 +912,6 @@
         color: var(--muted);
       }
 
-      .stat-grid {
-        display: grid;
-        gap: var(--gap);
-        width: max-content;
-      }
-
-      .axis-grid-wrap {
-        position: relative;
-        display: inline-block;
-        width: max-content;
-      }
-
-      .axis-bg {
-        position: absolute;
-        border-radius: 12px;
-        background: rgba(15, 23, 42, 0.8);
-        z-index: 0;
-      }
-
       .stat-matrix {
         display: block;
         min-width: max-content;
@@ -964,70 +949,6 @@
 
       .axis-x-label {
         transform-origin: 0 100%;
-      }
-
-      .axis-x-label.diagonal {
-        transform: rotate(-45deg);
-      }
-
-      .axis-grid {
-        display: grid;
-        gap: var(--gap);
-        align-items: center;
-        position: relative;
-        z-index: 1;
-      }
-
-      .axis-cell {
-        width: var(--cell);
-        height: var(--cell);
-      }
-
-      .axis-label {
-        font-family: "JetBrains Mono", monospace;
-        font-size: 11px;
-        color: #f1f5f9;
-        text-align: center;
-        line-height: 1;
-        white-space: nowrap;
-        align-self: end;
-        --axis-label-shift: 0px;
-        transform: translateX(var(--axis-label-shift));
-      }
-
-      .axis-label.x {
-        text-align: left;
-        justify-self: start;
-        --axis-label-shift: calc(var(--cell) / 2 - 0.5ch);
-      }
-
-      .axis-label.y {
-        justify-self: end;
-        text-align: right;
-        align-self: center;
-        padding-right: var(--axis-gap);
-      }
-
-      .axis-label.diagonal {
-        transform: translateX(var(--axis-label-shift)) rotate(-45deg);
-        transform-origin: 50% 100%;
-      }
-
-      .more-stats .axis-label.diagonal {
-        transform: translateX(var(--axis-label-shift)) rotate(-45deg) translateY(-4px);
-      }
-
-      .more-stats .axis-label.x.diagonal {
-        --axis-label-shift: calc(var(--cell) / 2 - 0.5ch + 1px);
-      }
-
-      .more-stats .axis-label.x {
-        align-self: start;
-        padding-top: 2px;
-      }
-
-      .axis-label.empty {
-        visibility: hidden;
       }
 
       .cell {

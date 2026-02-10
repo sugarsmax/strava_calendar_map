@@ -27,13 +27,13 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    - Set **Authorization Callback Domain** to `localhost`, then copy:
    - The `Client ID` value
    - The `Client Secret` value
-5. Make sure GitHub CLI is authenticated:
+4. Make sure GitHub CLI is authenticated:
 
    ```bash
    gh auth login
    ```
 
-6. Run the following, replacing `CLIENT_ID` with the `Client ID` value obtained in step 3 above:
+5. Run the following, replacing `CLIENT_ID` with the `Client ID` value obtained in step 3 above:
 
    ```bash
    python3 scripts/setup_auth.py --client-id CLIENT_ID
@@ -46,13 +46,13 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
    - capture the callback code locally
    - exchange it for a refresh token
    - set `STRAVA_CLIENT_ID`, `STRAVA_CLIENT_SECRET`, and `STRAVA_REFRESH_TOKEN` as secrets in your repo, via `gh secret set`
-7. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
+6. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
-8. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
+7. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
    - If GitHub shows an **Enable workflows** button in [Actions](../../actions), click it first.
    - Go to [Actions](../../actions) → [Sync Strava Heatmaps](../../actions/workflows/sync.yml) → **Run workflow**.
    - The same workflow is also scheduled in `.github/workflows/sync.yml` (daily at `15:00 UTC`).
-9. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
+8. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
 
 ### Option 2: Manual setup (no local clone required)
 
@@ -90,23 +90,23 @@ This is the fastest path, but it requires a local clone and GitHub CLI (`gh`) au
 
    The response will contain several values. You'll need the `refresh_token`. For example if it shows `..."refresh_token":"ABC123"...`, copy the value `ABC123` for use in the next step.
 
-5. Add GitHub secrets (repo → [Settings → Secrets and variables → Actions](../../settings/secrets/actions)):
+4. Add GitHub secrets (repo → [Settings → Secrets and variables → Actions](../../settings/secrets/actions)):
    - Secret name: `STRAVA_CLIENT_ID`
       - Secret value: The `Client ID` value from step 2 above
    - Secret name: `STRAVA_CLIENT_SECRET`
       - Secret value: The `Client Secret` value from step 2 above
-   - Secret name: `STRAVA_REFRESH_TOKEN` (
-      - Secret value: The `refresh_token` value from the step 3 OAuth exchange above)
+   - Secret name: `STRAVA_REFRESH_TOKEN`
+      - Secret value: The `refresh_token` value from the step 3 OAuth exchange above
 
-6. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
+5. Enable GitHub Pages (repo → [Settings → Pages](../../settings/pages)):
    - Under **Build and deployment**, set **Source** to **GitHub Actions**.
 
-7. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
+6. Run [Sync Strava Heatmaps](../../actions/workflows/sync.yml):
    - If GitHub shows an **Enable workflows** button in [Actions](../../actions), click it first.
    - Go to [Actions](../../actions) → [Sync Strava Heatmaps](../../actions/workflows/sync.yml) → **Run workflow**.
    - The same workflow is also scheduled in `.github/workflows/sync.yml` (daily at `15:00 UTC`).
 
-8. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
+7. Open your live site at `https://<your-username>.github.io/<repo-name>/` after deploy finishes.
 
 Both options run the same workflow, which will:
 - restore persisted state from the `dashboard-data` branch (if present)
