@@ -2025,7 +2025,6 @@ async function init() {
 
   function toggleTypeFromSummaryCard(type) {
     toggleType(type);
-    finalizeTypeSelection();
   }
 
   function toggleYear(value) {
@@ -2187,12 +2186,12 @@ async function init() {
 
     updateButtonState(typeButtons, selectedTypes, allTypesSelected);
     updateButtonState(yearButtons, selectedYears, allYearsSelected, (v) => Number(v));
-    const typeMenuText = getTypeMenuText(types, allTypesSelected);
+    const typeMenuText = getTypeMenuText(types, allTypesSelected || allAvailableTypesSelected);
     const yearMenuText = getYearMenuText(years, allYearsSelected);
     setMenuLabel(
       typeMenuLabel,
       typeMenuText,
-      !allTypesSelected && types.length > 1 ? "Multiple Activities Selected" : "",
+      !allTypesSelected && !allAvailableTypesSelected && types.length > 1 ? "Multiple Activities Selected" : "",
     );
     setMenuLabel(
       yearMenuLabel,
