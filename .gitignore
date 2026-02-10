@@ -10,6 +10,11 @@ __pycache__/
 # Raw activities (privacy)
 activities/raw/
 
+# Generated dashboard outputs (persisted on dashboard-data branch)
+data/
+heatmaps/
+site/data.json
+
 # OS
 .DS_Store
 

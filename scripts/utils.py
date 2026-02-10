@@ -56,10 +56,6 @@ def utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
-def to_date_str(dt: datetime) -> str:
-    return dt.strftime("%Y-%m-%d")
-
-
 def format_duration(seconds: float) -> str:
     total = int(round(seconds))
     hours = total // 3600

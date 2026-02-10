@@ -1,6 +1,5 @@
 const DEFAULT_COLORS = ["#1f2937", "#1f2937", "#1f2937", "#1f2937", "#1f2937"];
 const MULTI_TYPE_COLOR = "#b967ff";
-const STAT_HEAT_COLOR = "#05ffa1";
 const FALLBACK_VAPORWAVE = ["#f15bb5", "#fee440", "#00bbf9", "#00f5d4", "#9b5de5", "#fb5607", "#ffbe0b", "#72efdd"];
 const STAT_PLACEHOLDER = "- - -";
 let TYPE_META = {};
@@ -1098,31 +1097,6 @@ function combineYearAggregates(yearData, types) {
   return result;
 }
 
-function combineAggregatesByDate(payload, types, years) {
-  const combined = {};
-  years.forEach((year) => {
-    const yearData = payload.aggregates?.[String(year)] || {};
-    types.forEach((type) => {
-      const entries = yearData?.[type] || {};
-      Object.entries(entries).forEach(([dateStr, entry]) => {
-        if (!combined[dateStr]) {
-          combined[dateStr] = {
-            count: 0,
-            distance: 0,
-            moving_time: 0,
-            elevation_gain: 0,
-          };
-        }
-        combined[dateStr].count += entry.count || 0;
-        combined[dateStr].distance += entry.distance || 0;
-        combined[dateStr].moving_time += entry.moving_time || 0;
-        combined[dateStr].elevation_gain += entry.elevation_gain || 0;
-      });
-    });
-  });
-  return combined;
-}
-
 function getFilteredActivities(payload, types, years) {
   const activities = payload.activities || [];
   if (!activities.length) return [];
@@ -1646,28 +1620,6 @@ function buildYearMatrix(years, colLabels, matrixValues, color, options = {}) {
   matrixArea.appendChild(grid);
   container.appendChild(matrixArea);
   return container;
-}
-
-function calculateStreaks(activeDates) {
-  if (!activeDates.length) {
-    return { longest: 0, latest: 0 };
-  }
-  const sorted = activeDates.slice().sort();
-  let longest = 1;
-  let current = 1;
-  for (let i = 1; i < sorted.length; i += 1) {
-    const prev = new Date(`${sorted[i - 1]}T00:00:00`);
-    const curr = new Date(`${sorted[i]}T00:00:00`);
-    const diffDays = (curr - prev) / (1000 * 60 * 60 * 24);
-    if (diffDays === 1) {
-      current += 1;
-    } else {
-      longest = Math.max(longest, current);
-      current = 1;
-    }
-  }
-  longest = Math.max(longest, current);
-  return { longest, latest: current };
 }
 
 function renderStats(payload, types, years, color) {

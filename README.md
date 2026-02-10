@@ -122,7 +122,8 @@ Both options run the same workflow, which will:
 ## Fork Sync Best Practice
 
 - To pull in new updates and features from the original repo, use GitHub's **Sync fork** button on your fork's `main` branch.
-- Strava activity data is stored on a dedicated `dashboard-data` branch which deploys your data to the dashboard, but doesn't commit to the repo - so `main` stays fork-sync friendly.
+- Strava activity data is stored on a dedicated `dashboard-data` branch and deployed from there, so generated outputs do not need to be committed on `main`.
+- `main` is intentionally kept free of generated `data/`, `heatmaps/`, and `site/data.json` artifacts so fork sync stays cleaner.
 - After syncing, run [Sync Strava Heatmaps](../../actions/workflows/sync.yml) if you want your dashboard refreshed immediately.
 
 ## Activity Type Note

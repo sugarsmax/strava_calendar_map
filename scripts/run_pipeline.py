@@ -43,6 +43,7 @@ def _commit_changes(message: str) -> None:
         [
             "git",
             "add",
+            "-f",
             "data",
             "heatmaps",
             "site",
