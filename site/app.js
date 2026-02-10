@@ -1225,10 +1225,7 @@ function buildStatsOverview(payload, types, years, color) {
 
   const yearsDesc = years.slice().sort((a, b) => b - a);
   const emptyColor = DEFAULT_COLORS[0];
-  const yearIndex = new Map();
-  yearsDesc.forEach((year, index) => {
-    yearIndex.set(Number(year), index);
-  });
+  const selectedYearSet = new Set(yearsDesc.map(Number));
   const activities = getFilteredActivities(payload, types, yearsDesc)
     .map((activity) => {
       const dateStr = String(activity.date || "");
@@ -1241,7 +1238,7 @@ function buildStatsOverview(payload, types, years, color) {
         && Number.isFinite(hourValue)
         && hourValue >= 0
         && hourValue <= 23;
-      if (!yearIndex.has(year) || Number.isNaN(date.getTime())) {
+      if (!selectedYearSet.has(year) || Number.isNaN(date.getTime())) {
         return null;
       }
       return {
@@ -1257,13 +1254,25 @@ function buildStatsOverview(payload, types, years, color) {
     })
     .filter(Boolean);
 
+  const oldestActivityYear = activities.reduce(
+    (oldest, activity) => Math.min(oldest, activity.year),
+    Number.POSITIVE_INFINITY,
+  );
+  const visibleYearsDesc = Number.isFinite(oldestActivityYear)
+    ? yearsDesc.filter((year) => Number(year) >= oldestActivityYear)
+    : yearsDesc.slice();
+  const yearIndex = new Map();
+  visibleYearsDesc.forEach((year, index) => {
+    yearIndex.set(Number(year), index);
+  });
+
   const formatBreakdown = (total, breakdown) => formatTooltipBreakdown(total, breakdown, types);
 
   const dayDisplayLabels = ["Sun", "", "", "Wed", "", "", "Sat"];
   const monthDisplayLabels = ["Jan", "", "Mar", "", "May", "", "Jul", "", "Sep", "", "Nov", ""];
 
-  const buildZeroedMatrix = (columns) => yearsDesc.map(() => new Array(columns).fill(0));
-  const buildBreakdownMatrix = (columns) => yearsDesc.map(() => (
+  const buildZeroedMatrix = (columns) => visibleYearsDesc.map(() => new Array(columns).fill(0));
+  const buildBreakdownMatrix = (columns) => visibleYearsDesc.map(() => (
     Array.from({ length: columns }, () => createTooltipBreakdown())
   ));
 
@@ -1433,7 +1442,7 @@ function buildStatsOverview(payload, types, years, color) {
     dayPanel.body.innerHTML = "";
     dayPanel.body.appendChild(
       buildYearMatrix(
-        yearsDesc,
+        visibleYearsDesc,
         dayDisplayLabels,
         matrixData.dayMatrix,
         color,
@@ -1453,7 +1462,7 @@ function buildStatsOverview(payload, types, years, color) {
     monthPanel.body.innerHTML = "";
     monthPanel.body.appendChild(
       buildYearMatrix(
-        yearsDesc,
+        visibleYearsDesc,
         monthDisplayLabels,
         matrixData.monthMatrix,
         color,
@@ -1476,7 +1485,7 @@ function buildStatsOverview(payload, types, years, color) {
       const hourTooltipLabels = matrixData.hourTotals.map((_, hour) => `${formatHourLabel(hour)} (${hour}:00)`);
       hourPanel.body.appendChild(
         buildYearMatrix(
-          yearsDesc,
+          visibleYearsDesc,
           hourLabels,
           matrixData.hourMatrix,
           color,
