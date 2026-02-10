@@ -143,7 +143,7 @@ function buildSectionLayoutPlan(list) {
     .map((card) => getElementBoxWidth(card.querySelector(".heatmap-area")))
     .filter((width) => width > 0);
 
-  let graphRailWidth = yearGraphWidths.length ? Math.ceil(Math.max(...yearGraphWidths)) : 0;
+  let graphRailWidth = yearGraphWidths.length ? Math.max(...yearGraphWidths) : 0;
   let frequencyGap = null;
   let frequencyPadRight = null;
 
@@ -157,13 +157,18 @@ function buildSectionLayoutPlan(list) {
 
     if (!graphRailWidth && totalFrequencyGraphWidth > 0) {
       const baseGap = readCssVar("--frequency-graph-gap-base", 12, frequencyCard);
-      graphRailWidth = Math.ceil(totalFrequencyGraphWidth + (Math.max(0, graphCount - 1) * baseGap));
+      graphRailWidth = totalFrequencyGraphWidth + (Math.max(0, graphCount - 1) * baseGap);
     }
 
-    if (graphRailWidth > 0 && totalFrequencyGraphWidth > 0 && graphCount > 1) {
+    if (graphRailWidth > 0 && totalFrequencyGraphWidth > 0) {
       const totalGap = Math.max(0, graphRailWidth - totalFrequencyGraphWidth);
-      frequencyGap = Math.floor(totalGap / (graphCount - 1));
-      frequencyPadRight = Math.max(0, totalGap - (frequencyGap * (graphCount - 1)));
+      if (graphCount > 1) {
+        // Use subpixel gaps so we don't need trailing right padding that can create tiny overflow scroll.
+        frequencyGap = totalGap / (graphCount - 1);
+        frequencyPadRight = 0;
+      } else {
+        frequencyPadRight = totalGap;
+      }
     }
   }
 
@@ -173,7 +178,6 @@ function buildSectionLayoutPlan(list) {
   ];
 
   let shouldStackSection = false;
-  const viewportWidth = window.innerWidth;
   const desktopLike = window.matchMedia("(min-width: 901px)").matches;
   cards.forEach((card) => {
     const statsColumn = card.classList.contains("more-stats")
@@ -185,10 +189,10 @@ function buildSectionLayoutPlan(list) {
       ? getElementBoxWidth(card.querySelector(".more-stats-grid"))
       : getElementBoxWidth(card.querySelector(".heatmap-area"));
     const mainWidth = graphRailWidth > 0 ? graphRailWidth : measuredMain;
-    const statsWidth = Math.ceil(getElementBoxWidth(statsColumn));
+    const statsWidth = getElementBoxWidth(statsColumn);
     const sideGap = readCssVar("--stats-column-gap", 12, card);
-    const requiredWidth = Math.ceil(mainWidth + sideGap + statsWidth);
-    const availableWidth = Math.floor(getElementContentWidth(card));
+    const requiredWidth = mainWidth + sideGap + statsWidth;
+    const availableWidth = getElementContentWidth(card);
     const overflow = requiredWidth - availableWidth;
     const tolerance = desktopLike
       ? readCssVar("--stack-overflow-tolerance-desktop", 0, card)
