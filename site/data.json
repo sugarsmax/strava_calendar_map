@@ -17317,6 +17317,20 @@
       "subtype": "WeightTraining",
       "type": "WeightTraining",
       "year": 2026
+    },
+    {
+      "date": "2026-02-11",
+      "hour": 9,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-02-11",
+      "hour": 17,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -35462,6 +35476,16 @@
           "distance": 4354.8,
           "elevation_gain": 7.6,
           "moving_time": 575.0
+        },
+        "2026-02-11": {
+          "activity_ids": [
+            17364449651,
+            17369207217
+          ],
+          "count": 2,
+          "distance": 8988.400000000001,
+          "elevation_gain": 47.2,
+          "moving_time": 1547.0
         }
       },
       "WalkHike": {
@@ -35609,7 +35633,7 @@
       }
     }
   },
-  "generated_at": "2026-02-11T15:51:19.907991+00:00",
+  "generated_at": "2026-02-12T15:42:16.338815+00:00",
   "other_bucket": "OtherSports",
   "type_meta": {
     "Climbing": {
