@@ -39,6 +39,13 @@ from garmin_token_store import (
     token_store_ready,
 )
 
+if sys.version_info < (3, 9):
+    raise SystemExit(
+        "Python 3.9+ is required to run scripts/setup_auth.py. "
+        f"Detected {sys.version.split()[0]}. "
+        "Please run with Python 3.11 (recommended)."
+    )
+
 
 TOKEN_ENDPOINT = "https://www.strava.com/oauth/token"
 AUTHORIZE_ENDPOINT = "https://www.strava.com/oauth/authorize"
