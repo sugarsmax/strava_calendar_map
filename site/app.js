@@ -15,9 +15,6 @@ let OTHER_BUCKET = "OtherSports";
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MS_PER_DAY = 1000 * 60 * 60 * 24;
-const TOUCH_TAP_MAX_MOVEMENT_PX = 10;
-const TOUCH_TAP_MAX_DURATION_MS = 450;
-const TOUCH_TAP_SCROLL_THRESHOLD_PX = 2;
 const DEFAULT_UNITS = Object.freeze({ distance: "mi", elevation: "ft" });
 const UNIT_SYSTEM_TO_UNITS = Object.freeze({
   imperial: Object.freeze({ distance: "mi", elevation: "ft" }),
@@ -561,123 +558,21 @@ function hideTooltip() {
   tooltip.classList.remove("visible");
 }
 
-function findTouchById(touches, id) {
-  if (!touches || !Number.isFinite(id)) return null;
-  for (let i = 0; i < touches.length; i += 1) {
-    if (touches[i].identifier === id) {
-      return touches[i];
-    }
+function getTooltipEventPoint(event, fallbackElement) {
+  const clientX = Number(event?.clientX);
+  const clientY = Number(event?.clientY);
+  if (Number.isFinite(clientX) && Number.isFinite(clientY)) {
+    return { x: clientX, y: clientY };
   }
-  return null;
-}
-
-function findScrollableTouchContainer(node) {
-  let current = node;
-  while (current && current !== document.body) {
-    if (current instanceof Element) {
-      const style = window.getComputedStyle(current);
-      const overflowX = String(style.overflowX || "");
-      const overflowY = String(style.overflowY || "");
-      const scrollsX = (overflowX === "auto" || overflowX === "scroll")
-        && current.scrollWidth > current.clientWidth;
-      const scrollsY = (overflowY === "auto" || overflowY === "scroll")
-        && current.scrollHeight > current.clientHeight;
-      if (scrollsX || scrollsY) {
-        return current;
-      }
-    }
-    current = current.parentElement;
+  const rect = fallbackElement?.getBoundingClientRect?.();
+  if (!rect) {
+    const viewport = getViewportMetrics();
+    return { x: viewport.width / 2, y: viewport.height / 2 };
   }
-  return document.scrollingElement || document.documentElement;
-}
-
-function attachTouchTap(target, onTap) {
-  let touchState = null;
-
-  const updateTouchMovement = (touch) => {
-    if (!touchState || !touch) return;
-    const dx = Math.abs((Number(touch.clientX) || 0) - touchState.startX);
-    const dy = Math.abs((Number(touch.clientY) || 0) - touchState.startY);
-    if (dx > TOUCH_TAP_MAX_MOVEMENT_PX || dy > TOUCH_TAP_MAX_MOVEMENT_PX) {
-      touchState.moved = true;
-    }
+  return {
+    x: rect.left + (rect.width / 2),
+    y: rect.top + (rect.height / 2),
   };
-
-  target.addEventListener(
-    "touchstart",
-    (event) => {
-      if (!event.touches || event.touches.length !== 1) {
-        touchState = null;
-        return;
-      }
-      const touch = event.touches[0];
-      const scrollContainer = findScrollableTouchContainer(target);
-      touchState = {
-        id: touch.identifier,
-        startX: Number(touch.clientX) || 0,
-        startY: Number(touch.clientY) || 0,
-        startTime: Number(event.timeStamp) || performance.now(),
-        moved: false,
-        scrollContainer,
-        startScrollLeft: Number(scrollContainer?.scrollLeft || 0),
-        startScrollTop: Number(scrollContainer?.scrollTop || 0),
-        startWindowScrollX: Number(window.scrollX || 0),
-        startWindowScrollY: Number(window.scrollY || 0),
-      };
-    },
-    { passive: true },
-  );
-
-  target.addEventListener(
-    "touchmove",
-    (event) => {
-      if (!touchState) return;
-      const touch = findTouchById(event.touches, touchState.id)
-        || findTouchById(event.changedTouches, touchState.id);
-      updateTouchMovement(touch);
-    },
-    { passive: true },
-  );
-
-  target.addEventListener(
-    "touchcancel",
-    () => {
-      touchState = null;
-    },
-    { passive: true },
-  );
-
-  target.addEventListener(
-    "touchend",
-    (event) => {
-      if (!touchState) return;
-      const touch = findTouchById(event.changedTouches, touchState.id);
-      if (!touch) return;
-      updateTouchMovement(touch);
-      const endTime = Number(event.timeStamp) || performance.now();
-      const durationMs = Math.max(0, endTime - touchState.startTime);
-      const scrollLeft = Number(touchState.scrollContainer?.scrollLeft || 0);
-      const scrollTop = Number(touchState.scrollContainer?.scrollTop || 0);
-      const scrollDeltaX = Math.abs(scrollLeft - touchState.startScrollLeft);
-      const scrollDeltaY = Math.abs(scrollTop - touchState.startScrollTop);
-      const windowScrollDeltaX = Math.abs((Number(window.scrollX || 0)) - touchState.startWindowScrollX);
-      const windowScrollDeltaY = Math.abs((Number(window.scrollY || 0)) - touchState.startWindowScrollY);
-      const scrolled = scrollDeltaX > TOUCH_TAP_SCROLL_THRESHOLD_PX
-        || scrollDeltaY > TOUCH_TAP_SCROLL_THRESHOLD_PX
-        || windowScrollDeltaX > TOUCH_TAP_SCROLL_THRESHOLD_PX
-        || windowScrollDeltaY > TOUCH_TAP_SCROLL_THRESHOLD_PX;
-      const isTap = !touchState.moved && !scrolled && durationMs <= TOUCH_TAP_MAX_DURATION_MS;
-
-      touchState = null;
-      if (!isTap) return;
-
-      onTap({
-        x: Number(touch.clientX) || 0,
-        y: Number(touch.clientY) || 0,
-      });
-    },
-    { passive: true },
-  );
 }
 
 function attachTooltip(cell, text) {
@@ -692,7 +587,7 @@ function attachTooltip(cell, text) {
     cell.addEventListener("mouseleave", hideTooltip);
     return;
   }
-  attachTouchTap(cell, ({ x, y }) => {
+  cell.addEventListener("click", (event) => {
     if (cell.classList.contains("active")) {
       cell.classList.remove("active");
       hideTooltip();
@@ -701,7 +596,8 @@ function attachTooltip(cell, text) {
     const active = document.querySelector(".cell.active");
     if (active) active.classList.remove("active");
     cell.classList.add("active");
-    showTooltip(text, x, y);
+    const point = getTooltipEventPoint(event, cell);
+    showTooltip(text, point.x, point.y);
   });
 }
 
@@ -1434,7 +1330,7 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
       });
       cell.addEventListener("mouseleave", hideTooltip);
     } else {
-      attachTouchTap(cell, ({ x, y }) => {
+      cell.addEventListener("click", (event) => {
         if (cell.classList.contains("active")) {
           cell.classList.remove("active");
           hideTooltip();
@@ -1443,7 +1339,8 @@ function buildHeatmapArea(aggregates, year, units, colors, type, layout, options
         const active = grid.querySelector(".cell.active");
         if (active) active.classList.remove("active");
         cell.classList.add("active");
-        showTooltip(tooltipText, x, y);
+        const point = getTooltipEventPoint(event, cell);
+        showTooltip(tooltipText, point.x, point.y);
       });
     }
 
