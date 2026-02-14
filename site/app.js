@@ -3201,6 +3201,9 @@ async function init() {
       allTypesMode = true;
       selectedTypes.clear();
       update();
+      if (mobileLayout) {
+        typeClearButton.blur();
+      }
     });
   }
   if (yearClearButton) {
