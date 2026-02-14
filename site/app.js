@@ -358,7 +358,12 @@ function applySectionLayoutPlan(plan) {
       const keepChipsWithTitle = shouldStackSection;
       if (keepChipsWithTitle) {
         title.appendChild(metricChipRow);
-        alignFrequencyMetricChipsToSecondGraphAxis(frequencyCard, title, metricChipRow);
+        const shouldAlignChipsToAxis = isDesktopLikeViewport() && !isTouch;
+        if (shouldAlignChipsToAxis) {
+          alignFrequencyMetricChipsToSecondGraphAxis(frequencyCard, title, metricChipRow);
+        } else {
+          metricChipRow.style.removeProperty("margin-left");
+        }
       } else if (facts.firstElementChild !== metricChipRow) {
         metricChipRow.style.removeProperty("margin-left");
         facts.insertBefore(metricChipRow, facts.firstChild);
