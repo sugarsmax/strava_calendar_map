@@ -508,7 +508,7 @@ def _prompt_full_backfill_choice(source: str) -> bool:
         f"{source}. You can keep incremental sync or force a full history re-fetch."
     )
     choice = _prompt_choice(
-        "Run a full backfill this time? (y/N): ",
+        "Run a full backfill this time? [y/n] (default: n): ",
         {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
         default="n",
         invalid_message="Please enter 'y' or 'n'.",
