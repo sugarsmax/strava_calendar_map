@@ -506,7 +506,12 @@ function showTooltip(text, x, y) {
     tooltip.style.transformOrigin = "top left";
   }
   tooltip.classList.add("visible");
-  requestAnimationFrame(() => positionTooltip(x, y));
+  requestAnimationFrame(() => {
+    positionTooltip(x, y);
+    if (isTouch) {
+      requestAnimationFrame(() => positionTooltip(x, y));
+    }
+  });
 }
 
 function hideTooltip() {
