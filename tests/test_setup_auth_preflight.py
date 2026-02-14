@@ -2,6 +2,7 @@ import os
 import subprocess
 import sys
 import unittest
+from argparse import Namespace
 from unittest import mock
 
 
@@ -112,6 +113,14 @@ class SetupAuthDispatchTests(unittest.TestCase):
             value = setup_auth._existing_dashboard_source("owner/repo")
         self.assertIsNone(value)
 
+    def test_resolve_source_non_interactive_prefers_existing_source(self) -> None:
+        args = Namespace(source=None)
+        self.assertEqual(setup_auth._resolve_source(args, interactive=False, previous_source="garmin"), "garmin")
+
+    def test_resolve_source_non_interactive_uses_default_without_existing_source(self) -> None:
+        args = Namespace(source=None)
+        self.assertEqual(setup_auth._resolve_source(args, interactive=False, previous_source=None), "strava")
+
     def test_try_dispatch_sync_uses_full_backfill_when_supported(self) -> None:
         with mock.patch(
             "setup_auth._run",
@@ -176,6 +185,82 @@ class SetupAuthDispatchTests(unittest.TestCase):
 
         self.assertTrue(ok)
         self.assertIn("workflow does not declare 'source' input", detail)
+
+
+class SetupAuthMainFlowTests(unittest.TestCase):
+    @staticmethod
+    def _default_args() -> Namespace:
+        return Namespace(
+            source=None,
+            no_bootstrap_env=False,
+            env_bootstrapped=False,
+            client_id=None,
+            client_secret=None,
+            garmin_token_store_b64=None,
+            garmin_email=None,
+            garmin_password=None,
+            store_garmin_password_secrets=False,
+            repo=None,
+            unit_system=None,
+            port=setup_auth.DEFAULT_PORT,
+            timeout=setup_auth.DEFAULT_TIMEOUT,
+            scope="read,activity:read_all",
+            no_browser=True,
+            no_auto_github=False,
+            no_watch=True,
+        )
+
+    def _run_main_for_source(self, previous_source: str, source: str, full_backfill_prompt_result: bool) -> tuple[
+        int,
+        mock.MagicMock,
+        mock.MagicMock,
+    ]:
+        args = self._default_args()
+        with (
+            mock.patch("setup_auth.parse_args", return_value=args),
+            mock.patch("setup_auth._bootstrap_env_and_reexec"),
+            mock.patch("setup_auth._isatty", return_value=True),
+            mock.patch("setup_auth._assert_gh_ready"),
+            mock.patch("setup_auth._resolve_repo_slug", return_value="owner/repo"),
+            mock.patch("setup_auth._assert_repo_access"),
+            mock.patch("setup_auth._assert_actions_secret_access"),
+            mock.patch("setup_auth._existing_dashboard_source", return_value=previous_source),
+            mock.patch("setup_auth._resolve_source", return_value=source),
+            mock.patch("setup_auth._prompt_full_backfill_choice", return_value=full_backfill_prompt_result) as prompt_mock,
+            mock.patch("setup_auth._resolve_units", return_value=("mi", "ft")),
+            mock.patch(
+                "setup_auth._resolve_garmin_auth_values",
+                return_value=("garmin-token-b64", "user@example.com", "password"),
+            ),
+            mock.patch("setup_auth._set_secret"),
+            mock.patch("setup_auth._set_variable"),
+            mock.patch("setup_auth._try_enable_actions_permissions", return_value=(True, "ok")),
+            mock.patch("setup_auth._try_enable_workflows", return_value=(True, "ok")),
+            mock.patch("setup_auth._try_configure_pages", return_value=(True, "ok")),
+            mock.patch("setup_auth._try_dispatch_sync", return_value=(True, "ok")) as dispatch_mock,
+            mock.patch("setup_auth._find_latest_workflow_run", return_value=(123, "https://example.test/run/123")),
+        ):
+            return setup_auth.main(), prompt_mock, dispatch_mock
+
+    def test_main_prompts_full_backfill_on_same_source_rerun(self) -> None:
+        result, prompt_mock, dispatch_mock = self._run_main_for_source(
+            previous_source="garmin",
+            source="garmin",
+            full_backfill_prompt_result=True,
+        )
+        self.assertEqual(result, 0)
+        prompt_mock.assert_called_once_with("garmin")
+        dispatch_mock.assert_called_once_with("owner/repo", "garmin", full_backfill=True)
+
+    def test_main_skips_full_backfill_prompt_when_switching_source(self) -> None:
+        result, prompt_mock, dispatch_mock = self._run_main_for_source(
+            previous_source="strava",
+            source="garmin",
+            full_backfill_prompt_result=True,
+        )
+        self.assertEqual(result, 0)
+        prompt_mock.assert_not_called()
+        dispatch_mock.assert_called_once_with("owner/repo", "garmin", full_backfill=False)
 
 
 if __name__ == "__main__":

@@ -30,6 +30,17 @@ class BootstrapFlowTests(unittest.TestCase):
 set -euo pipefail
 echo "$*" >> "${FAKE_GIT_LOG}"
 if [[ "${1:-}" == "rev-parse" && "${2:-}" == "--is-inside-work-tree" ]]; then
+  if [[ "${FAKE_GIT_INSIDE_WORKTREE:-0}" == "1" ]]; then
+    echo "true"
+    exit 0
+  fi
+  exit 1
+fi
+if [[ "${1:-}" == "rev-parse" && "${2:-}" == "--show-toplevel" ]]; then
+  if [[ -n "${FAKE_GIT_TOPLEVEL:-}" ]]; then
+    echo "${FAKE_GIT_TOPLEVEL}"
+    exit 0
+  fi
   exit 1
 fi
 if [[ "${1:-}" == "clone" ]]; then
@@ -117,6 +128,46 @@ exit 0
             with open(py_log, "r", encoding="utf-8") as f:
                 py_calls = f.read()
             self.assertIn(f"{existing_clone}|scripts/setup_auth.py", py_calls)
+
+    def test_bootstrap_detects_local_clone_and_runs_setup_without_clone_prompt(self) -> None:
+        with tempfile.TemporaryDirectory() as tmpdir:
+            fake_bin, git_log, py_log = self._make_fake_bin(tmpdir)
+            local_clone = os.path.join(tmpdir, "local-clone")
+            nested_dir = os.path.join(local_clone, "nested")
+            os.makedirs(os.path.join(local_clone, ".git"), exist_ok=True)
+            os.makedirs(os.path.join(local_clone, "scripts"), exist_ok=True)
+            os.makedirs(nested_dir, exist_ok=True)
+            with open(os.path.join(local_clone, "scripts", "setup_auth.py"), "w", encoding="utf-8") as f:
+                f.write("# test\n")
+
+            env = os.environ.copy()
+            env["PATH"] = f"{fake_bin}:{env['PATH']}"
+            env["FAKE_GIT_LOG"] = git_log
+            env["FAKE_GH_LOG"] = os.path.join(tmpdir, "gh.log")
+            env["FAKE_PY_LOG"] = py_log
+            env["FAKE_GIT_INSIDE_WORKTREE"] = "1"
+            env["FAKE_GIT_TOPLEVEL"] = local_clone
+
+            proc = subprocess.run(
+                ["bash", BOOTSTRAP_PATH],
+                input="y\n",
+                text=True,
+                capture_output=True,
+                cwd=nested_dir,
+                env=env,
+                check=False,
+            )
+            self.assertEqual(proc.returncode, 0, msg=f"{proc.stdout}\n{proc.stderr}")
+
+            with open(git_log, "r", encoding="utf-8") as f:
+                git_calls = f.read()
+            self.assertIn("rev-parse --is-inside-work-tree", git_calls)
+            self.assertIn("rev-parse --show-toplevel", git_calls)
+            self.assertNotIn("clone ", git_calls)
+
+            with open(py_log, "r", encoding="utf-8") as f:
+                py_calls = f.read()
+            self.assertIn(f"{local_clone}|scripts/setup_auth.py", py_calls)
 
     def test_bootstrap_keeps_fresh_clone_default_target(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:

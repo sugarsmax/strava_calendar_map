@@ -649,11 +649,17 @@ def _prompt_source() -> str:
     return selected
 
 
-def _resolve_source(args: argparse.Namespace, interactive: bool) -> str:
+def _resolve_source(
+    args: argparse.Namespace,
+    interactive: bool,
+    previous_source: Optional[str] = None,
+) -> str:
     if args.source:
         return args.source
     if interactive:
         return _prompt_source()
+    if previous_source in {"strava", "garmin"}:
+        return previous_source
     return DEFAULT_SOURCE
 
 
@@ -1275,7 +1281,7 @@ def main() -> int:
     _assert_actions_secret_access(repo)
     print(f"Using repository: {repo}")
     previous_source = _existing_dashboard_source(repo)
-    source = _resolve_source(args, interactive)
+    source = _resolve_source(args, interactive, previous_source)
     full_backfill = False
     if interactive and previous_source == source:
         full_backfill = _prompt_full_backfill_choice(source)
