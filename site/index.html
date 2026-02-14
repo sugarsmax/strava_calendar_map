@@ -52,6 +52,11 @@
         --shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
       }
 
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+
       * {
         box-sizing: border-box;
       }
@@ -582,6 +587,7 @@
       }
 
       .card-empty-year .card-empty-year-stat .card-stat-label {
+        font-size: 10px;
         margin-bottom: 0;
         white-space: nowrap;
         text-transform: none;
@@ -1300,6 +1306,9 @@
           font-size: 9px;
         }
         .card-stats .card-stat-label {
+          font-size: clamp(9px, 2.4vw, 10px);
+        }
+        .card-empty-year .card-empty-year-stat .card-stat-label {
           font-size: clamp(9px, 2.4vw, 10px);
         }
         .card-stats .card-stat-value {

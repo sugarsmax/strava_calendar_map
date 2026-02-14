@@ -1483,17 +1483,12 @@ function buildCard(type, year, aggregates, units, options = {}) {
   return card;
 }
 
-function buildEmptyYearCard(type, year, labelOverride) {
+function buildEmptyYearCard(year) {
   const card = document.createElement("div");
   card.className = "card card-empty-year";
   const body = document.createElement("div");
   body.className = "card-empty-year-body";
-  const label = labelOverride || displayType(type);
-  const normalizedLabel = String(label).trim().toLowerCase();
-  const activityLabel = normalizedLabel.endsWith(" activities") || normalizedLabel.endsWith(" activity")
-    ? normalizedLabel
-    : `${normalizedLabel} activities`;
-  const emptyMessage = `No ${activityLabel} in ${year}`;
+  const emptyMessage = `No activities in ${year}`;
 
   const emptyStat = buildSideStatCard(emptyMessage, "", {
     className: "card-stat card-empty-year-stat",
@@ -1503,14 +1498,9 @@ function buildEmptyYearCard(type, year, labelOverride) {
   return card;
 }
 
-function buildEmptySelectionCard(types, years) {
-  const selectedTypes = Array.isArray(types) ? types.filter(Boolean) : [];
-  const label = selectedTypes.length
-    ? selectedTypes.map((type) => displayType(type)).join(" + ")
-    : "activities";
+function buildEmptySelectionCard(_types, years) {
   const year = Array.isArray(years) && years.length ? years[0] : 0;
-  const fallbackType = selectedTypes[0] || "all";
-  return buildEmptyYearCard(fallbackType, year, label);
+  return buildEmptyYearCard(year);
 }
 
 function buildLabeledCardRow(label, card, kind) {
@@ -2936,7 +2926,6 @@ async function init() {
         const yearTotals = getTypesYearTotals(payload, types, years);
         const cardYears = years.slice();
         const { typeLabelsByDate, typeBreakdownsByDate } = buildCombinedTypeDetailsByDate(payload, types, cardYears);
-        const emptyLabel = types.map((type) => displayType(type)).join(" + ");
         const combinedSelectionKey = `combined:${types.join("|")}`;
         if (showMoreStats) {
           const frequencyCard = buildStatsOverview(payload, types, cardYears, frequencyCardColor, {
@@ -2993,7 +2982,7 @@ async function init() {
                 typeLabelsByDate,
               },
             )
-            : buildEmptyYearCard("all", year, emptyLabel);
+            : buildEmptyYearCard(year);
           setCardScrollKey(card, `${combinedSelectionKey}:year:${year}`);
           trackYearMetricAvailability(
             year,
@@ -3045,7 +3034,7 @@ async function init() {
                 initialMetricKey: getInitialYearMetricKey(year),
                 onYearMetricStateChange,
               })
-              : buildEmptyYearCard(type, year);
+              : buildEmptyYearCard(year);
             setCardScrollKey(card, `${typeCardKey}:year:${year}`);
             trackYearMetricAvailability(
               year,
