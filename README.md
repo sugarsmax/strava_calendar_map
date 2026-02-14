@@ -24,8 +24,7 @@ bash <(curl -fsSL https://raw.githubusercontent.com/aspain/git-sweaty/main/scrip
 
 This command will guide you through:
 - `gh auth login` (if needed)
-- forking (optional)
-- cloning (if needed)
+- forking and cloning (if not already done)
 - running interactive setup
 
 #### Option B (manual clone + local bootstrap script)
