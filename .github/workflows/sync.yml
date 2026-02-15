@@ -119,9 +119,7 @@ jobs:
             refresh_token: "${STRAVA_REFRESH_TOKEN}"
           CONFIG
             if [[ -n "${DASHBOARD_STRAVA_PROFILE_URL}" ]]; then
-              cat <<CONFIG >> config.local.yaml
-            profile_url: "${DASHBOARD_STRAVA_PROFILE_URL}"
-          CONFIG
+              echo "  profile_url: \"${DASHBOARD_STRAVA_PROFILE_URL}\"" >> config.local.yaml
             fi
           else
             cat <<CONFIG >> config.local.yaml
