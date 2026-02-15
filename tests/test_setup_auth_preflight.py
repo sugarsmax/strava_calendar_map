@@ -130,21 +130,34 @@ class SetupAuthDispatchTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             setup_auth._normalize_strava_profile_url("https://example.com/athletes/123")
 
+    def test_detect_strava_profile_url_from_token_payload(self) -> None:
+        value = setup_auth._detect_strava_profile_url({"athlete": {"id": 42}})
+        self.assertEqual(value, "https://www.strava.com/athletes/42")
+
     def test_resolve_strava_profile_url_non_interactive_uses_existing_variable(self) -> None:
         args = Namespace(strava_profile_url=None)
-        with mock.patch("setup_auth._get_variable", return_value="https://www.strava.com/athletes/456"):
+        with (
+            mock.patch("setup_auth._detect_strava_profile_url", return_value=""),
+            mock.patch("setup_auth._get_variable", return_value="https://www.strava.com/athletes/456"),
+        ):
             value = setup_auth._resolve_strava_profile_url(args, interactive=False, repo="owner/repo")
         self.assertEqual(value, "https://www.strava.com/athletes/456")
 
-    def test_resolve_strava_profile_url_interactive_prompts(self) -> None:
+    def test_resolve_strava_profile_url_interactive_uses_detected_when_enabled(self) -> None:
         args = Namespace(strava_profile_url=None)
         with (
             mock.patch("setup_auth._get_variable", return_value=""),
-            mock.patch("setup_auth._prompt_strava_profile_url", return_value="https://www.strava.com/athletes/789") as prompt_mock,
+            mock.patch("setup_auth._detect_strava_profile_url", return_value="https://www.strava.com/athletes/789"),
+            mock.patch("setup_auth._prompt_use_strava_profile_link", return_value=True) as prompt_mock,
         ):
-            value = setup_auth._resolve_strava_profile_url(args, interactive=True, repo="owner/repo")
+            value = setup_auth._resolve_strava_profile_url(
+                args,
+                interactive=True,
+                repo="owner/repo",
+                tokens={"athlete": {"id": 789}},
+            )
         self.assertEqual(value, "https://www.strava.com/athletes/789")
-        prompt_mock.assert_called_once_with("")
+        prompt_mock.assert_called_once_with(default_enabled=True)
 
     def test_clear_variable_ignores_not_found(self) -> None:
         with mock.patch(
@@ -349,7 +362,12 @@ class SetupAuthMainFlowTests(unittest.TestCase):
             result = setup_auth.main()
 
         self.assertEqual(result, 0)
-        resolve_profile_mock.assert_called_once_with(args, True, "owner/repo")
+        resolve_profile_mock.assert_called_once_with(
+            args,
+            True,
+            "owner/repo",
+            tokens={"refresh_token": "refresh-token", "athlete": {}},
+        )
         self.assertIn(
             mock.call(
                 "DASHBOARD_STRAVA_PROFILE_URL",

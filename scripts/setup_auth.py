@@ -49,6 +49,7 @@ if sys.version_info < (3, 9):
 
 TOKEN_ENDPOINT = "https://www.strava.com/oauth/token"
 AUTHORIZE_ENDPOINT = "https://www.strava.com/oauth/authorize"
+STRAVA_ATHLETE_ENDPOINT = "https://www.strava.com/api/v3/athlete"
 CALLBACK_PATH = "/exchange_token"
 DEFAULT_PORT = 8765
 DEFAULT_TIMEOUT = 180
@@ -703,32 +704,78 @@ def _normalize_strava_profile_url(value: Optional[str]) -> str:
     return normalized
 
 
-def _prompt_strava_profile_url(existing_value: str) -> str:
-    print("\nOptional: add a Strava profile link to the dashboard header.")
-    default_choice = "y" if existing_value else "n"
+def _strava_profile_url_from_athlete(athlete: object) -> str:
+    if not isinstance(athlete, dict):
+        return ""
+    athlete_id = athlete.get("id")
+    if athlete_id is None:
+        return ""
+    athlete_id_text = str(athlete_id).strip()
+    if not athlete_id_text:
+        return ""
+    return f"https://www.strava.com/athletes/{athlete_id_text}"
+
+
+def _fetch_strava_athlete(access_token: str) -> dict:
+    token = str(access_token or "").strip()
+    if not token:
+        return {}
+    request = urllib.request.Request(
+        STRAVA_ATHLETE_ENDPOINT,
+        method="GET",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=15) as response:
+            body = response.read().decode("utf-8")
+    except Exception:
+        return {}
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError:
+        return {}
+    return payload if isinstance(payload, dict) else {}
+
+
+def _detect_strava_profile_url(tokens: dict) -> str:
+    token_payload = tokens if isinstance(tokens, dict) else {}
+    detected = _strava_profile_url_from_athlete(token_payload.get("athlete"))
+    if detected:
+        return detected
+
+    access_token = str(token_payload.get("access_token") or "").strip()
+    if not access_token:
+        return ""
+    athlete = _fetch_strava_athlete(access_token)
+    return _strava_profile_url_from_athlete(athlete)
+
+
+def _prompt_use_strava_profile_link(default_enabled: bool) -> bool:
+    print("\nOptional: show your Strava profile link in the dashboard header.")
+    default_choice = "y" if default_enabled else "n"
     choice = _prompt_choice(
-        "Show a Strava profile link next to the repo link? [y/n]: ",
+        "Show Strava profile link next to the repo link? [y/n]: ",
         {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
         default=default_choice,
         invalid_message="Please enter 'y' or 'n'.",
     )
-    if choice != "yes":
-        return ""
-
-    while True:
-        prompt_suffix = f" [{existing_value}]" if existing_value else ""
-        entered = input(f"Strava profile URL{prompt_suffix}: ").strip()
-        candidate = entered or existing_value
-        try:
-            return _normalize_strava_profile_url(candidate)
-        except ValueError as exc:
-            print(exc)
+    return choice == "yes"
 
 
-def _resolve_strava_profile_url(args: argparse.Namespace, interactive: bool, repo: str) -> str:
+def _resolve_strava_profile_url(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+    tokens: Optional[dict] = None,
+) -> str:
     explicit = getattr(args, "strava_profile_url", None)
     if explicit is not None:
-        return _normalize_strava_profile_url(explicit)
+        explicit_text = str(explicit).strip()
+        if not explicit_text:
+            return ""
+        return _normalize_strava_profile_url(explicit_text)
+
+    detected = _normalize_strava_profile_url(_detect_strava_profile_url(tokens or {}))
 
     existing_raw = _get_variable("DASHBOARD_STRAVA_PROFILE_URL", repo)
     try:
@@ -736,10 +783,12 @@ def _resolve_strava_profile_url(args: argparse.Namespace, interactive: bool, rep
     except ValueError:
         existing_value = ""
 
+    candidate = detected or existing_value
     if interactive:
-        return _prompt_strava_profile_url(existing_value)
+        enabled = _prompt_use_strava_profile_link(default_enabled=bool(candidate))
+        return candidate if enabled else ""
 
-    return existing_value
+    return candidate
 
 
 def _iter_exception_chain(exc: Exception) -> Iterator[BaseException]:
@@ -1315,7 +1364,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--strava-profile-url",
         default=None,
-        help="Optional Strava profile URL shown in the dashboard header.",
+        help="Optional Strava profile URL override shown in the dashboard header (auto-detected by default).",
     )
     parser.add_argument(
         "--no-browser",
@@ -1424,7 +1473,7 @@ def main() -> int:
         athlete_name = " ".join(
             [str(athlete.get("firstname", "")).strip(), str(athlete.get("lastname", "")).strip()]
         ).strip()
-        strava_profile_url = _resolve_strava_profile_url(args, interactive, repo)
+        strava_profile_url = _resolve_strava_profile_url(args, interactive, repo, tokens=tokens)
     elif source == "garmin":
         token_store_b64, garmin_email, garmin_password = _resolve_garmin_auth_values(args, interactive)
         if token_store_b64:
