@@ -260,7 +260,7 @@
     "raw_activity_type": "InlineSkate",
     "raw_type": "InlineSkate",
     "start_date_local": "2006-05-13T15:10:09Z",
-    "type": "InlineSkate",
+    "type": "OtherSports",
     "year": 2006
   },
   {
@@ -272,7 +272,7 @@
     "raw_activity_type": "InlineSkate",
     "raw_type": "InlineSkate",
     "start_date_local": "2006-08-07T18:38:16Z",
-    "type": "InlineSkate",
+    "type": "OtherSports",
     "year": 2006
   },
   {
@@ -416,7 +416,7 @@
     "raw_activity_type": "InlineSkate",
     "raw_type": "InlineSkate",
     "start_date_local": "2008-03-02T10:36:15Z",
-    "type": "InlineSkate",
+    "type": "OtherSports",
     "year": 2008
   },
   {
@@ -488,7 +488,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2008-07-30T18:32:02Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2008
   },
   {
@@ -920,7 +920,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2010-04-11T14:46:16Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2010
   },
   {
@@ -956,7 +956,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2010-05-07T12:11:26Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2010
   },
   {
@@ -980,7 +980,7 @@
     "raw_activity_type": "Ride",
     "raw_type": "GravelRide",
     "start_date_local": "2010-05-27T16:32:11Z",
-    "type": "GravelRide",
+    "type": "Ride",
     "year": 2010
   },
   {
@@ -1268,7 +1268,7 @@
     "raw_activity_type": "Kitesurf",
     "raw_type": "Kitesurf",
     "start_date_local": "2014-07-05T12:16:35Z",
-    "type": "Kitesurf",
+    "type": "OtherSports",
     "year": 2014
   },
   {
@@ -1700,7 +1700,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2017-03-05T07:46:49Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2017
   },
   {
@@ -1712,7 +1712,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2017-03-13T11:10:00Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2017
   },
   {
@@ -1724,7 +1724,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2017-03-15T06:10:00Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2017
   },
   {
@@ -1748,7 +1748,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2017-04-18T16:24:08Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2017
   },
   {
@@ -1760,7 +1760,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2017-04-26T18:00:00Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2017
   },
   {
@@ -2312,7 +2312,7 @@
     "raw_activity_type": "Skateboard",
     "raw_type": "Skateboard",
     "start_date_local": "2018-08-10T08:25:42Z",
-    "type": "Skateboard",
+    "type": "OtherSports",
     "year": 2018
   },
   {
@@ -3512,7 +3512,7 @@
     "raw_activity_type": "VirtualRide",
     "raw_type": "VirtualRide",
     "start_date_local": "2019-02-28T03:57:56Z",
-    "type": "VirtualRide",
+    "type": "Ride",
     "year": 2019
   },
   {
@@ -3848,7 +3848,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-04-13T08:23:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -3860,7 +3860,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-04-13T09:02:24Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -5516,7 +5516,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-10-06T14:44:24Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -5960,7 +5960,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-11-11T10:06:16Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -6080,7 +6080,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-11-16T16:23:38Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -6092,7 +6092,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-11-16T17:01:05Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -6320,7 +6320,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-12-07T09:42:08Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -6344,7 +6344,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2019-12-15T13:00:14Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2019
   },
   {
@@ -7184,7 +7184,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-02-17T15:29:32Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7436,7 +7436,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-07T12:22:23Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7448,7 +7448,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-07T12:59:50Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7460,7 +7460,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-20T16:33:15Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7496,7 +7496,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-25T09:37:26Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7508,7 +7508,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-26T07:45:42Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7520,7 +7520,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-27T10:40:06Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7556,7 +7556,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-31T07:48:01Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7568,7 +7568,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-31T08:04:15Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7580,7 +7580,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-03-31T16:20:43Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7604,7 +7604,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-02T07:29:01Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7628,7 +7628,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-03T10:42:51Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7664,7 +7664,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-06T07:17:20Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7688,7 +7688,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-07T08:38:12Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7700,7 +7700,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-07T16:48:14Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7724,7 +7724,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-09T10:26:38Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7736,7 +7736,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-12T13:05:42Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7844,7 +7844,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-17T09:26:52Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7880,7 +7880,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-19T13:34:29Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7916,7 +7916,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-21T10:19:29Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -7952,7 +7952,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-24T07:40:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8024,7 +8024,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-04-29T13:37:56Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8048,7 +8048,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-01T12:30:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8108,7 +8108,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-06T10:18:51Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8132,7 +8132,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-09T16:11:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8192,7 +8192,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-14T08:40:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8204,7 +8204,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-15T08:27:27Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8240,7 +8240,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-16T17:10:03Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8264,7 +8264,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-22T16:52:13Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8312,7 +8312,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-24T13:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8336,7 +8336,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-25T17:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8348,7 +8348,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-27T08:06:37Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8372,7 +8372,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-28T08:59:15Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8396,7 +8396,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-05-31T10:03:57Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8444,7 +8444,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-02T17:24:19Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8456,7 +8456,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-04T14:57:39Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8468,7 +8468,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-04T16:49:24Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8492,7 +8492,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-08T10:57:55Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8600,7 +8600,7 @@
     "raw_activity_type": "InlineSkate",
     "raw_type": "InlineSkate",
     "start_date_local": "2020-06-19T09:57:36Z",
-    "type": "InlineSkate",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -8612,7 +8612,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-19T11:01:39Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8624,7 +8624,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-20T11:50:56Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8648,7 +8648,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-21T10:53:11Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8660,7 +8660,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-21T12:25:51Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8696,7 +8696,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-23T08:31:48Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8744,7 +8744,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-28T11:09:08Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8780,7 +8780,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-06-30T08:54:40Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8792,7 +8792,7 @@
     "raw_activity_type": "InlineSkate",
     "raw_type": "InlineSkate",
     "start_date_local": "2020-06-30T19:13:06Z",
-    "type": "InlineSkate",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -8816,7 +8816,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-02T16:57:45Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8876,7 +8876,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-05T15:02:36Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8924,7 +8924,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-08T08:23:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8936,7 +8936,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2020-07-09T08:40:49Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -8984,7 +8984,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-11T16:37:33Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -8996,7 +8996,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-12T11:26:56Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9008,7 +9008,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-12T12:53:07Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9020,7 +9020,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-12T14:04:15Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9068,7 +9068,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-15T18:35:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9116,7 +9116,7 @@
     "raw_activity_type": "Canoeing",
     "raw_type": "Canoeing",
     "start_date_local": "2020-07-17T11:02:54Z",
-    "type": "Canoeing",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -9128,7 +9128,7 @@
     "raw_activity_type": "Canoeing",
     "raw_type": "Canoeing",
     "start_date_local": "2020-07-17T11:36:05Z",
-    "type": "Canoeing",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -9152,7 +9152,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-19T11:46:55Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9200,7 +9200,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-07-23T08:18:26Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9272,7 +9272,7 @@
     "raw_activity_type": "Canoeing",
     "raw_type": "Canoeing",
     "start_date_local": "2020-07-27T15:14:50Z",
-    "type": "Canoeing",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -9380,7 +9380,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-05T14:12:58Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9440,7 +9440,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-10T08:23:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9452,7 +9452,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2020-08-11T13:37:53Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -9560,7 +9560,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-18T15:36:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9572,7 +9572,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-18T16:50:05Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9632,7 +9632,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-24T08:01:26Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9656,7 +9656,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-25T15:56:33Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9668,7 +9668,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-25T19:41:56Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9740,7 +9740,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-08-30T14:13:45Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9752,7 +9752,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-01T07:55:32Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9788,7 +9788,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-04T10:21:41Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9884,7 +9884,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-11T07:14:33Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9896,7 +9896,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-12T14:32:51Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9932,7 +9932,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-21T08:23:29Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9944,7 +9944,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-24T07:14:33Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9980,7 +9980,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-26T15:41:44Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -9992,7 +9992,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-26T16:46:13Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10004,7 +10004,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-27T14:17:26Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10016,7 +10016,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-09-27T15:30:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10064,7 +10064,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-01T08:37:49Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10076,7 +10076,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2020-10-02T07:06:36Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -10112,7 +10112,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-05T11:56:19Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10124,7 +10124,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2020-10-06T08:34:44Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -10172,7 +10172,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-13T09:39:52Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10196,7 +10196,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-14T15:55:37Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10208,7 +10208,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-15T08:34:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10244,7 +10244,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2020-10-18T12:17:27Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -10280,7 +10280,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-20T09:32:31Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10292,7 +10292,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-21T16:37:30Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10304,7 +10304,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-21T16:55:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10340,7 +10340,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-10-23T17:26:24Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10436,7 +10436,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2020-10-31T08:08:24Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2020
   },
   {
@@ -10640,7 +10640,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-11-15T14:23:13Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10664,7 +10664,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-11-17T10:02:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10688,7 +10688,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-11-18T07:50:58Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10880,7 +10880,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-04T08:57:31Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -10928,7 +10928,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-09T07:38:40Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -11000,7 +11000,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-17T12:21:05Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -11060,7 +11060,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-21T15:08:47Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -11072,7 +11072,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-21T15:25:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -11108,7 +11108,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2020-12-25T15:37:40Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2020
   },
   {
@@ -11180,7 +11180,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-01-01T17:09:39Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -11468,7 +11468,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-01-29T08:02:04Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -11492,7 +11492,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-02-02T08:05:52Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -11540,7 +11540,7 @@
     "raw_activity_type": "Snowshoe",
     "raw_type": "Snowshoe",
     "start_date_local": "2021-02-06T10:59:31Z",
-    "type": "Snowshoe",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11564,7 +11564,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-02-08T13:01:05Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11612,7 +11612,7 @@
     "raw_activity_type": "NordicSki",
     "raw_type": "NordicSki",
     "start_date_local": "2021-02-13T11:17:28Z",
-    "type": "NordicSki",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11624,7 +11624,7 @@
     "raw_activity_type": "NordicSki",
     "raw_type": "NordicSki",
     "start_date_local": "2021-02-14T09:54:40Z",
-    "type": "NordicSki",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11636,7 +11636,7 @@
     "raw_activity_type": "NordicSki",
     "raw_type": "NordicSki",
     "start_date_local": "2021-02-14T12:14:46Z",
-    "type": "NordicSki",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11648,7 +11648,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-02-15T13:27:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -11744,7 +11744,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-02-24T17:00:03Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -11804,7 +11804,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-03-03T08:20:03Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -11864,7 +11864,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-03-08T08:39:22Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12152,7 +12152,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-03-29T08:30:35Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12200,7 +12200,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-04-02T08:33:49Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12296,7 +12296,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-04-09T12:21:01Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12308,7 +12308,7 @@
     "raw_activity_type": "RollerSki",
     "raw_type": "RollerSki",
     "start_date_local": "2021-04-09T17:12:48Z",
-    "type": "RollerSki",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -12344,7 +12344,7 @@
     "raw_activity_type": "Canoeing",
     "raw_type": "Canoeing",
     "start_date_local": "2021-04-11T11:09:29Z",
-    "type": "Canoeing",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -12632,7 +12632,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-05-09T14:28:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12860,7 +12860,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-05-31T12:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12968,7 +12968,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-06-11T17:34:15Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -12992,7 +12992,7 @@
     "raw_activity_type": "Kayaking",
     "raw_type": "Kayaking",
     "start_date_local": "2021-06-12T15:38:07Z",
-    "type": "Kayaking",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13004,7 +13004,7 @@
     "raw_activity_type": "Kayaking",
     "raw_type": "Kayaking",
     "start_date_local": "2021-06-12T16:10:19Z",
-    "type": "Kayaking",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13208,7 +13208,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-06-29T08:27:43Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -13340,7 +13340,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-07-11T15:14:27Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -13352,7 +13352,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-07-11T19:06:45Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13496,7 +13496,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-08-01T19:14:27Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13508,7 +13508,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-08-04T18:06:11Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -13556,7 +13556,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-08-08T19:10:24Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13580,7 +13580,7 @@
     "raw_activity_type": "Kayaking",
     "raw_type": "Kayaking",
     "start_date_local": "2021-08-14T15:16:40Z",
-    "type": "Kayaking",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13700,7 +13700,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-01T12:30:00Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13724,7 +13724,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-09-05T19:04:37Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13748,7 +13748,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-08T12:30:00Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13796,7 +13796,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-12T09:23:55Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13808,7 +13808,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-09-12T19:05:28Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13832,7 +13832,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-14T22:00:00Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13844,7 +13844,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-15T07:51:32Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13856,7 +13856,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-15T13:30:00Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13880,7 +13880,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-20T08:34:45Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13892,7 +13892,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-21T07:27:38Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13916,7 +13916,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-22T09:17:40Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -13976,7 +13976,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-09-26T15:38:59Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -13988,7 +13988,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-09-26T18:07:26Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14000,7 +14000,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-09-28T08:16:36Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14048,7 +14048,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-10-03T18:18:51Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14096,7 +14096,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2021-10-17T17:40:53Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14120,7 +14120,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-10-25T07:47:08Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14156,7 +14156,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-10-28T07:39:16Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14180,7 +14180,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-10-29T08:18:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14192,7 +14192,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-10-30T09:38:29Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14216,7 +14216,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-10-31T09:08:43Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14240,7 +14240,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-11-04T07:45:28Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14252,7 +14252,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-11-06T16:53:50Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14360,7 +14360,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2021-11-12T16:32:49Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2021
   },
   {
@@ -14456,7 +14456,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2021-11-19T15:11:53Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14828,7 +14828,7 @@
     "raw_activity_type": "IceSkate",
     "raw_type": "IceSkate",
     "start_date_local": "2021-12-31T12:29:42Z",
-    "type": "IceSkate",
+    "type": "OtherSports",
     "year": 2021
   },
   {
@@ -14840,7 +14840,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-01-01T11:38:27Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15008,7 +15008,7 @@
     "raw_activity_type": "Yoga",
     "raw_type": "Yoga",
     "start_date_local": "2022-02-12T09:07:08Z",
-    "type": "Yoga",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -15044,7 +15044,7 @@
     "raw_activity_type": "Crossfit",
     "raw_type": "Crossfit",
     "start_date_local": "2022-02-16T08:44:56Z",
-    "type": "Crossfit",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -15056,7 +15056,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-02-16T09:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15092,7 +15092,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-02-23T08:30:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15116,7 +15116,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-02-26T17:46:57Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15140,7 +15140,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-02-28T09:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15164,7 +15164,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-03-02T10:31:10Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15236,7 +15236,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-03-08T09:36:18Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15320,7 +15320,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-03-13T17:38:53Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15356,7 +15356,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-03-14T09:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15440,7 +15440,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-03-27T16:39:58Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15500,7 +15500,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-04-02T09:18:33Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -15512,7 +15512,7 @@
     "raw_activity_type": "IceSkate",
     "raw_type": "IceSkate",
     "start_date_local": "2022-04-03T13:00:28Z",
-    "type": "IceSkate",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -15596,7 +15596,7 @@
     "raw_activity_type": "Yoga",
     "raw_type": "Yoga",
     "start_date_local": "2022-04-14T08:20:05Z",
-    "type": "Yoga",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -15776,7 +15776,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-05-01T15:26:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -16016,7 +16016,7 @@
     "raw_activity_type": "Run",
     "raw_type": "Run",
     "start_date_local": "2022-05-22T18:35:46Z",
-    "type": "Run",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -16928,7 +16928,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-08-18T11:30:17Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -17552,7 +17552,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-10-22T15:35:14Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -17840,7 +17840,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-12-03T13:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -17876,7 +17876,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-12-07T07:40:44Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -17900,7 +17900,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2022-12-08T07:45:30Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2022
   },
   {
@@ -17996,7 +17996,7 @@
     "raw_activity_type": "IceSkate",
     "raw_type": "IceSkate",
     "start_date_local": "2022-12-27T13:52:55Z",
-    "type": "IceSkate",
+    "type": "OtherSports",
     "year": 2022
   },
   {
@@ -18164,7 +18164,7 @@
     "raw_activity_type": "AlpineSki",
     "raw_type": "AlpineSki",
     "start_date_local": "2023-01-14T09:28:52Z",
-    "type": "AlpineSki",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -18188,7 +18188,7 @@
     "raw_activity_type": "AlpineSki",
     "raw_type": "AlpineSki",
     "start_date_local": "2023-01-15T09:28:53Z",
-    "type": "AlpineSki",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -18680,7 +18680,7 @@
     "raw_activity_type": "IceSkate",
     "raw_type": "IceSkate",
     "start_date_local": "2023-03-05T13:35:01Z",
-    "type": "IceSkate",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -18752,7 +18752,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-03-11T15:10:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -18776,7 +18776,7 @@
     "raw_activity_type": "Golf",
     "raw_type": "Golf",
     "start_date_local": "2023-03-15T14:13:38Z",
-    "type": "Golf",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -18824,7 +18824,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-03-19T16:25:30Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -19268,7 +19268,7 @@
     "raw_activity_type": "Rowing",
     "raw_type": "VirtualRow",
     "start_date_local": "2023-05-11T09:12:00Z",
-    "type": "VirtualRow",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -19508,7 +19508,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-06-11T16:43:44Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -19520,7 +19520,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-06-11T17:25:12Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -19532,7 +19532,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-06-12T09:49:37Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -19640,7 +19640,7 @@
     "raw_activity_type": "Kayaking",
     "raw_type": "Kayaking",
     "start_date_local": "2023-06-23T10:30:34Z",
-    "type": "Kayaking",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -20096,7 +20096,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-08-13T18:01:53Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20120,7 +20120,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-08-15T07:30:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20228,7 +20228,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Badminton",
     "start_date_local": "2023-08-21T10:56:14Z",
-    "type": "Badminton",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -20240,7 +20240,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-08-23T06:51:28Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20336,7 +20336,7 @@
     "raw_activity_type": "Kayaking",
     "raw_type": "Kayaking",
     "start_date_local": "2023-09-02T17:06:29Z",
-    "type": "Kayaking",
+    "type": "OtherSports",
     "year": 2023
   },
   {
@@ -20360,7 +20360,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-09-04T10:30:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20684,7 +20684,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-09-29T12:28:37Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20720,7 +20720,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-01T16:27:57Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20744,7 +20744,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-04T18:08:25Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20792,7 +20792,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-09T15:22:02Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20828,7 +20828,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-11T17:26:49Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20864,7 +20864,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-14T11:01:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20876,7 +20876,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-15T15:00:57Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -20996,7 +20996,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-10-29T15:47:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -21056,7 +21056,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-11-05T13:10:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -21104,7 +21104,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-11-08T05:45:53Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -21152,7 +21152,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-11-16T13:12:08Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -21284,7 +21284,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2023-12-09T13:38:38Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2023
   },
   {
@@ -21440,7 +21440,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-01-05T10:13:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -21656,7 +21656,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-02-03T15:48:21Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -21788,7 +21788,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-02-18T12:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -21944,7 +21944,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-03-10T08:41:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -21956,7 +21956,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-03-10T17:43:28Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -22040,7 +22040,7 @@
     "raw_activity_type": "Surfing",
     "raw_type": "Surfing",
     "start_date_local": "2024-03-28T14:44:43Z",
-    "type": "Surfing",
+    "type": "OtherSports",
     "year": 2024
   },
   {
@@ -22184,7 +22184,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-04-14T11:21:05Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -22244,7 +22244,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-04-20T14:28:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -22268,7 +22268,7 @@
     "raw_activity_type": "Yoga",
     "raw_type": "Yoga",
     "start_date_local": "2024-04-24T07:36:33Z",
-    "type": "Yoga",
+    "type": "OtherSports",
     "year": 2024
   },
   {
@@ -22292,7 +22292,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-05-01T07:17:36Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -22304,7 +22304,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-05-02T07:23:11Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -22796,7 +22796,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-06-09T15:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -23036,7 +23036,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-06-30T11:18:12Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -23168,7 +23168,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-07-19T11:30:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -23252,7 +23252,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-07-28T13:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -23420,7 +23420,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-08-10T09:21:23Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -23984,7 +23984,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-09-23T15:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -24044,7 +24044,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-09-28T09:04:36Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -24428,7 +24428,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-11-02T11:22:20Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -24524,7 +24524,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-11-10T15:30:51Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -24596,7 +24596,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2024-11-16T10:43:42Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2024
   },
   {
@@ -24704,7 +24704,7 @@
     "raw_activity_type": "IceSkate",
     "raw_type": "IceSkate",
     "start_date_local": "2024-11-30T13:27:47Z",
-    "type": "IceSkate",
+    "type": "OtherSports",
     "year": 2024
   },
   {
@@ -25208,7 +25208,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-01-25T13:11:19Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -25880,7 +25880,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2025-03-29T10:04:14Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2025
   },
   {
@@ -25976,7 +25976,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-04-04T16:08:36Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -26060,7 +26060,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2025-04-10T09:23:56Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2025
   },
   {
@@ -26072,7 +26072,7 @@
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2025-04-11T09:45:48Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2025
   },
   {
@@ -26228,7 +26228,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-04-20T10:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -26636,7 +26636,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-05-17T09:40:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -26660,7 +26660,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-05-18T10:00:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -26864,7 +26864,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-06-01T11:20:00Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -27332,7 +27332,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-07-12T06:42:41Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -27392,7 +27392,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-07-17T05:31:18Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -28844,7 +28844,7 @@
     "raw_activity_type": "Workout",
     "raw_type": "Workout",
     "start_date_local": "2025-11-08T13:02:50Z",
-    "type": "Workout",
+    "type": "WeightTraining",
     "year": 2025
   },
   {
@@ -29680,6 +29680,7 @@
     "distance": 0.0,
     "elevation_gain": 0.0,
     "id": "17334351633",
+    "is_commute": false,
     "moving_time": 1594.0,
     "raw_activity_type": "WeightTraining",
     "raw_type": "WeightTraining",
@@ -29692,11 +29693,12 @@
     "distance": 4379.8,
     "elevation_gain": 7.7,
     "id": "17364449651",
+    "is_commute": true,
     "moving_time": 722.0,
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
     "start_date_local": "2026-02-11T09:05:04Z",
-    "type": "Ride",
+    "type": "Commute",
     "year": 2026
   },
   {
@@ -29704,11 +29706,12 @@
     "distance": 4608.6,
     "elevation_gain": 39.5,
     "id": "17369207217",
+    "is_commute": true,
     "moving_time": 825.0,
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
     "start_date_local": "2026-02-11T17:46:18Z",
-    "type": "Ride",
+    "type": "Commute",
     "year": 2026
   },
   {
@@ -29716,11 +29719,12 @@
     "distance": 4352.5,
     "elevation_gain": 7.7,
     "id": "17376079830",
+    "is_commute": true,
     "moving_time": 631.0,
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
     "start_date_local": "2026-02-12T10:06:56Z",
-    "type": "Ride",
+    "type": "Commute",
     "year": 2026
   },
   {
@@ -29728,6 +29732,7 @@
     "distance": 3453.8,
     "elevation_gain": 40.0,
     "id": "17379628108",
+    "is_commute": false,
     "moving_time": 679.0,
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
@@ -29740,6 +29745,7 @@
     "distance": 0.0,
     "elevation_gain": 0.0,
     "id": "17380179818",
+    "is_commute": false,
     "moving_time": 3120.0,
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
@@ -29752,6 +29758,7 @@
     "distance": 3437.8,
     "elevation_gain": 9.4,
     "id": "17397723134",
+    "is_commute": false,
     "moving_time": 2492.0,
     "raw_activity_type": "Walk",
     "raw_type": "Walk",
@@ -29764,11 +29771,12 @@
     "distance": 0.0,
     "elevation_gain": 0.0,
     "id": "17400325227",
+    "is_commute": false,
     "moving_time": 3600.0,
     "raw_activity_type": "EBikeRide",
     "raw_type": "EBikeRide",
     "start_date_local": "2026-02-14T15:56:04Z",
-    "type": "EBikeRide",
+    "type": "Ride",
     "year": 2026
   }
 ]
