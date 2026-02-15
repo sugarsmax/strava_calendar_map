@@ -36,6 +36,10 @@ class RepoLinkInferenceTests(unittest.TestCase):
             r"function customDashboardUrlFromLocation\(loc\)\s*{[\s\S]*?\n}\n",
             app_js,
         )
+        custom_label_match = re.search(
+            r"function customDashboardLabelFromUrl\(url\)\s*{[\s\S]*?\n}\n",
+            app_js,
+        )
         header_link_match = re.search(
             r"function resolveHeaderRepoLink\(loc, fallbackRepo\)\s*{[\s\S]*?\n}\n",
             app_js,
@@ -50,6 +54,7 @@ class RepoLinkInferenceTests(unittest.TestCase):
             or not resolve_match
             or not host_match
             or not custom_url_match
+            or not custom_label_match
             or not header_link_match
             or not strava_match
         ):
@@ -59,6 +64,7 @@ class RepoLinkInferenceTests(unittest.TestCase):
         cls.resolve_source = resolve_match.group(0)
         cls.host_source = host_match.group(0)
         cls.custom_url_source = custom_url_match.group(0)
+        cls.custom_label_source = custom_label_match.group(0)
         cls.header_link_source = header_link_match.group(0)
         cls.strava_parse_source = strava_match.group(0)
 
@@ -94,6 +100,7 @@ class RepoLinkInferenceTests(unittest.TestCase):
             f"{self.resolve_source}\n"
             f"{self.host_source}\n"
             f"{self.custom_url_source}\n"
+            f"{self.custom_label_source}\n"
             f"{self.header_link_source}\n"
             "const payload = JSON.parse(process.argv[1]);\n"
             "const result = resolveHeaderRepoLink(payload.loc, payload.fallback);\n"
@@ -165,7 +172,7 @@ class RepoLinkInferenceTests(unittest.TestCase):
             result,
             {
                 "href": "https://strava.nedevski.com/",
-                "text": "https://strava.nedevski.com/",
+                "text": "strava.nedevski.com",
             },
         )
 

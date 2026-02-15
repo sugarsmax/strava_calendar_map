@@ -203,11 +203,25 @@ function customDashboardUrlFromLocation(loc) {
   }
 }
 
+function customDashboardLabelFromUrl(url) {
+  const raw = String(url || "").trim();
+  if (!raw) return "";
+  try {
+    const parsed = new URL(raw);
+    const path = String(parsed.pathname || "").replace(/\/+$/, "");
+    const suffixPath = path && path !== "/" ? path : "";
+    return `${parsed.host}${suffixPath}${parsed.search}`;
+  } catch (_error) {
+    return "";
+  }
+}
+
 function resolveHeaderRepoLink(loc, fallbackRepo) {
   if (!isGitHubHostedLocation(loc)) {
     const customUrl = customDashboardUrlFromLocation(loc);
     if (customUrl) {
-      return { href: customUrl, text: customUrl };
+      const customLabel = customDashboardLabelFromUrl(customUrl) || customUrl;
+      return { href: customUrl, text: customLabel };
     }
   }
 
