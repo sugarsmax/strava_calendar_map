@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-15T02:27:26.517697+00:00",
+  "generated_at": "2026-02-15T02:56:03.745333+00:00",
   "years": {
     "1994": {
       "Ride": {
@@ -18610,6 +18610,25 @@
           "distance": 4354.8,
           "elevation_gain": 7.6,
           "moving_time": 575.0
+        },
+        "2026-02-11": {
+          "activity_ids": [
+            "17364449651",
+            "17369207217"
+          ],
+          "count": 2,
+          "distance": 8988.400000000001,
+          "elevation_gain": 47.2,
+          "moving_time": 1547.0
+        },
+        "2026-02-12": {
+          "activity_ids": [
+            "17376079830"
+          ],
+          "count": 1,
+          "distance": 4352.5,
+          "elevation_gain": 7.7,
+          "moving_time": 631.0
         }
       },
       "Elliptical": {
@@ -18670,26 +18689,24 @@
           "elevation_gain": 166.0,
           "moving_time": 5321.0
         },
-        "2026-02-11": {
-          "activity_ids": [
-            17364449651,
-            17369207217
-          ],
-          "count": 2,
-          "distance": 8988.400000000001,
-          "elevation_gain": 47.2,
-          "moving_time": 1547.0
-        },
         "2026-02-12": {
           "activity_ids": [
-            17376079830,
-            17379628108,
-            17380179818
+            "17379628108",
+            "17380179818"
           ],
-          "count": 3,
-          "distance": 7806.3,
-          "elevation_gain": 47.7,
-          "moving_time": 4430.0
+          "count": 2,
+          "distance": 3453.8,
+          "elevation_gain": 40.0,
+          "moving_time": 3799.0
+        },
+        "2026-02-14": {
+          "activity_ids": [
+            "17400325227"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 3600.0
         }
       },
       "RockClimbing": {
@@ -18797,6 +18814,15 @@
           "distance": 4844.0,
           "elevation_gain": 18.2,
           "moving_time": 3542.0
+        },
+        "2026-02-14": {
+          "activity_ids": [
+            "17397723134"
+          ],
+          "count": 1,
+          "distance": 3437.8,
+          "elevation_gain": 9.4,
+          "moving_time": 2492.0
         }
       },
       "WeightTraining": {
@@ -18847,7 +18873,7 @@
         },
         "2026-02-08": {
           "activity_ids": [
-            17334351633
+            "17334351633"
           ],
           "count": 1,
           "distance": 0.0,
