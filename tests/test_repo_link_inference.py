@@ -28,11 +28,16 @@ class RepoLinkInferenceTests(unittest.TestCase):
             r"function resolveGitHubRepo\(loc, fallbackRepo\)\s*{[\s\S]*?\n}\n",
             app_js,
         )
-        if not infer_match or not parse_match or not resolve_match:
+        strava_match = re.search(
+            r"function parseStravaProfileUrl\(value\)\s*{[\s\S]*?\n}\n",
+            app_js,
+        )
+        if not infer_match or not parse_match or not resolve_match or not strava_match:
             raise AssertionError("Could not find repo inference helpers in site/app.js")
         cls.parse_source = parse_match.group(0)
         cls.infer_source = infer_match.group(0)
         cls.resolve_source = resolve_match.group(0)
+        cls.strava_parse_source = strava_match.group(0)
 
     def _resolve_repo(self, hostname: str, pathname: str, fallback_repo=None):
         script = (
@@ -53,6 +58,21 @@ class RepoLinkInferenceTests(unittest.TestCase):
                     "fallback": fallback_repo,
                 }),
             ],
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        return json.loads(completed.stdout)
+
+    def _parse_strava_profile(self, value):
+        script = (
+            f"{self.strava_parse_source}\n"
+            "const payload = JSON.parse(process.argv[1]);\n"
+            "const result = parseStravaProfileUrl(payload.value);\n"
+            "process.stdout.write(JSON.stringify(result));\n"
+        )
+        completed = subprocess.run(
+            ["node", "-e", script, json.dumps({"value": value})],
             check=True,
             capture_output=True,
             text=True,
@@ -81,6 +101,20 @@ class RepoLinkInferenceTests(unittest.TestCase):
 
     def test_custom_domain_returns_null_without_fallback(self) -> None:
         result = self._resolve_repo("subdomain.example.com", "/")
+        self.assertIsNone(result)
+
+    def test_parses_valid_strava_profile_url(self) -> None:
+        result = self._parse_strava_profile("https://www.strava.com/athletes/12345")
+        self.assertEqual(
+            result,
+            {
+                "href": "https://www.strava.com/athletes/12345",
+                "label": "www.strava.com/athletes/12345",
+            },
+        )
+
+    def test_rejects_non_strava_profile_url(self) -> None:
+        result = self._parse_strava_profile("https://example.com/athletes/12345")
         self.assertIsNone(result)
 
 

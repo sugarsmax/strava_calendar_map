@@ -73,6 +73,7 @@ REPO_SSH_RE = re.compile(
     re.IGNORECASE,
 )
 REPO_SLUG_RE = re.compile(r"^(?P<owner>[^/\s]+)/(?P<repo>[^/\s]+)$")
+STRAVA_HOST_RE = re.compile(r"(^|\.)strava\.com$", re.IGNORECASE)
 
 
 @dataclass
@@ -663,6 +664,73 @@ def _resolve_source(
     return DEFAULT_SOURCE
 
 
+def _normalize_strava_profile_url(value: Optional[str]) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        return ""
+    if not re.match(r"^https?://", raw, flags=re.IGNORECASE):
+        raw = f"https://{raw.lstrip('/')}"
+    parsed = urllib.parse.urlparse(raw)
+    host = str(parsed.hostname or "").lower()
+    if not host or not STRAVA_HOST_RE.search(host):
+        raise ValueError("Strava profile URL must use a strava.com hostname.")
+    path = str(parsed.path or "").strip()
+    if not path or path == "/":
+        raise ValueError("Strava profile URL must include a profile path (for example /athletes/<id>).")
+
+    normalized_path = path.rstrip("/") or "/"
+    normalized = urllib.parse.urlunparse(
+        (
+            parsed.scheme or "https",
+            parsed.netloc,
+            normalized_path,
+            "",
+            parsed.query,
+            "",
+        )
+    )
+    return normalized
+
+
+def _prompt_strava_profile_url(existing_value: str) -> str:
+    print("\nOptional: add a Strava profile link to the dashboard header.")
+    default_choice = "y" if existing_value else "n"
+    choice = _prompt_choice(
+        "Show a Strava profile link next to the repo link? [y/n]: ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default=default_choice,
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    if choice != "yes":
+        return ""
+
+    while True:
+        prompt_suffix = f" [{existing_value}]" if existing_value else ""
+        entered = input(f"Strava profile URL{prompt_suffix}: ").strip()
+        candidate = entered or existing_value
+        try:
+            return _normalize_strava_profile_url(candidate)
+        except ValueError as exc:
+            print(exc)
+
+
+def _resolve_strava_profile_url(args: argparse.Namespace, interactive: bool, repo: str) -> str:
+    explicit = getattr(args, "strava_profile_url", None)
+    if explicit is not None:
+        return _normalize_strava_profile_url(explicit)
+
+    existing_raw = _get_variable("DASHBOARD_STRAVA_PROFILE_URL", repo)
+    try:
+        existing_value = _normalize_strava_profile_url(existing_raw)
+    except ValueError:
+        existing_value = ""
+
+    if interactive:
+        return _prompt_strava_profile_url(existing_value)
+
+    return existing_value
+
+
 def _iter_exception_chain(exc: Exception) -> Iterator[BaseException]:
     seen: set[int] = set()
     current: Optional[BaseException] = exc
@@ -1234,6 +1302,11 @@ def parse_args() -> argparse.Namespace:
         help="Strava OAuth scopes.",
     )
     parser.add_argument(
+        "--strava-profile-url",
+        default=None,
+        help="Optional Strava profile URL shown in the dashboard header.",
+    )
+    parser.add_argument(
         "--no-browser",
         action="store_true",
         help="Do not auto-open browser; print auth URL only.",
@@ -1291,6 +1364,7 @@ def main() -> int:
     print("\nUpdating repository secrets via gh...")
     configured_secret_names: list[str] = []
     athlete_name = ""
+    strava_profile_url = ""
     strava_rotation_secret_ok: Optional[bool] = None
     strava_rotation_secret_detail = ""
     if source == "strava":
@@ -1339,6 +1413,7 @@ def main() -> int:
         athlete_name = " ".join(
             [str(athlete.get("firstname", "")).strip(), str(athlete.get("lastname", "")).strip()]
         ).strip()
+        strava_profile_url = _resolve_strava_profile_url(args, interactive, repo)
     elif source == "garmin":
         token_store_b64, garmin_email, garmin_password = _resolve_garmin_auth_values(args, interactive)
         if token_store_b64:
@@ -1378,11 +1453,14 @@ def main() -> int:
 
     variable_errors = []
     print("Updating repository variables via gh...")
-    for name, value in [
+    variable_pairs = [
         ("DASHBOARD_SOURCE", source),
         ("DASHBOARD_DISTANCE_UNIT", distance_unit),
         ("DASHBOARD_ELEVATION_UNIT", elevation_unit),
-    ]:
+    ]
+    if source == "strava":
+        variable_pairs.append(("DASHBOARD_STRAVA_PROFILE_URL", strava_profile_url))
+    for name, value in variable_pairs:
         try:
             _set_variable(name, value, repo)
         except RuntimeError as exc:
@@ -1397,10 +1475,24 @@ def main() -> int:
             manual_help=(
                 f"Open {variables_settings_url} and set DASHBOARD_SOURCE={source}, "
                 f"DASHBOARD_DISTANCE_UNIT={distance_unit} "
-                f"and DASHBOARD_ELEVATION_UNIT={elevation_unit}."
+                f"and DASHBOARD_ELEVATION_UNIT={elevation_unit}"
+                + (
+                    (
+                        ", DASHBOARD_STRAVA_PROFILE_URL="
+                        f"{strava_profile_url}"
+                    )
+                    if source == "strava" and strava_profile_url
+                    else "."
+                )
+                + ("." if source == "strava" and strava_profile_url else "")
             ),
         )
     else:
+        profile_suffix = (
+            f", DASHBOARD_STRAVA_PROFILE_URL={strava_profile_url}"
+            if source == "strava" and strava_profile_url
+            else ""
+        )
         _add_step(
             steps,
             name="Store dashboard variables",
@@ -1408,7 +1500,8 @@ def main() -> int:
             detail=(
                 "Saved DASHBOARD_SOURCE="
                 f"{source}, DASHBOARD_DISTANCE_UNIT={distance_unit}, "
-                f"DASHBOARD_ELEVATION_UNIT={elevation_unit}."
+                f"DASHBOARD_ELEVATION_UNIT={elevation_unit}"
+                f"{profile_suffix}."
             ),
         )
     print("\nCredentials configured.")
@@ -1418,10 +1511,16 @@ def main() -> int:
     if configured_secret_names:
         print(f"Secrets set: {', '.join(configured_secret_names)}")
     if not variable_errors:
+        profile_suffix = (
+            f", DASHBOARD_STRAVA_PROFILE_URL={strava_profile_url}"
+            if source == "strava" and strava_profile_url
+            else ""
+        )
         print(
             "Variables set: "
             f"DASHBOARD_SOURCE={source}, DASHBOARD_DISTANCE_UNIT={distance_unit}, "
             f"DASHBOARD_ELEVATION_UNIT={elevation_unit}"
+            f"{profile_suffix}"
         )
 
     if args.no_auto_github:

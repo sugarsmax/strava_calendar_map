@@ -41,6 +41,7 @@ const tooltip = document.getElementById("tooltip");
 const summary = document.getElementById("summary");
 const updated = document.getElementById("updated");
 const repoLink = document.querySelector(".repo-link");
+const stravaProfileLink = document.querySelector(".strava-profile-link");
 const dashboardTitle = document.getElementById("dashboardTitle");
 const isTouch = window.matchMedia("(hover: none) and (pointer: coarse)").matches;
 const BREAKPOINTS = Object.freeze({
@@ -191,6 +192,48 @@ function syncRepoLink(fallbackRepo) {
   const href = `https://github.com/${inferred.owner}/${inferred.repo}`;
   repoLink.href = href;
   repoLink.textContent = `${inferred.owner}/${inferred.repo}`;
+}
+
+function parseStravaProfileUrl(value) {
+  let raw = String(value || "").trim();
+  if (!raw) return null;
+  if (!/^https?:\/\//i.test(raw)) {
+    raw = `https://${raw.replace(/^\/+/, "")}`;
+  }
+
+  let parsed;
+  try {
+    parsed = new URL(raw);
+  } catch (_error) {
+    return null;
+  }
+
+  const host = String(parsed.hostname || "").toLowerCase();
+  if (!(host === "strava.com" || host.endsWith(".strava.com"))) {
+    return null;
+  }
+
+  const path = String(parsed.pathname || "").trim().replace(/\/+$/, "");
+  if (!path || path === "/") {
+    return null;
+  }
+
+  return {
+    href: `${parsed.protocol}//${parsed.host}${path}${parsed.search}`,
+    label: `${parsed.hostname}${path}`,
+  };
+}
+
+function syncStravaProfileLink(profileUrl) {
+  if (!stravaProfileLink) return;
+  const parsed = parseStravaProfileUrl(profileUrl);
+  if (!parsed) {
+    stravaProfileLink.hidden = true;
+    return;
+  }
+  stravaProfileLink.href = parsed.href;
+  stravaProfileLink.textContent = parsed.label;
+  stravaProfileLink.hidden = false;
 }
 
 function providerDisplayName(source) {
@@ -2366,6 +2409,7 @@ function renderLoadError(error) {
 
 async function init() {
   syncRepoLink();
+  syncStravaProfileLink();
   const resp = await fetch("data.json");
   if (!resp.ok) {
     throw new Error(`Failed to load data.json (${resp.status})`);
@@ -2379,6 +2423,11 @@ async function init() {
     || payload.repo_slug
     || payload.repo_url
     || payload.repository,
+  );
+  syncStravaProfileLink(
+    payload.strava_profile_url
+    || payload.stravaProfileUrl
+    || payload.strava_profile,
   );
   setDashboardTitle(payload.source);
   TYPE_META = payload.type_meta || {};

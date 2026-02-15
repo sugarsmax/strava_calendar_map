@@ -2,6 +2,7 @@ import argparse
 import os
 import re
 import subprocess
+import urllib.parse
 from datetime import date, timedelta
 from typing import Callable, Dict, List, Optional
 
@@ -41,6 +42,7 @@ BG_COLOR = "#0f172a"
 GRID_BG_COLOR = "rgba(15, 23, 42, 0.8)"
 LABEL_FONT = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
 REPO_SLUG_RE = re.compile(r"^[^/\s]+/[^/\s]+$")
+STRAVA_HOST_RE = re.compile(r"(^|\.)strava\.com$", re.IGNORECASE)
 
 
 def _year_range_from_config(config: Dict, aggregate_years: Dict) -> List[int]:
@@ -162,6 +164,31 @@ def _repo_slug_from_git() -> Optional[str]:
     if not match:
         return None
     return f"{match.group('owner')}/{match.group('repo')}"
+
+
+def _strava_profile_url_from_config(config: Dict) -> Optional[str]:
+    raw = str((config.get("strava", {}) or {}).get("profile_url", "")).strip()
+    if not raw:
+        return None
+    if not re.match(r"^https?://", raw, flags=re.IGNORECASE):
+        raw = f"https://{raw.lstrip('/')}"
+    parsed = urllib.parse.urlparse(raw)
+    host = str(parsed.hostname or "").lower()
+    if not host or not STRAVA_HOST_RE.search(host):
+        return None
+    path = str(parsed.path or "").strip().rstrip("/")
+    if not path:
+        return None
+    return urllib.parse.urlunparse(
+        (
+            parsed.scheme or "https",
+            parsed.netloc,
+            path,
+            "",
+            parsed.query,
+            "",
+        )
+    )
 
 
 def _svg_for_year(
@@ -324,8 +351,9 @@ def generate(write_svgs: bool = True):
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(svg)
 
+    source = normalize_source(config.get("source", "strava"))
     site_payload = {
-        "source": normalize_source(config.get("source", "strava")),
+        "source": source,
         "generated_at": utc_now().isoformat(),
         "years": years,
         "types": types,
@@ -335,6 +363,9 @@ def generate(write_svgs: bool = True):
         "units": units,
         "activities": _load_activities(),
     }
+    strava_profile_url = _strava_profile_url_from_config(config)
+    if source == "strava" and strava_profile_url:
+        site_payload["strava_profile_url"] = strava_profile_url
     repo_slug = _repo_slug_from_git()
     if repo_slug:
         site_payload["repo"] = repo_slug
