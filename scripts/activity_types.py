@@ -119,6 +119,7 @@ DEFAULT_TYPE_LABELS = {
     "SkateSports": "Skate Sports",
     "AdaptiveSports": "Adaptive Sports",
     "OtherSports": "Other Sports",
+    "Commute": "Commute",
 }
 
 TYPE_ACCENT_COLORS = {
@@ -141,6 +142,7 @@ TYPE_ACCENT_COLORS = {
     "SkateSports": "#9ef01a",
     "AdaptiveSports": "#8338ec",
     "OtherSports": "#ff006e",
+    "Commute": "#666666",
 }
 
 FALLBACK_VAPORWAVE_COLORS = [

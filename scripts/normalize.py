@@ -91,6 +91,11 @@ def _normalize_activity(activity: Dict, type_aliases: Dict[str, str], source: st
     raw_type = str(activity.get("sport_type") or raw_activity_type or "Unknown")
     canonical_raw_type = _resolve_canonical_type(raw_type, source)
     activity_type = type_aliases.get(raw_type, type_aliases.get(canonical_raw_type, canonical_raw_type))
+
+    # Override type to Commute if marked as commute
+    if activity.get("commute"):
+        activity_type = "Commute"
+
     distance = _coalesce(activity.get("distance"), activity.get("totalDistance"))
     moving_time = _pick_duration_seconds(*_duration_candidates(activity))
     elevation_gain = _coalesce(
