@@ -116,15 +116,19 @@ def _load_activities() -> List[Dict]:
         if not date_str or year is None or not activity_type or not subtype or not start_date_local:
             continue
         try:
-            hour = parse_iso_datetime(start_date_local).hour
+            dt = parse_iso_datetime(start_date_local)
+            hour = dt.hour
+            minute = dt.minute
         except Exception:
             hour = None
+            minute = None
         activities.append({
             "date": date_str,
             "year": int(year),
             "type": activity_type,
             "subtype": str(subtype),
             "hour": hour,
+            "minute": minute,
         })
     return activities
 
