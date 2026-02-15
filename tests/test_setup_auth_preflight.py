@@ -146,6 +146,21 @@ class SetupAuthDispatchTests(unittest.TestCase):
         self.assertEqual(value, "https://www.strava.com/athletes/789")
         prompt_mock.assert_called_once_with("")
 
+    def test_clear_variable_ignores_not_found(self) -> None:
+        with mock.patch(
+            "setup_auth._run",
+            return_value=_completed_process(returncode=1, stderr="HTTP 404: Not Found"),
+        ):
+            setup_auth._clear_variable("DASHBOARD_STRAVA_PROFILE_URL", "owner/repo")
+
+    def test_clear_variable_raises_on_other_errors(self) -> None:
+        with mock.patch(
+            "setup_auth._run",
+            return_value=_completed_process(returncode=1, stderr="HTTP 403: Forbidden"),
+        ):
+            with self.assertRaises(RuntimeError):
+                setup_auth._clear_variable("DASHBOARD_STRAVA_PROFILE_URL", "owner/repo")
+
     def test_try_dispatch_sync_uses_full_backfill_when_supported(self) -> None:
         with mock.patch(
             "setup_auth._run",

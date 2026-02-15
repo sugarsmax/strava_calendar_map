@@ -485,6 +485,17 @@ def _set_variable(name: str, value: str, repo: str) -> None:
         raise RuntimeError(f"Failed to set GitHub variable {name}{detail}")
 
 
+def _clear_variable(name: str, repo: str) -> None:
+    result = _run(["gh", "variable", "delete", name, "--repo", repo], check=False)
+    if result.returncode == 0:
+        return
+    error_text = (result.stderr or "").lower()
+    if "not found" in error_text or "http 404" in error_text:
+        return
+    detail = _first_stderr_line(result.stderr)
+    raise RuntimeError(f"Failed to clear GitHub variable {name}: {detail}")
+
+
 def _get_variable(name: str, repo: str) -> Optional[str]:
     result = _run(["gh", "variable", "get", name, "--repo", repo], check=False)
     if result.returncode != 0:
@@ -1462,7 +1473,10 @@ def main() -> int:
         variable_pairs.append(("DASHBOARD_STRAVA_PROFILE_URL", strava_profile_url))
     for name, value in variable_pairs:
         try:
-            _set_variable(name, value, repo)
+            if name == "DASHBOARD_STRAVA_PROFILE_URL" and not value:
+                _clear_variable(name, repo)
+            else:
+                _set_variable(name, value, repo)
         except RuntimeError as exc:
             variable_errors.append(str(exc))
 
