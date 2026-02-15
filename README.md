@@ -43,7 +43,7 @@ This command will guide you through:
    ```
 
 Follow the terminal prompts to choose a source and unit preference:
-- `strava` - terminal will link to [Strava API application](https://www.strava.com/settings/api). Create an application first and set **Authorization Callback Domain** to `localhost`. The prompt will then ask for `Client ID` and `Client Secret`
+- `strava` - terminal will link to [Strava API application](https://www.strava.com/settings/api). Create an application first and set **Authorization Callback Domain** to `localhost`. The prompt will then ask for `Client ID` and `Client Secret`, and if you'd like to place your Strava profile link on the dashboard.
 - `garmin` - terminal prompts for Garmin email/password
 - unit preference (`US` or `Metric`)
 
