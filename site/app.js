@@ -136,9 +136,57 @@ function inferGitHubRepoFromLocation(loc) {
   return null;
 }
 
-function syncRepoLink() {
+function parseGitHubRepo(value) {
+  if (value && typeof value === "object") {
+    const owner = String(value.owner || "").trim();
+    const repo = String(value.repo || "").trim().replace(/\.git$/i, "");
+    if (owner && repo) {
+      return { owner, repo };
+    }
+    return null;
+  }
+
+  let raw = String(value || "").trim();
+  if (!raw) return null;
+
+  if (/^git@github\.com:/i.test(raw)) {
+    raw = raw.replace(/^git@github\.com:/i, "");
+  } else if (/^https?:\/\//i.test(raw)) {
+    try {
+      const parsed = new URL(raw);
+      if (String(parsed.hostname || "").toLowerCase() !== "github.com") {
+        return null;
+      }
+      raw = parsed.pathname || "";
+    } catch (_error) {
+      return null;
+    }
+  } else {
+    raw = raw.replace(/^(?:https?:\/\/)?(?:www\.)?github\.com\//i, "");
+  }
+
+  const pathParts = raw
+    .replace(/^\/+|\/+$/g, "")
+    .split("/")
+    .filter(Boolean);
+  if (pathParts.length < 2) return null;
+
+  const owner = String(pathParts[0] || "").trim();
+  const repo = String(pathParts[1] || "").trim().replace(/\.git$/i, "");
+  if (!owner || !repo) return null;
+  return { owner, repo };
+}
+
+function resolveGitHubRepo(loc, fallbackRepo) {
+  return inferGitHubRepoFromLocation(loc) || parseGitHubRepo(fallbackRepo);
+}
+
+function syncRepoLink(fallbackRepo) {
   if (!repoLink) return;
-  const inferred = inferGitHubRepoFromLocation(window.location);
+  const inferred = resolveGitHubRepo(
+    window.location,
+    fallbackRepo || repoLink.getAttribute("href") || repoLink.textContent,
+  );
   if (!inferred) return;
   const href = `https://github.com/${inferred.owner}/${inferred.repo}`;
   repoLink.href = href;
@@ -2326,6 +2374,12 @@ async function init() {
   if (!payload || typeof payload !== "object") {
     throw new Error("Invalid dashboard data format.");
   }
+  syncRepoLink(
+    payload.repo
+    || payload.repo_slug
+    || payload.repo_url
+    || payload.repository,
+  );
   setDashboardTitle(payload.source);
   TYPE_META = payload.type_meta || {};
   OTHER_BUCKET = String(payload.other_bucket || "OtherSports");
