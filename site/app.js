@@ -189,14 +189,14 @@ function isGitHubHostedLocation(loc) {
 
 function customDashboardUrlFromLocation(loc) {
   const protocol = String(loc?.protocol || "").toLowerCase();
-  const hostname = String(loc?.hostname || "").trim();
-  if (!hostname) return "";
+  const host = String(loc?.host || loc?.hostname || "").trim();
+  if (!host) return "";
   const pathname = String(loc?.pathname || "/");
   const search = String(loc?.search || "");
   if (!protocol || !/^https?:$/.test(protocol)) return "";
 
   try {
-    const normalized = new URL(`${protocol}//${hostname}${pathname}${search}`);
+    const normalized = new URL(`${protocol}//${host}${pathname}${search}`);
     return normalized.toString();
   } catch (_error) {
     return "";

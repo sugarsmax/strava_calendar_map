@@ -4,6 +4,7 @@ import re
 import shutil
 import subprocess
 import unittest
+from typing import Optional
 
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -93,7 +94,15 @@ class RepoLinkInferenceTests(unittest.TestCase):
         )
         return json.loads(completed.stdout)
 
-    def _resolve_header_link(self, hostname: str, pathname: str, protocol: str = "https:", fallback_repo=None):
+    def _resolve_header_link(
+        self,
+        hostname: str,
+        pathname: str,
+        protocol: str = "https:",
+        fallback_repo=None,
+        host: Optional[str] = None,
+        search: str = "",
+    ):
         script = (
             f"{self.parse_source}\n"
             f"{self.infer_source}\n"
@@ -112,7 +121,13 @@ class RepoLinkInferenceTests(unittest.TestCase):
                 "-e",
                 script,
                 json.dumps({
-                    "loc": {"hostname": hostname, "pathname": pathname, "protocol": protocol},
+                    "loc": {
+                        "hostname": hostname,
+                        "host": host,
+                        "pathname": pathname,
+                        "protocol": protocol,
+                        "search": search,
+                    },
                     "fallback": fallback_repo,
                 }),
             ],
@@ -173,6 +188,53 @@ class RepoLinkInferenceTests(unittest.TestCase):
             {
                 "href": "https://strava.nedevski.com/",
                 "text": "strava.nedevski.com",
+            },
+        )
+
+    def test_header_link_keeps_custom_path_and_query(self) -> None:
+        result = self._resolve_header_link(
+            "strava.nedevski.com",
+            "/dashboard/",
+            protocol="https:",
+            search="?year=2026",
+            fallback_repo="owner/repo",
+        )
+        self.assertEqual(
+            result,
+            {
+                "href": "https://strava.nedevski.com/dashboard/?year=2026",
+                "text": "strava.nedevski.com/dashboard?year=2026",
+            },
+        )
+
+    def test_header_link_keeps_custom_port_in_label_and_href(self) -> None:
+        result = self._resolve_header_link(
+            "localhost",
+            "/preview/",
+            protocol="http:",
+            host="localhost:4173",
+            fallback_repo="owner/repo",
+        )
+        self.assertEqual(
+            result,
+            {
+                "href": "http://localhost:4173/preview/",
+                "text": "localhost:4173/preview",
+            },
+        )
+
+    def test_header_link_falls_back_to_repo_for_non_http_protocol(self) -> None:
+        result = self._resolve_header_link(
+            "strava.nedevski.com",
+            "/",
+            protocol="file:",
+            fallback_repo="owner/repo",
+        )
+        self.assertEqual(
+            result,
+            {
+                "href": "https://github.com/owner/repo",
+                "text": "owner/repo",
             },
         )
 
