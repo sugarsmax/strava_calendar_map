@@ -182,16 +182,52 @@ function resolveGitHubRepo(loc, fallbackRepo) {
   return inferGitHubRepoFromLocation(loc) || parseGitHubRepo(fallbackRepo);
 }
 
+function isGitHubHostedLocation(loc) {
+  const host = String(loc?.hostname || "").toLowerCase();
+  return Boolean(host) && (host === "github.com" || host.endsWith(".github.io"));
+}
+
+function customDashboardUrlFromLocation(loc) {
+  const protocol = String(loc?.protocol || "").toLowerCase();
+  const hostname = String(loc?.hostname || "").trim();
+  if (!hostname) return "";
+  const pathname = String(loc?.pathname || "/");
+  const search = String(loc?.search || "");
+  if (!protocol || !/^https?:$/.test(protocol)) return "";
+
+  try {
+    const normalized = new URL(`${protocol}//${hostname}${pathname}${search}`);
+    return normalized.toString();
+  } catch (_error) {
+    return "";
+  }
+}
+
+function resolveHeaderRepoLink(loc, fallbackRepo) {
+  if (!isGitHubHostedLocation(loc)) {
+    const customUrl = customDashboardUrlFromLocation(loc);
+    if (customUrl) {
+      return { href: customUrl, text: customUrl };
+    }
+  }
+
+  const inferred = resolveGitHubRepo(loc, fallbackRepo);
+  if (!inferred) return null;
+  return {
+    href: `https://github.com/${inferred.owner}/${inferred.repo}`,
+    text: `${inferred.owner}/${inferred.repo}`,
+  };
+}
+
 function syncRepoLink(fallbackRepo) {
   if (!repoLink) return;
-  const inferred = resolveGitHubRepo(
+  const resolved = resolveHeaderRepoLink(
     window.location,
     fallbackRepo || repoLink.getAttribute("href") || repoLink.textContent,
   );
-  if (!inferred) return;
-  const href = `https://github.com/${inferred.owner}/${inferred.repo}`;
-  repoLink.href = href;
-  repoLink.textContent = `${inferred.owner}/${inferred.repo}`;
+  if (!resolved) return;
+  repoLink.href = resolved.href;
+  repoLink.textContent = resolved.text;
 }
 
 function parseStravaProfileUrl(value) {
@@ -220,7 +256,7 @@ function parseStravaProfileUrl(value) {
 
   return {
     href: `${parsed.protocol}//${parsed.host}${path}${parsed.search}`,
-    label: `${parsed.hostname}${path}`,
+    label: "Strava Profile",
   };
 }
 
