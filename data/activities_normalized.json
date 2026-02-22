@@ -32205,5 +32205,31 @@
     "start_date_local": "2026-02-17T14:32:20Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-02-21",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "17478562341",
+    "is_commute": false,
+    "moving_time": 1951.0,
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-02-21T17:44:59Z",
+    "type": "Elliptical",
+    "year": 2026
+  },
+  {
+    "date": "2026-02-21",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "17478622298",
+    "is_commute": false,
+    "moving_time": 904.0,
+    "raw_activity_type": "WeightTraining",
+    "raw_type": "WeightTraining",
+    "start_date_local": "2026-02-21T18:17:56Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
