@@ -19879,6 +19879,22 @@
       "subtype": "WeightTraining",
       "type": "WeightTraining",
       "year": 2026
+    },
+    {
+      "date": "2026-02-24",
+      "hour": 18,
+      "minute": 53,
+      "subtype": "Rowing",
+      "type": "Rowing",
+      "year": 2026
+    },
+    {
+      "date": "2026-02-24",
+      "hour": 19,
+      "minute": 49,
+      "subtype": "Rowing",
+      "type": "Rowing",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -38637,6 +38653,16 @@
           "distance": 2921.0,
           "elevation_gain": 0.0,
           "moving_time": 900.0
+        },
+        "2026-02-24": {
+          "activity_ids": [
+            "17513581984",
+            "17513718931"
+          ],
+          "count": 2,
+          "distance": 6886.0,
+          "elevation_gain": 0.0,
+          "moving_time": 2153.0
         }
       },
       "Snowboard": {
@@ -38800,7 +38826,7 @@
       }
     }
   },
-  "generated_at": "2026-02-24T15:46:21.714619+00:00",
+  "generated_at": "2026-02-25T15:52:21.402986+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
