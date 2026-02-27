@@ -32257,5 +32257,31 @@
     "start_date_local": "2026-02-24T19:49:00Z",
     "type": "Rowing",
     "year": 2026
+  },
+  {
+    "date": "2026-02-26",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "17537426792",
+    "is_commute": false,
+    "moving_time": 1550.0,
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-02-26T19:29:06Z",
+    "type": "Elliptical",
+    "year": 2026
+  },
+  {
+    "date": "2026-02-26",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "17537475141",
+    "is_commute": false,
+    "moving_time": 596.0,
+    "raw_activity_type": "WeightTraining",
+    "raw_type": "WeightTraining",
+    "start_date_local": "2026-02-26T19:58:59Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
