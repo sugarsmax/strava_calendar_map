@@ -30,13 +30,20 @@ import json
 import webbrowser
 from email.utils import parsedate_to_datetime
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Iterator, Optional, Tuple
 
 from garmin_token_store import (
+    decode_token_store_b64,
     encode_token_store_dir_as_zip_b64,
     hydrate_token_store_from_legacy_file,
     token_store_ready,
+    write_token_store_bytes,
+)
+from repo_helpers import (
+    normalize_dashboard_url as _shared_normalize_dashboard_url,
+    normalize_repo_slug as _shared_normalize_repo_slug,
+    pages_url_from_slug as _shared_pages_url_from_slug,
 )
 
 if sys.version_info < (3, 9):
@@ -54,6 +61,7 @@ CALLBACK_PATH = "/exchange_token"
 DEFAULT_PORT = 8765
 DEFAULT_TIMEOUT = 180
 DEFAULT_SOURCE = "strava"
+DEFAULT_TEMPLATE_REPO = "aspain/git-sweaty"
 VENV_DIRNAME = ".venv"
 GARMIN_AUTH_MAX_ATTEMPTS = 3
 
@@ -65,16 +73,19 @@ UNIT_PRESETS = {
     "us": ("mi", "ft"),
     "metric": ("km", "m"),
 }
-REPO_URL_RE = re.compile(
-    r"^https?://github\.com/(?P<owner>[^/]+)/(?P<repo>[^/]+)/?$",
-    re.IGNORECASE,
-)
-REPO_SSH_RE = re.compile(
-    r"^git@github\.com:(?P<owner>[^/]+)/(?P<repo>[^/]+)$",
-    re.IGNORECASE,
-)
-REPO_SLUG_RE = re.compile(r"^(?P<owner>[^/\s]+)/(?P<repo>[^/\s]+)$")
+DEFAULT_WEEK_START = "sunday"
+WEEK_START_CHOICES = {"sunday", "monday"}
 STRAVA_HOST_RE = re.compile(r"(^|\.)strava\.com$", re.IGNORECASE)
+GARMIN_CONNECT_HOST_RE = re.compile(r"(^|\.)connect\.garmin\.com$", re.IGNORECASE)
+TRUTHY_BOOL_TEXT = {"1", "true", "yes", "y", "on"}
+FALSEY_BOOL_TEXT = {"0", "false", "no", "n", "off", ""}
+STRAVA_REQUIRED_SECRET_NAMES = {
+    "STRAVA_CLIENT_ID",
+    "STRAVA_CLIENT_SECRET",
+    "STRAVA_REFRESH_TOKEN",
+}
+GARMIN_PRIMARY_SECRET_NAMES = {"GARMIN_TOKENS_B64"}
+GARMIN_FALLBACK_SECRET_NAMES = {"GARMIN_EMAIL", "GARMIN_PASSWORD"}
 
 
 @dataclass
@@ -89,6 +100,14 @@ class StepResult:
 class CallbackResult:
     code: Optional[str] = None
     error: Optional[str] = None
+
+
+@dataclass
+class ExistingDashboardSettings:
+    source: str
+    distance_unit: str
+    elevation_unit: str
+    week_start: str
 
 
 class ReusableTCPServer(socketserver.TCPServer):
@@ -321,31 +340,7 @@ def _assert_actions_secret_access(repo: str) -> None:
 
 
 def _normalize_repo_slug(value: Optional[str]) -> Optional[str]:
-    if not value:
-        return None
-    raw = value.strip()
-    if not raw:
-        return None
-
-    m = REPO_URL_RE.match(raw)
-    if m:
-        repo = m.group("repo")
-        if repo.endswith(".git"):
-            repo = repo[:-4]
-        return f"{m.group('owner')}/{repo}"
-
-    m = REPO_SSH_RE.match(raw)
-    if m:
-        repo = m.group("repo")
-        if repo.endswith(".git"):
-            repo = repo[:-4]
-        return f"{m.group('owner')}/{repo}"
-
-    m = REPO_SLUG_RE.match(raw)
-    if m:
-        return f"{m.group('owner')}/{m.group('repo')}"
-
-    return None
+    return _shared_normalize_repo_slug(value)
 
 
 def _repo_slug_from_git() -> Optional[str]:
@@ -395,6 +390,30 @@ def _venv_python_path(venv_dir: str) -> str:
     return os.path.join(venv_dir, "bin", "python")
 
 
+def _venv_has_pip(venv_python: str) -> bool:
+    probe = _run([venv_python, "-m", "pip", "--version"], check=False)
+    return probe.returncode == 0
+
+
+def _ensure_venv_pip(venv_python: str) -> None:
+    if _venv_has_pip(venv_python):
+        return
+
+    print("pip is missing in .venv; attempting bootstrap via ensurepip...")
+    ensure = _run([venv_python, "-m", "ensurepip", "--upgrade"], check=False)
+    if ensure.returncode != 0:
+        detail = _first_stderr_line(ensure.stderr or ensure.stdout)
+        raise RuntimeError(
+            "The local virtual environment was created without pip and automatic pip bootstrap failed "
+            f"({detail}). Install Python with ensurepip support (for example install the OS package that "
+            "provides python3-venv), or run with --no-bootstrap-env and manage your environment manually."
+        )
+    if not _venv_has_pip(venv_python):
+        raise RuntimeError(
+            "The local virtual environment was created without pip and could not be repaired automatically."
+        )
+
+
 def _bootstrap_env_and_reexec(args: argparse.Namespace) -> None:
     if args.no_bootstrap_env or args.env_bootstrapped or _in_virtualenv():
         return
@@ -410,6 +429,7 @@ def _bootstrap_env_and_reexec(args: argparse.Namespace) -> None:
         print("\nCreating local virtual environment (.venv)...")
         _run_stream([sys.executable, "-m", "venv", venv_dir], cwd=root)
 
+    _ensure_venv_pip(venv_python)
     print("Installing Python dependencies into .venv...")
     _run_stream([venv_python, "-m", "pip", "install", "--upgrade", "pip"], cwd=root)
     _run_stream([venv_python, "-m", "pip", "install", "-r", requirements], cwd=root)
@@ -498,7 +518,10 @@ def _clear_variable(name: str, repo: str) -> None:
 
 
 def _get_variable(name: str, repo: str) -> Optional[str]:
-    result = _run(["gh", "variable", "get", name, "--repo", repo], check=False)
+    try:
+        result = _run(["gh", "variable", "get", name, "--repo", repo], check=False)
+    except FileNotFoundError:
+        return None
     if result.returncode != 0:
         return None
     value = (result.stdout or "").strip()
@@ -513,6 +536,216 @@ def _existing_dashboard_source(repo: str) -> Optional[str]:
     if normalized in {"strava", "garmin"}:
         return normalized
     return None
+
+
+def _normalize_distance_unit(value: Optional[str]) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"mi", "km"}:
+        return normalized
+    raise ValueError(f"Unsupported distance unit '{value}'. Expected one of: km, mi.")
+
+
+def _normalize_elevation_unit(value: Optional[str]) -> str:
+    normalized = str(value or "").strip().lower()
+    if normalized in {"ft", "m"}:
+        return normalized
+    raise ValueError(f"Unsupported elevation unit '{value}'. Expected one of: ft, m.")
+
+
+def _existing_dashboard_units(repo: str) -> Optional[Tuple[str, str]]:
+    distance_raw = _get_variable("DASHBOARD_DISTANCE_UNIT", repo)
+    elevation_raw = _get_variable("DASHBOARD_ELEVATION_UNIT", repo)
+    if distance_raw is None or elevation_raw is None:
+        return None
+    try:
+        distance = _normalize_distance_unit(distance_raw)
+        elevation = _normalize_elevation_unit(elevation_raw)
+    except ValueError:
+        return None
+    if (distance, elevation) not in set(UNIT_PRESETS.values()):
+        return None
+    return distance, elevation
+
+
+def _existing_dashboard_profile_url(repo: str, source: str) -> str:
+    source_name = str(source or "").strip().lower()
+    if source_name == "strava":
+        variable_name = "DASHBOARD_STRAVA_PROFILE_URL"
+        normalizer = _normalize_strava_profile_url
+    elif source_name == "garmin":
+        variable_name = "DASHBOARD_GARMIN_PROFILE_URL"
+        normalizer = _normalize_garmin_profile_url
+    else:
+        return ""
+    raw = _get_variable(variable_name, repo)
+    if not raw:
+        return ""
+    try:
+        return normalizer(raw)
+    except ValueError:
+        return ""
+
+
+def _existing_dashboard_strava_profile_url(repo: str) -> str:
+    return _existing_dashboard_profile_url(repo, "strava")
+
+
+def _existing_dashboard_garmin_profile_url(repo: str) -> str:
+    return _existing_dashboard_profile_url(repo, "garmin")
+
+
+def _load_existing_dashboard_settings(repo: str) -> Optional[ExistingDashboardSettings]:
+    source = _existing_dashboard_source(repo)
+    units = _existing_dashboard_units(repo)
+    week_start = _existing_dashboard_week_start(repo)
+    if not source or units is None or not week_start:
+        return None
+    distance_unit, elevation_unit = units
+    return ExistingDashboardSettings(
+        source=source,
+        distance_unit=distance_unit,
+        elevation_unit=elevation_unit,
+        week_start=week_start,
+    )
+
+
+def _normalize_week_start(value: Optional[str]) -> str:
+    normalized = str(value or "").strip().lower()
+    aliases = {
+        "sun": "sunday",
+        "sunday": "sunday",
+        "mon": "monday",
+        "monday": "monday",
+    }
+    resolved = aliases.get(normalized)
+    if resolved:
+        return resolved
+    allowed = ", ".join(sorted(WEEK_START_CHOICES))
+    raise ValueError(f"Unsupported week start '{value}'. Expected one of: {allowed}.")
+
+
+def _existing_dashboard_week_start(repo: str) -> Optional[str]:
+    value = _get_variable("DASHBOARD_WEEK_START", repo)
+    if value is None:
+        return None
+    try:
+        return _normalize_week_start(value)
+    except ValueError:
+        return None
+
+
+def _parse_bool_text(value: Optional[str], *, field_name: str) -> bool:
+    normalized = str(value or "").strip().lower()
+    if normalized in TRUTHY_BOOL_TEXT:
+        return True
+    if normalized in FALSEY_BOOL_TEXT:
+        return False
+    allowed_values = ", ".join(sorted(TRUTHY_BOOL_TEXT | FALSEY_BOOL_TEXT))
+    raise ValueError(f"Unsupported value for {field_name}: {value!r}. Expected one of: {allowed_values}.")
+
+
+def _existing_dashboard_activity_links(repo: str, source: str) -> Optional[bool]:
+    source_name = str(source or "").strip().upper()
+    if source_name not in {"STRAVA", "GARMIN"}:
+        return None
+    variable_name = f"DASHBOARD_{source_name}_ACTIVITY_LINKS"
+    value = _get_variable(variable_name, repo)
+    if value is None:
+        return None
+    try:
+        return _parse_bool_text(value, field_name=variable_name)
+    except ValueError:
+        return None
+
+
+def _existing_dashboard_strava_activity_links(repo: str) -> Optional[bool]:
+    return _existing_dashboard_activity_links(repo, "strava")
+
+
+def _existing_dashboard_garmin_activity_links(repo: str) -> Optional[bool]:
+    return _existing_dashboard_activity_links(repo, "garmin")
+
+
+def _list_secret_names(repo: str) -> set[str]:
+    try:
+        result = _run(["gh", "secret", "list", "--repo", repo, "--json", "name"], check=False)
+    except FileNotFoundError:
+        return set()
+    if result.returncode != 0:
+        return set()
+    try:
+        payload = json.loads(result.stdout or "[]")
+    except json.JSONDecodeError:
+        return set()
+    names: set[str] = set()
+    if not isinstance(payload, list):
+        return names
+    for item in payload:
+        if not isinstance(item, dict):
+            continue
+        name = item.get("name")
+        if isinstance(name, str) and name.strip():
+            names.add(name.strip())
+    return names
+
+
+def _has_required_source_secrets(source: str, secret_names: set[str]) -> bool:
+    normalized_source = str(source or "").strip().lower()
+    if normalized_source == "strava":
+        return STRAVA_REQUIRED_SECRET_NAMES.issubset(secret_names)
+    if normalized_source == "garmin":
+        has_primary = GARMIN_PRIMARY_SECRET_NAMES.issubset(secret_names)
+        has_fallback = GARMIN_FALLBACK_SECRET_NAMES.issubset(secret_names)
+        return has_primary or has_fallback
+    return False
+
+
+def _prompt_reuse_existing_settings() -> bool:
+    choice = _prompt_choice(
+        "\nReuse existing dashboard settings? [y/n] (default: y): ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default="y",
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    return choice == "yes"
+
+
+def _prompt_update_credentials() -> bool:
+    choice = _prompt_choice(
+        "Update credentials now? [y/n] (default: n): ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default="n",
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    return choice == "yes"
+
+
+def _has_explicit_setup_overrides(args: argparse.Namespace) -> bool:
+    return any(
+        getattr(args, key, None) is not None
+        for key in (
+            "source",
+            "unit_system",
+            "week_start",
+            "strava_profile_url",
+            "strava_activity_links",
+            "garmin_profile_url",
+            "garmin_activity_links",
+        )
+    )
+
+
+def _has_explicit_credentials_for_source(args: argparse.Namespace, source: str) -> bool:
+    normalized_source = str(source or "").strip().lower()
+    if normalized_source == "strava":
+        return bool(getattr(args, "client_id", None) or getattr(args, "client_secret", None))
+    if normalized_source == "garmin":
+        return bool(
+            getattr(args, "garmin_token_store_b64", None)
+            or getattr(args, "garmin_email", None)
+            or getattr(args, "garmin_password", None)
+        )
+    return False
 
 
 def _prompt_full_backfill_choice(source: str) -> bool:
@@ -616,10 +849,139 @@ def _parse_iso8601_utc(value: str) -> Optional[datetime]:
 
 
 def _pages_url_from_slug(slug: str) -> str:
-    owner, repo = slug.split("/", 1)
-    if repo.lower() == f"{owner.lower()}.github.io":
-        return f"https://{owner}.github.io/"
-    return f"https://{owner}.github.io/{repo}/"
+    return _shared_pages_url_from_slug(slug)
+
+
+def _normalize_dashboard_url(value: str) -> str:
+    return _shared_normalize_dashboard_url(value)
+
+
+def _dashboard_url_from_pages_api(repo: str) -> Optional[str]:
+    try:
+        result = _run(["gh", "api", f"repos/{repo}/pages"], check=False)
+    except FileNotFoundError:
+        return None
+    if result.returncode != 0:
+        return None
+
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(payload, dict):
+        return None
+
+    custom_url = _normalize_dashboard_url(payload.get("cname", ""))
+    if custom_url:
+        return custom_url
+
+    html_url = _normalize_dashboard_url(payload.get("html_url", ""))
+    if html_url:
+        return html_url
+    return None
+
+
+def _normalize_pages_custom_domain(value: str) -> str:
+    raw = str(value or "").strip()
+    if not raw:
+        raise ValueError("Custom domain cannot be empty.")
+
+    candidate = raw if "://" in raw else f"https://{raw.lstrip('/')}"
+    parsed = urllib.parse.urlparse(candidate)
+    scheme = str(parsed.scheme or "").lower()
+    if scheme not in {"http", "https"}:
+        raise ValueError("Custom domain must use http(s) or be a plain host.")
+
+    host = str(parsed.hostname or "").strip().rstrip(".").lower()
+    if not host:
+        raise ValueError("Custom domain must include a valid host.")
+    if parsed.port is not None:
+        raise ValueError("Custom domain must not include a port.")
+    path = str(parsed.path or "").strip()
+    if path and path not in {"/"}:
+        raise ValueError("Custom domain must be host-only (no path).")
+    if parsed.query or parsed.fragment:
+        raise ValueError("Custom domain must not include query or fragment.")
+    return host
+
+
+def _get_pages_custom_domain(repo: str) -> Optional[str]:
+    result = _run(
+        ["gh", "api", f"repos/{repo}/pages", "--jq", ".cname"],
+        check=False,
+    )
+    if result.returncode != 0:
+        return None
+    raw = str(result.stdout or "").strip()
+    if not raw or raw.lower() == "null":
+        return None
+    try:
+        return _normalize_pages_custom_domain(raw)
+    except ValueError:
+        return None
+
+
+def _prompt_custom_pages_domain(repo: str) -> Tuple[bool, Optional[str]]:
+    existing = _get_pages_custom_domain(repo)
+
+    print("\nOptional: set a custom dashboard domain (example: strava.example.com).")
+    default_choice = "n"
+    use_custom = _prompt_choice(
+        "Use a custom dashboard domain? [y/n] (default: n): ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default=default_choice,
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    if use_custom != "yes":
+        if existing:
+            clear_choice = _prompt_choice(
+                f"Clear existing custom domain '{existing}'? [y/n]: ",
+                {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+                default="y",
+                invalid_message="Please enter 'y' or 'n'.",
+            )
+            if clear_choice == "yes":
+                return True, None
+        return False, None
+
+    while True:
+        if existing:
+            response = input(
+                f"Custom domain host (press Enter to keep '{existing}'): "
+            ).strip()
+            if not response:
+                return True, existing
+        else:
+            response = input("Custom domain host (for example strava.example.com): ").strip()
+            if not response:
+                print("Please enter a domain host, or choose 'n' in the previous prompt.")
+                continue
+
+        try:
+            return True, _normalize_pages_custom_domain(response)
+        except ValueError as exc:
+            print(f"Invalid custom domain: {exc}")
+
+
+def _resolve_custom_pages_domain(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+) -> Tuple[bool, Optional[str]]:
+    if bool(getattr(args, "clear_custom_domain", False)):
+        return True, None
+
+    explicit = getattr(args, "custom_domain", None)
+    if explicit is not None:
+        explicit_text = str(explicit).strip()
+        if not explicit_text:
+            return True, None
+        return True, _normalize_pages_custom_domain(explicit_text)
+
+    if not interactive:
+        return False, None
+
+    return _prompt_custom_pages_domain(repo)
 
 
 def _prompt_choice(
@@ -676,7 +1038,7 @@ def _resolve_source(
     return DEFAULT_SOURCE
 
 
-def _normalize_strava_profile_url(value: Optional[str]) -> str:
+def _normalize_provider_profile_url(value: Optional[str], source: str) -> str:
     raw = str(value or "").strip()
     if not raw:
         return ""
@@ -684,13 +1046,27 @@ def _normalize_strava_profile_url(value: Optional[str]) -> str:
         raw = f"https://{raw.lstrip('/')}"
     parsed = urllib.parse.urlparse(raw)
     host = str(parsed.hostname or "").lower()
-    if not host or not STRAVA_HOST_RE.search(host):
-        raise ValueError("Strava profile URL must use a strava.com hostname.")
-    path = str(parsed.path or "").strip()
-    if not path or path == "/":
-        raise ValueError("Strava profile URL must include a profile path (for example /athletes/<id>).")
+    normalized_source = str(source or "").strip().lower()
 
-    normalized_path = path.rstrip("/") or "/"
+    if normalized_source == "strava":
+        if not host or not STRAVA_HOST_RE.search(host):
+            raise ValueError("Strava profile URL must use a strava.com hostname.")
+        path_error = "Strava profile URL must include a profile path (for example /athletes/<id>)."
+        normalized_path = str(parsed.path or "").strip().rstrip("/") or "/"
+        if not normalized_path or normalized_path == "/":
+            raise ValueError(path_error)
+    elif normalized_source == "garmin":
+        if not host or not GARMIN_CONNECT_HOST_RE.search(host):
+            raise ValueError("Garmin profile URL must use a connect.garmin.com hostname.")
+        path_error = "Garmin profile URL must include a profile path (for example /modern/profile/<id>)."
+        path = str(parsed.path or "").strip()
+        match = re.match(r"^/(?:modern/)?profile/([^/]+)(?:/.*)?$", path, flags=re.IGNORECASE)
+        if not match:
+            raise ValueError(path_error)
+        normalized_path = f"/modern/profile/{match.group(1)}"
+    else:
+        raise ValueError(f"Unsupported source for profile URL normalization: {source!r}")
+
     normalized = urllib.parse.urlunparse(
         (
             parsed.scheme or "https",
@@ -702,6 +1078,14 @@ def _normalize_strava_profile_url(value: Optional[str]) -> str:
         )
     )
     return normalized
+
+
+def _normalize_strava_profile_url(value: Optional[str]) -> str:
+    return _normalize_provider_profile_url(value, "strava")
+
+
+def _normalize_garmin_profile_url(value: Optional[str]) -> str:
+    return _normalize_provider_profile_url(value, "garmin")
 
 
 def _strava_profile_url_from_athlete(athlete: object) -> str:
@@ -750,11 +1134,269 @@ def _detect_strava_profile_url(tokens: dict) -> str:
     return _strava_profile_url_from_athlete(athlete)
 
 
+def _garmin_profile_url_from_profile(profile: object) -> str:
+    if not isinstance(profile, dict):
+        return ""
+
+    direct_candidate_fields = (
+        "displayName",
+        "display_name",
+        "profileId",
+        "profile_id",
+        "id",
+        "userProfilePk",
+        "userId",
+        "user_id",
+        "userName",
+        "user_name",
+    )
+    nested_candidate_roots = (
+        "profile",
+        "userData",
+    )
+
+    candidate_values: list[object] = []
+    for key in direct_candidate_fields:
+        candidate_values.append(profile.get(key))
+    for root in nested_candidate_roots:
+        nested = profile.get(root)
+        if isinstance(nested, dict):
+            for key in direct_candidate_fields:
+                candidate_values.append(nested.get(key))
+
+    for value in candidate_values:
+        if value in (None, ""):
+            continue
+        profile_id = str(value).strip()
+        if not profile_id:
+            continue
+        encoded_id = urllib.parse.quote(profile_id, safe="")
+        if encoded_id:
+            return f"https://connect.garmin.com/modern/profile/{encoded_id}"
+    return ""
+
+
+def _coerce_garmin_profile_payload(value: object) -> dict:
+    if isinstance(value, dict):
+        return value
+    if value is None:
+        return {}
+
+    payload: dict[str, object] = {}
+    field_aliases = (
+        ("displayName", "displayName"),
+        ("display_name", "displayName"),
+        ("profileId", "profileId"),
+        ("profile_id", "profileId"),
+        ("id", "id"),
+        ("userProfilePk", "userProfilePk"),
+        ("userId", "userId"),
+        ("user_id", "userId"),
+        ("userName", "userName"),
+        ("user_name", "userName"),
+        ("fullName", "fullName"),
+        ("full_name", "fullName"),
+    )
+    for source_attr, target_key in field_aliases:
+        attr_value = getattr(value, source_attr, None)
+        if attr_value in (None, ""):
+            continue
+        payload[target_key] = attr_value
+    return payload
+
+
+def _fetch_garmin_profile(
+    *,
+    token_store_b64: str,
+    email: str,
+    password: str,
+) -> dict:
+    try:
+        import garth
+    except ImportError:
+        return {}
+
+    token_value = str(token_store_b64 or "").strip()
+    email_value = str(email or "").strip()
+    password_value = str(password or "").strip()
+
+    with tempfile.TemporaryDirectory(prefix="garmin-profile-") as tmpdir:
+        token_store_dir = os.path.join(tmpdir, "token_store")
+        resumed = False
+        if token_value:
+            try:
+                token_bytes = decode_token_store_b64(token_value)
+                write_token_store_bytes(token_bytes, token_store_dir)
+                if token_store_ready(token_store_dir):
+                    garth.resume(token_store_dir)
+                    resumed = True
+            except Exception:
+                resumed = False
+
+        if not resumed:
+            if not email_value or not password_value:
+                return {}
+            try:
+                garth.login(email_value, password_value)
+            except Exception:
+                return {}
+
+        profile_candidates: list[dict] = []
+
+        def _add_profile_candidate(candidate: object) -> bool:
+            payload = _coerce_garmin_profile_payload(candidate)
+            if not payload:
+                return False
+            profile_candidates.append(payload)
+            return bool(_garmin_profile_url_from_profile(payload))
+
+        garth_client = getattr(garth, "client", None)
+        if garth_client is not None:
+            try:
+                if _add_profile_candidate(getattr(garth_client, "profile", None)):
+                    return profile_candidates[-1]
+            except Exception:
+                pass
+
+        user_profile_cls = getattr(garth, "UserProfile", None)
+        if user_profile_cls is not None and hasattr(user_profile_cls, "get"):
+            try:
+                if _add_profile_candidate(user_profile_cls.get()):
+                    return profile_candidates[-1]
+            except Exception:
+                pass
+
+        for path in (
+            "/userprofile-service/socialProfile",
+            "/userprofile-service/userprofile/profile",
+        ):
+            try:
+                if _add_profile_candidate(garth.connectapi(path)):
+                    return profile_candidates[-1]
+            except Exception:
+                continue
+
+        # Fallback to Garmin wrapper session helpers used by sync path.
+        try:
+            from garminconnect import Garmin
+        except Exception:
+            Garmin = None  # type: ignore[assignment]
+
+        if Garmin:
+            clients = []
+            for factory in (
+                (lambda: Garmin(email=email_value, password=password_value)),
+                (lambda: Garmin(email_value, password_value)),
+                (lambda: Garmin()),
+            ):
+                try:
+                    clients.append(factory())
+                except Exception:
+                    continue
+            for client in clients:
+                login_ok = False
+                for login_attempt in (
+                    (lambda: client.login(tokenstore=token_store_dir)),
+                    (lambda: client.login(token_store=token_store_dir)),
+                    (lambda: client.login(token_store_dir)),
+                    (lambda: client.login(email_value, password_value)),
+                    (lambda: client.login(email=email_value, password=password_value)),
+                    (lambda: client.login()),
+                ):
+                    try:
+                        login_attempt()
+                        login_ok = True
+                        break
+                    except TypeError:
+                        continue
+                    except Exception:
+                        continue
+                if not login_ok:
+                    continue
+
+                display_name = getattr(client, "display_name", None)
+                if _add_profile_candidate({"displayName": display_name}):
+                    return profile_candidates[-1]
+                garth_client_obj = getattr(client, "garth", None)
+                if garth_client_obj is not None:
+                    try:
+                        if _add_profile_candidate(getattr(garth_client_obj, "profile", None)):
+                            return profile_candidates[-1]
+                    except Exception:
+                        pass
+                for path in (
+                    "/userprofile-service/socialProfile",
+                    "/userprofile-service/userprofile/profile",
+                ):
+                    connectapi = getattr(client, "connectapi", None)
+                    if not callable(connectapi):
+                        continue
+                    try:
+                        if _add_profile_candidate(connectapi(path)):
+                            return profile_candidates[-1]
+                    except Exception:
+                        continue
+
+    return {}
+
+
+def _detect_garmin_profile_url(
+    *,
+    token_store_b64: str,
+    email: str,
+    password: str,
+) -> str:
+    profile = _fetch_garmin_profile(
+        token_store_b64=token_store_b64,
+        email=email,
+        password=password,
+    )
+    return _garmin_profile_url_from_profile(profile)
+
+
 def _prompt_use_strava_profile_link(default_enabled: bool) -> bool:
     print("\nOptional: show your Strava profile link in the dashboard header.")
     default_choice = "y" if default_enabled else "n"
     choice = _prompt_choice(
-        "Show Strava profile link next to the repo link? [y/n]: ",
+        "Show Strava profile link in dashboard? [y/n]: ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default=default_choice,
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    return choice == "yes"
+
+
+def _prompt_use_strava_activity_links(default_enabled: bool) -> bool:
+    print("\nOptional: include links to Strava activities in yearly heatmap tooltips.")
+    print("Desktop tip: click a heatmap dot to pin the tooltip so links are clickable.")
+    default_choice = "y" if default_enabled else "n"
+    choice = _prompt_choice(
+        "Show Strava activity links in tooltip details? [y/n]: ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default=default_choice,
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    return choice == "yes"
+
+
+def _prompt_use_garmin_profile_link(default_enabled: bool) -> bool:
+    print("\nOptional: show your Garmin profile link in the dashboard header.")
+    default_choice = "y" if default_enabled else "n"
+    choice = _prompt_choice(
+        "Show Garmin profile link in dashboard? [y/n]: ",
+        {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
+        default=default_choice,
+        invalid_message="Please enter 'y' or 'n'.",
+    )
+    return choice == "yes"
+
+
+def _prompt_use_garmin_activity_links(default_enabled: bool) -> bool:
+    print("\nOptional: include links to Garmin activities in yearly heatmap tooltips.")
+    print("Desktop tip: click a heatmap dot to pin the tooltip so links are clickable.")
+    default_choice = "y" if default_enabled else "n"
+    choice = _prompt_choice(
+        "Show Garmin activity links in tooltip details? [y/n]: ",
         {"y": "yes", "yes": "yes", "n": "no", "no": "no"},
         default=default_choice,
         invalid_message="Please enter 'y' or 'n'.",
@@ -767,6 +1409,10 @@ def _resolve_strava_profile_url(
     interactive: bool,
     repo: str,
     tokens: Optional[dict] = None,
+    *,
+    enabled_override: Optional[bool] = None,
+    prefilled_url: str = "",
+    prompt_if_missing: bool = True,
 ) -> str:
     explicit = getattr(args, "strava_profile_url", None)
     if explicit is not None:
@@ -783,12 +1429,175 @@ def _resolve_strava_profile_url(
     except ValueError:
         existing_value = ""
 
-    candidate = detected or existing_value
+    try:
+        prefilled_value = _normalize_strava_profile_url(prefilled_url)
+    except ValueError:
+        prefilled_value = ""
+
+    candidate = detected or prefilled_value or existing_value
+    if enabled_override is not None:
+        if not enabled_override:
+            return ""
+        if candidate:
+            return candidate
+        return ""
+
     if interactive:
         enabled = _prompt_use_strava_profile_link(default_enabled=bool(candidate))
-        return candidate if enabled else ""
+        if not enabled:
+            return ""
+        if candidate:
+            return candidate
+        return ""
 
     return candidate
+
+
+def _resolve_garmin_profile_url(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+    *,
+    token_store_b64: str,
+    email: str,
+    password: str,
+    enabled_override: Optional[bool] = None,
+    prefilled_url: str = "",
+    prompt_if_missing: bool = True,
+) -> str:
+    explicit = getattr(args, "garmin_profile_url", None)
+    if explicit is not None:
+        explicit_text = str(explicit).strip()
+        if not explicit_text:
+            return ""
+        return _normalize_garmin_profile_url(explicit_text)
+
+    detected = ""
+    if token_store_b64 or (email and password):
+        detected = _normalize_garmin_profile_url(
+            _detect_garmin_profile_url(
+                token_store_b64=token_store_b64,
+                email=email,
+                password=password,
+            )
+        )
+
+    existing_raw = _get_variable("DASHBOARD_GARMIN_PROFILE_URL", repo)
+    try:
+        existing_value = _normalize_garmin_profile_url(existing_raw)
+    except ValueError:
+        existing_value = ""
+
+    try:
+        prefilled_value = _normalize_garmin_profile_url(prefilled_url)
+    except ValueError:
+        prefilled_value = ""
+
+    candidate = detected or prefilled_value or existing_value
+    if enabled_override is not None:
+        if not enabled_override:
+            return ""
+        if candidate:
+            return candidate
+        return ""
+
+    if interactive:
+        enabled = _prompt_use_garmin_profile_link(default_enabled=bool(candidate))
+        if not enabled:
+            return ""
+        if candidate:
+            return candidate
+        return ""
+
+    return candidate
+
+
+def _resolve_strava_profile_link_preference(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+) -> Tuple[Optional[bool], str]:
+    explicit = getattr(args, "strava_profile_url", None)
+    if explicit is not None:
+        explicit_text = str(explicit).strip()
+        if not explicit_text:
+            return False, ""
+        return True, _normalize_strava_profile_url(explicit_text)
+
+    existing_raw = _get_variable("DASHBOARD_STRAVA_PROFILE_URL", repo)
+    try:
+        existing_value = _normalize_strava_profile_url(existing_raw)
+    except ValueError:
+        existing_value = ""
+
+    if not interactive:
+        return None, existing_value
+
+    enabled = _prompt_use_strava_profile_link(default_enabled=bool(existing_value))
+    if not enabled:
+        return False, ""
+    if existing_value:
+        return True, existing_value
+    return True, ""
+
+
+def _resolve_garmin_profile_link_preference(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+) -> Tuple[Optional[bool], str]:
+    explicit = getattr(args, "garmin_profile_url", None)
+    if explicit is not None:
+        explicit_text = str(explicit).strip()
+        if not explicit_text:
+            return False, ""
+        return True, _normalize_garmin_profile_url(explicit_text)
+
+    existing_raw = _get_variable("DASHBOARD_GARMIN_PROFILE_URL", repo)
+    try:
+        existing_value = _normalize_garmin_profile_url(existing_raw)
+    except ValueError:
+        existing_value = ""
+
+    if not interactive:
+        return None, existing_value
+
+    enabled = _prompt_use_garmin_profile_link(default_enabled=bool(existing_value))
+    if not enabled:
+        return False, ""
+    if existing_value:
+        return True, existing_value
+    return True, ""
+
+
+def _resolve_strava_activity_links(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+) -> bool:
+    explicit = getattr(args, "strava_activity_links", None)
+    if explicit is not None:
+        return _parse_bool_text(explicit, field_name="--strava-activity-links")
+
+    existing = _existing_dashboard_strava_activity_links(repo)
+    if interactive:
+        return _prompt_use_strava_activity_links(default_enabled=bool(existing))
+    return bool(existing)
+
+
+def _resolve_garmin_activity_links(
+    args: argparse.Namespace,
+    interactive: bool,
+    repo: str,
+) -> bool:
+    explicit = getattr(args, "garmin_activity_links", None)
+    if explicit is not None:
+        return _parse_bool_text(explicit, field_name="--garmin-activity-links")
+
+    existing = _existing_dashboard_garmin_activity_links(repo)
+    if interactive:
+        return _prompt_use_garmin_activity_links(default_enabled=bool(existing))
+    return bool(existing)
 
 
 def _iter_exception_chain(exc: Exception) -> Iterator[BaseException]:
@@ -980,6 +1789,33 @@ def _prompt_units() -> Tuple[str, str]:
     return UNIT_PRESETS[system]
 
 
+def _prompt_week_start(default_week_start: str) -> str:
+    default_normalized = _normalize_week_start(default_week_start)
+    default_choice = "1" if default_normalized == "sunday" else "2"
+    print("\nChoose heatmap week start (top row in yearly cards):")
+    print("  1) Sunday")
+    print("  2) Monday")
+    selected = _prompt_choice(
+        f"Selection (enter 1 or 2) (default: {default_choice}): ",
+        {"1": "sunday", "2": "monday"},
+        default=default_choice,
+        invalid_message="Please enter '1' or '2'.",
+    )
+    return selected
+
+
+def _resolve_week_start(args: argparse.Namespace, interactive: bool, repo: str) -> str:
+    explicit = getattr(args, "week_start", None)
+    if explicit:
+        return _normalize_week_start(explicit)
+
+    existing = _existing_dashboard_week_start(repo)
+    if interactive:
+        return _prompt_week_start(DEFAULT_WEEK_START)
+
+    return existing or DEFAULT_WEEK_START
+
+
 def _resolve_garmin_auth_values(args: argparse.Namespace, interactive: bool) -> Tuple[str, str, str]:
     token_store_b64 = (args.garmin_token_store_b64 or "").strip()
     email = (args.garmin_email or "").strip()
@@ -1105,18 +1941,291 @@ def _try_enable_actions_permissions(repo: str) -> Tuple[bool, str]:
     return False, "Unable to configure repository Actions permissions automatically."
 
 
-def _try_enable_workflows(repo: str, workflows: list[str]) -> Tuple[bool, str]:
-    failures = []
-    for workflow in workflows:
-        result = _run(
-            ["gh", "workflow", "enable", workflow, "--repo", repo],
+def _repo_has_issues_enabled(repo: str) -> Optional[bool]:
+    result = _run(["gh", "api", f"repos/{repo}", "--jq", ".has_issues"], check=False)
+    if result.returncode != 0:
+        return None
+    value = str(result.stdout or "").strip().lower()
+    if value == "true":
+        return True
+    if value == "false":
+        return False
+    return None
+
+
+def _try_enable_repo_issues(repo: str) -> Tuple[bool, str]:
+    current = _repo_has_issues_enabled(repo)
+    if current is True:
+        return True, "Repository Issues are already enabled."
+
+    errors: list[str] = []
+    attempts = [
+        ["gh", "api", "-X", "PATCH", f"repos/{repo}", "-F", "has_issues=true"],
+        ["gh", "api", "-X", "PATCH", f"repos/{repo}", "-f", "has_issues=true"],
+    ]
+    for cmd in attempts:
+        result = _run(cmd, check=False)
+        if result.returncode == 0 and _repo_has_issues_enabled(repo) is True:
+            return True, "Repository Issues are enabled."
+        if result.returncode != 0:
+            errors.append(_first_stderr_line(result.stderr))
+
+    final_state = _repo_has_issues_enabled(repo)
+    if final_state is True:
+        return True, "Repository Issues are enabled."
+
+    if errors:
+        ordered_unique = list(dict.fromkeys(errors))
+        return False, "; ".join(ordered_unique)
+    return False, "Unable to enable repository Issues automatically."
+
+
+def _repo_default_branch(repo: str) -> str:
+    result = _run(["gh", "api", f"repos/{repo}", "--jq", ".default_branch"], check=False)
+    if result.returncode != 0:
+        return "main"
+    value = str(result.stdout or "").strip()
+    return value or "main"
+
+
+def _workflow_file_exists(repo: str, workflow: str, branch: str) -> bool:
+    endpoint = f"repos/{repo}/contents/.github/workflows/{workflow}"
+    result = _run(["gh", "api", endpoint, "-f", f"ref={branch}"], check=False)
+    return result.returncode == 0
+
+
+def _repo_has_commits(repo: str) -> bool:
+    result = _run(["gh", "api", f"repos/{repo}/commits?per_page=1"], check=False)
+    if result.returncode == 0:
+        return True
+    error_text = f"{result.stderr or ''}\n{result.stdout or ''}".lower()
+    if "git repository is empty" in error_text:
+        return False
+    if "http 409" in error_text and "empty" in error_text:
+        return False
+    return True
+
+
+def _try_seed_missing_workflow_files(
+    repo: str,
+    workflows: list[str],
+    source_repo: str,
+) -> Tuple[bool, str]:
+    source = _normalize_repo_slug(source_repo)
+    if not source:
+        return False, "Template source repository is invalid."
+    if source == repo:
+        return False, "Template source repository matches destination; cannot auto-seed workflows."
+
+    default_branch = _repo_default_branch(repo)
+    missing = [workflow for workflow in workflows if not _workflow_file_exists(repo, workflow, default_branch)]
+    if not missing:
+        return True, "Workflow files already exist on the default branch."
+
+    if _repo_has_commits(repo):
+        return (
+            False,
+            (
+                "Workflow files are missing on the default branch and the repository is not empty. "
+                "Automatic template sync was skipped to avoid overwriting existing content."
+            ),
+        )
+
+    source_branch = _repo_default_branch(source)
+
+    sync_attempts = [
+        ["gh", "repo", "sync", repo, "--source", source, "--branch", default_branch, "--force"],
+        ["gh", "repo", "sync", repo, "--source", source, "--force"],
+    ]
+    sync_error = "Unable to sync destination repository from template source."
+    for cmd in sync_attempts:
+        result = _run(cmd, check=False)
+        if result.returncode == 0:
+            return (
+                True,
+                f"Seeded empty repository from {source} so workflows are available on {default_branch}.",
+            )
+        sync_error = _first_stderr_line(result.stderr)
+
+    seeded_via_git, git_seed_detail = _try_seed_empty_repo_via_git_push(
+        repo=repo,
+        source_repo=source,
+        source_branch=source_branch,
+        destination_branch=default_branch,
+    )
+    if seeded_via_git:
+        return (
+            True,
+            (
+                f"Seeded empty repository from {source} via authenticated git push after sync fallback failed "
+                f"({sync_error})."
+            ),
+        )
+
+    return False, f"Could not sync empty repository from {source}: {sync_error}; {git_seed_detail}"
+
+
+def _try_seed_empty_repo_via_git_push(
+    *,
+    repo: str,
+    source_repo: str,
+    source_branch: str,
+    destination_branch: str,
+) -> Tuple[bool, str]:
+    if shutil.which("git") is None:
+        return False, "git is required to seed empty repositories when workflow sync fallback is needed."
+
+    token = _gh_auth_token()
+    if not token:
+        return False, "Unable to read gh auth token for authenticated git push fallback."
+    encoded_token = urllib.parse.quote(token, safe="")
+
+    def _redact_git_error(text: str) -> str:
+        redacted = text or ""
+        for secret in (token, encoded_token):
+            if secret:
+                redacted = redacted.replace(secret, "***")
+        return redacted
+
+    tmpdir = tempfile.mkdtemp(prefix="git-sweaty-seed-")
+    clone_dir = os.path.join(tmpdir, "template")
+    try:
+        clone_result = _run(
+            [
+                "git",
+                "clone",
+                "--branch",
+                source_branch,
+                f"https://github.com/{source_repo}.git",
+                clone_dir,
+            ],
             check=False,
         )
-        if result.returncode != 0:
-            failures.append(f"{workflow}: {_first_stderr_line(result.stderr)}")
-    if failures:
-        return False, "; ".join(failures)
-    return True, "sync.yml and pages.yml are enabled."
+        if clone_result.returncode != 0:
+            return False, f"Could not clone template repository {source_repo}: {_first_stderr_line(clone_result.stderr)}"
+
+        push_setup_error: Optional[str] = None
+        setup_git_result = _run(["gh", "auth", "setup-git"], check=False)
+        push_commands: list[list[str]] = []
+        if setup_git_result.returncode == 0:
+            push_commands.extend(
+                [
+                    [
+                        "git",
+                        "-C",
+                        clone_dir,
+                        "push",
+                        f"https://github.com/{repo}.git",
+                        f"HEAD:{destination_branch}",
+                    ],
+                    [
+                        "git",
+                        "-C",
+                        clone_dir,
+                        "push",
+                        f"https://github.com/{repo}.git",
+                        f"HEAD:{destination_branch}",
+                        "--force",
+                    ],
+                ]
+            )
+        else:
+            push_setup_error = _first_stderr_line(_redact_git_error(setup_git_result.stderr))
+
+        push_commands.extend(
+            [
+            [
+                "git",
+                "-C",
+                clone_dir,
+                "push",
+                f"https://x-access-token:{encoded_token}@github.com/{repo}.git",
+                f"HEAD:{destination_branch}",
+            ],
+            [
+                "git",
+                "-C",
+                clone_dir,
+                "push",
+                f"https://x-access-token:{encoded_token}@github.com/{repo}.git",
+                f"HEAD:{destination_branch}",
+                "--force",
+            ],
+            ]
+        )
+
+        push_errors: list[str] = []
+        for push_cmd in push_commands:
+            push_result = _run(push_cmd, check=False)
+            if push_result.returncode == 0:
+                return True, f"Seeded empty repository from {source_repo} via authenticated git push."
+            push_errors.append(_first_stderr_line(_redact_git_error(push_result.stderr)))
+
+        details = list(dict.fromkeys(error for error in push_errors if error))
+        if push_setup_error:
+            details.insert(0, f"gh auth setup-git failed: {push_setup_error}")
+        detail_text = "; ".join(details) if details else "Unknown push failure."
+        return (
+            False,
+            "Could not push template branch to destination repository via authenticated git fallback: "
+            f"{detail_text}"
+        )
+    finally:
+        shutil.rmtree(tmpdir, ignore_errors=True)
+
+
+def _try_enable_workflows(
+    repo: str,
+    workflows: list[str],
+    *,
+    source_repo: str = DEFAULT_TEMPLATE_REPO,
+) -> Tuple[bool, str]:
+    def _all_not_found(enable_failures: list[str]) -> bool:
+        if not enable_failures:
+            return False
+        return all("workflow" in entry.lower() and "not found" in entry.lower() for entry in enable_failures)
+
+    def _attempt_enable() -> list[str]:
+        failures: list[str] = []
+        for workflow in workflows:
+            result = _run(
+                ["gh", "workflow", "enable", workflow, "--repo", repo],
+                check=False,
+            )
+            if result.returncode != 0:
+                failures.append(f"{workflow}: {_first_stderr_line(result.stderr)}")
+        return failures
+
+    failures = _attempt_enable()
+    if not failures:
+        return True, "sync.yml and pages.yml are enabled."
+
+    if _all_not_found(failures):
+        seeded, seed_detail = _try_seed_missing_workflow_files(repo, workflows, source_repo)
+        if seeded:
+            retry_failures = _attempt_enable()
+            retry_count = 0
+            max_retries = 6
+            while retry_failures and _all_not_found(retry_failures) and retry_count < max_retries:
+                retry_count += 1
+                time.sleep(2)
+                retry_failures = _attempt_enable()
+            if not retry_failures:
+                return True, f"sync.yml and pages.yml are enabled. {seed_detail}"
+            return False, f"{seed_detail}; {'; '.join(retry_failures)}"
+        return False, f"{'; '.join(failures)}; {seed_detail}"
+
+    return False, "; ".join(failures)
+
+
+def _resolve_template_repo(value: Optional[str]) -> str:
+    explicit = _normalize_repo_slug(value)
+    if explicit:
+        return explicit
+    env_value = _normalize_repo_slug(os.environ.get("GIT_SWEATY_UPSTREAM_REPO"))
+    if env_value:
+        return env_value
+    return DEFAULT_TEMPLATE_REPO
 
 
 def _get_pages_build_type(repo: str) -> Optional[str]:
@@ -1154,6 +2263,76 @@ def _try_configure_pages(repo: str) -> Tuple[bool, str]:
     if errors:
         return False, "; ".join(errors)
     return False, "Unable to configure GitHub Pages build type automatically."
+
+
+def _try_set_pages_custom_domain(repo: str, domain: str) -> Tuple[bool, str]:
+    normalized = _normalize_pages_custom_domain(domain)
+    current = _get_pages_custom_domain(repo)
+    if current == normalized:
+        return True, f"GitHub Pages custom domain already set to {normalized}."
+
+    attempts = [
+        ["gh", "api", "-X", "PUT", f"repos/{repo}/pages", "-f", f"cname={normalized}", "-f", "build_type=workflow"],
+        ["gh", "api", "-X", "PUT", f"repos/{repo}/pages", "-f", f"cname={normalized}"],
+        ["gh", "api", "-X", "POST", f"repos/{repo}/pages", "-f", f"cname={normalized}", "-f", "build_type=workflow"],
+        ["gh", "api", "-X", "POST", f"repos/{repo}/pages", "-f", f"cname={normalized}"],
+    ]
+    errors = []
+    for cmd in attempts:
+        result = _run(cmd, check=False)
+        if result.returncode == 0:
+            verified = _get_pages_custom_domain(repo)
+            if verified == normalized:
+                return True, f"GitHub Pages custom domain set to {normalized}."
+            return (
+                True,
+                f"Requested custom domain {normalized}; verify DNS and Pages settings if it does not appear yet.",
+            )
+        errors.append(_first_stderr_line(result.stderr))
+
+    final_domain = _get_pages_custom_domain(repo)
+    if final_domain == normalized:
+        return True, f"GitHub Pages custom domain set to {normalized}."
+
+    if errors:
+        return False, "; ".join(list(dict.fromkeys(errors)))
+    return False, f"Unable to set custom domain {normalized} automatically."
+
+
+def _try_clear_pages_custom_domain(repo: str) -> Tuple[bool, str]:
+    current = _get_pages_custom_domain(repo)
+    if not current:
+        return True, "GitHub Pages custom domain is already unset."
+
+    attempts = [
+        ["gh", "api", "-X", "PUT", f"repos/{repo}/pages", "-f", "cname=", "-f", "build_type=workflow"],
+        ["gh", "api", "-X", "PUT", f"repos/{repo}/pages", "-f", "cname="],
+        ["gh", "api", "-X", "POST", f"repos/{repo}/pages", "-f", "cname=", "-f", "build_type=workflow"],
+        ["gh", "api", "-X", "POST", f"repos/{repo}/pages", "-f", "cname="],
+    ]
+    errors = []
+    for cmd in attempts:
+        result = _run(cmd, check=False)
+        if result.returncode == 0:
+            verified = _get_pages_custom_domain(repo)
+            if not verified:
+                return True, "GitHub Pages custom domain cleared."
+            return (
+                True,
+                (
+                    "Requested custom domain removal; verify Pages settings if the previous domain "
+                    f"({verified}) still appears."
+                ),
+            )
+        errors.append(_first_stderr_line(result.stderr))
+
+    final_domain = _get_pages_custom_domain(repo)
+    if not final_domain:
+        return True, "GitHub Pages custom domain cleared."
+
+    if errors:
+        return False, "; ".join(list(dict.fromkeys(errors)))
+    return False, f"Unable to clear custom domain {final_domain} automatically."
 
 
 def _try_dispatch_sync(repo: str, source: str, full_backfill: bool = False) -> Tuple[bool, str]:
@@ -1244,48 +2423,101 @@ def _find_latest_workflow_run(
     workflow: str,
     event: str,
     not_before: datetime,
-    poll_attempts: int = 12,
+    poll_attempts: int = 45,
     sleep_seconds: int = 2,
     progress_label: Optional[str] = None,
 ) -> Tuple[Optional[int], Optional[str]]:
+    time_skew_grace = timedelta(minutes=2)
+    earliest_allowed = not_before - time_skew_grace
+
+    def _pick_run(runs: object) -> Tuple[Optional[int], Optional[str]]:
+        if not isinstance(runs, list):
+            return None, None
+        primary: list[tuple[datetime, int, Optional[str]]] = []
+        fallback: list[tuple[datetime, int, Optional[str]]] = []
+        for run in runs:
+            if not isinstance(run, dict):
+                continue
+            created_at = _parse_iso8601_utc(str(run.get("createdAt", "")))
+            run_id = run.get("databaseId")
+            run_url = run.get("url")
+            if created_at is None or not isinstance(run_id, int):
+                continue
+            if created_at >= not_before:
+                primary.append((created_at, run_id, str(run_url) if run_url else None))
+            elif created_at >= earliest_allowed:
+                fallback.append((created_at, run_id, str(run_url) if run_url else None))
+        if primary:
+            primary.sort(key=lambda item: item[0], reverse=True)
+            _, run_id, run_url = primary[0]
+            return run_id, run_url
+        if fallback:
+            fallback.sort(key=lambda item: item[0], reverse=True)
+            _, run_id, run_url = fallback[0]
+            return run_id, run_url
+        return None, None
+
     if progress_label:
         timeout_seconds = poll_attempts * sleep_seconds
         print(f"\nWaiting for {progress_label} (up to {timeout_seconds}s)...")
     for attempt in range(1, poll_attempts + 1):
-        result = _run(
-            [
-                "gh",
-                "run",
-                "list",
-                "--repo",
-                repo,
-                "--workflow",
-                workflow,
-                "--event",
-                event,
-                "--limit",
-                "10",
-                "--json",
-                "databaseId,url,createdAt",
-            ],
-            check=False,
-        )
+        fields = "databaseId,url,createdAt"
+        list_cmd = [
+            "gh",
+            "run",
+            "list",
+            "--repo",
+            repo,
+            "--workflow",
+            workflow,
+            "--limit",
+            "30",
+            "--json",
+            fields,
+        ]
+        if event:
+            list_cmd.extend(["--event", event])
+        result = _run(list_cmd, check=False)
         if result.returncode == 0:
             try:
                 runs = json.loads(result.stdout or "[]")
             except json.JSONDecodeError:
                 runs = []
-            for run in runs:
-                created_at = _parse_iso8601_utc(str(run.get("createdAt", "")))
-                if created_at is None:
-                    continue
-                if created_at >= not_before:
-                    run_id = run.get("databaseId")
-                    run_url = run.get("url")
-                    if isinstance(run_id, int):
-                        if progress_label:
-                            print(f"Detected {progress_label}.")
-                        return run_id, str(run_url) if run_url else None
+            run_id, run_url = _pick_run(runs)
+            if run_id is not None:
+                if progress_label:
+                    print(f"Detected {progress_label}.")
+                return run_id, run_url
+
+        # Some environments report delayed/mismatched event classification for newly dispatched runs.
+        # Fall back to scanning the same workflow without event filtering before giving up this poll.
+        if event:
+            fallback_result = _run(
+                [
+                    "gh",
+                    "run",
+                    "list",
+                    "--repo",
+                    repo,
+                    "--workflow",
+                    workflow,
+                    "--limit",
+                    "30",
+                    "--json",
+                    fields,
+                ],
+                check=False,
+            )
+            if fallback_result.returncode == 0:
+                try:
+                    fallback_runs = json.loads(fallback_result.stdout or "[]")
+                except json.JSONDecodeError:
+                    fallback_runs = []
+                run_id, run_url = _pick_run(fallback_runs)
+                if run_id is not None:
+                    if progress_label:
+                        print(f"Detected {progress_label}.")
+                    return run_id, run_url
         if progress_label and (attempt == 1 or attempt % 5 == 0):
             print(f"Still waiting for {progress_label}... ({attempt}/{poll_attempts})")
         time.sleep(sleep_seconds)
@@ -1344,10 +2576,24 @@ def parse_args() -> argparse.Namespace:
         help="Optional GitHub repo in OWNER/REPO form. If omitted, the script auto-detects it.",
     )
     parser.add_argument(
+        "--template-repo",
+        default=None,
+        help=(
+            "Template source repository used to seed empty targets when workflow files are missing "
+            "(defaults to GIT_SWEATY_UPSTREAM_REPO or aspain/git-sweaty)."
+        ),
+    )
+    parser.add_argument(
         "--unit-system",
         choices=["us", "metric"],
         default=None,
         help="Units preset for dashboard metrics.",
+    )
+    parser.add_argument(
+        "--week-start",
+        choices=["sunday", "monday"],
+        default=None,
+        help="Week start day for yearly heatmap y-axis labels.",
     )
     parser.add_argument("--port", type=int, default=DEFAULT_PORT, help="Local callback port.")
     parser.add_argument(
@@ -1365,6 +2611,33 @@ def parse_args() -> argparse.Namespace:
         "--strava-profile-url",
         default=None,
         help="Optional Strava profile URL override shown in the dashboard header (auto-detected by default).",
+    )
+    parser.add_argument(
+        "--strava-activity-links",
+        choices=["yes", "no", "true", "false", "1", "0"],
+        default=None,
+        help="Whether to show Strava activity links in yearly heatmap tooltip details.",
+    )
+    parser.add_argument(
+        "--garmin-profile-url",
+        default=None,
+        help="Optional Garmin profile URL override shown in the dashboard header (auto-detected by default).",
+    )
+    parser.add_argument(
+        "--garmin-activity-links",
+        choices=["yes", "no", "true", "false", "1", "0"],
+        default=None,
+        help="Whether to show Garmin activity links in yearly heatmap tooltip details.",
+    )
+    parser.add_argument(
+        "--custom-domain",
+        default=None,
+        help="Optional custom GitHub Pages domain host (for example strava.example.com).",
+    )
+    parser.add_argument(
+        "--clear-custom-domain",
+        action="store_true",
+        help="Clear existing GitHub Pages custom domain during setup.",
     )
     parser.add_argument(
         "--no-browser",
@@ -1413,76 +2686,173 @@ def main() -> int:
     _assert_repo_access(repo)
     _assert_actions_secret_access(repo)
     print(f"Using repository: {repo}")
-    previous_source = _existing_dashboard_source(repo)
-    source = _resolve_source(args, interactive, previous_source)
+    template_repo = _resolve_template_repo(getattr(args, "template_repo", None))
+    existing_settings = _load_existing_dashboard_settings(repo)
+    previous_source = existing_settings.source if existing_settings else _existing_dashboard_source(repo)
+    reuse_existing_settings = False
+    explicit_setup_overrides = _has_explicit_setup_overrides(args)
+    if interactive and not explicit_setup_overrides:
+        if existing_settings is None:
+            print("\nNo existing settings found; running full setup.")
+        else:
+            reuse_existing_settings = _prompt_reuse_existing_settings()
+
+    custom_domain_requested = False
+    custom_pages_domain: Optional[str] = None
+    if not args.no_auto_github:
+        explicit_domain_override = (
+            bool(getattr(args, "clear_custom_domain", False))
+            or getattr(args, "custom_domain", None) is not None
+        )
+        should_prompt_domain = not (interactive and reuse_existing_settings and not explicit_domain_override)
+        if should_prompt_domain:
+            custom_domain_requested, custom_pages_domain = _resolve_custom_pages_domain(args, interactive, repo)
+
+    if reuse_existing_settings and existing_settings is not None:
+        source = existing_settings.source
+        distance_unit = existing_settings.distance_unit
+        elevation_unit = existing_settings.elevation_unit
+        week_start = existing_settings.week_start
+    else:
+        source = _resolve_source(args, interactive, previous_source)
+        distance_unit, elevation_unit = _resolve_units(args, interactive)
+        week_start = _resolve_week_start(args, interactive, repo)
+
     full_backfill = False
     if interactive and previous_source == source:
         full_backfill = _prompt_full_backfill_choice(source)
 
-    distance_unit, elevation_unit = _resolve_units(args, interactive)
+    strava_profile_url = ""
+    strava_activity_links_enabled = False
+    garmin_profile_url = ""
+    garmin_activity_links_enabled = False
+    strava_profile_link_enabled_override: Optional[bool] = None
+    strava_profile_url_prefilled = ""
+    garmin_profile_link_enabled_override: Optional[bool] = None
+    garmin_profile_url_prefilled = ""
+    if source == "strava":
+        if reuse_existing_settings:
+            strava_activity_links_enabled = bool(_existing_dashboard_strava_activity_links(repo))
+            strava_profile_url_prefilled = _existing_dashboard_strava_profile_url(repo)
+            strava_profile_link_enabled_override = bool(strava_profile_url_prefilled)
+        else:
+            strava_activity_links_enabled = _resolve_strava_activity_links(args, interactive, repo)
+            (
+                strava_profile_link_enabled_override,
+                strava_profile_url_prefilled,
+            ) = _resolve_strava_profile_link_preference(args, interactive, repo)
+    elif source == "garmin":
+        if reuse_existing_settings:
+            garmin_activity_links_enabled = bool(_existing_dashboard_garmin_activity_links(repo))
+            garmin_profile_url_prefilled = _existing_dashboard_garmin_profile_url(repo)
+            garmin_profile_link_enabled_override = bool(garmin_profile_url_prefilled)
+        else:
+            garmin_activity_links_enabled = _resolve_garmin_activity_links(args, interactive, repo)
+            (
+                garmin_profile_link_enabled_override,
+                garmin_profile_url_prefilled,
+            ) = _resolve_garmin_profile_link_preference(args, interactive, repo)
+
+    update_credentials = True
+    if (
+        interactive
+        and reuse_existing_settings
+        and not _has_explicit_credentials_for_source(args, source)
+    ):
+        secret_names = _list_secret_names(repo)
+        if _has_required_source_secrets(source, secret_names):
+            update_credentials = _prompt_update_credentials()
+        else:
+            print(f"\nMissing required {source.capitalize()} credential secrets; credential re-entry is required.")
 
     print("\nUpdating repository secrets via gh...")
     configured_secret_names: list[str] = []
     athlete_name = ""
-    strava_profile_url = ""
     strava_rotation_secret_ok: Optional[bool] = None
     strava_rotation_secret_detail = ""
     if source == "strava":
-        if interactive and not args.client_id:
-            print("\nEnter your Strava API credentials from https://www.strava.com/settings/api")
-        if not interactive and not args.client_id:
-            raise RuntimeError("Missing STRAVA_CLIENT_ID in non-interactive mode. Re-run with --client-id.")
-        if not interactive and not args.client_secret:
-            raise RuntimeError("Missing STRAVA_CLIENT_SECRET in non-interactive mode. Re-run with --client-secret.")
+        if update_credentials:
+            if interactive and not args.client_id:
+                print("\nEnter your Strava API credentials from https://www.strava.com/settings/api")
+            if not interactive and not args.client_id:
+                raise RuntimeError("Missing STRAVA_CLIENT_ID in non-interactive mode. Re-run with --client-id.")
+            if not interactive and not args.client_secret:
+                raise RuntimeError("Missing STRAVA_CLIENT_SECRET in non-interactive mode. Re-run with --client-secret.")
 
-        client_id = _prompt(args.client_id, "STRAVA_CLIENT_ID")
-        client_secret = _prompt(args.client_secret, "STRAVA_CLIENT_SECRET", secret=True)
-        if not client_id or not client_secret:
-            if interactive:
-                raise ValueError("Both STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET are required.")
-            raise RuntimeError(
-                "Missing Strava credentials in non-interactive mode. "
-                "Provide both --client-id and --client-secret."
+            client_id = _prompt(args.client_id, "STRAVA_CLIENT_ID")
+            client_secret = _prompt(args.client_secret, "STRAVA_CLIENT_SECRET", secret=True)
+            if not client_id or not client_secret:
+                if interactive:
+                    raise ValueError("Both STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET are required.")
+                raise RuntimeError(
+                    "Missing Strava credentials in non-interactive mode. "
+                    "Provide both --client-id and --client-secret."
+                )
+
+            redirect_uri = f"http://localhost:{args.port}{CALLBACK_PATH}"
+            code = _authorize_and_get_code(
+                client_id=client_id,
+                redirect_uri=redirect_uri,
+                scope=args.scope,
+                port=args.port,
+                timeout_seconds=args.timeout,
+                open_browser=not args.no_browser,
             )
 
-        redirect_uri = f"http://localhost:{args.port}{CALLBACK_PATH}"
-        code = _authorize_and_get_code(
-            client_id=client_id,
-            redirect_uri=redirect_uri,
-            scope=args.scope,
-            port=args.port,
-            timeout_seconds=args.timeout,
-            open_browser=not args.no_browser,
-        )
+            tokens = _exchange_code_for_tokens(client_id, client_secret, code)
+            refresh_token = tokens["refresh_token"]
 
-        tokens = _exchange_code_for_tokens(client_id, client_secret, code)
-        refresh_token = tokens["refresh_token"]
-
-        _set_secret("STRAVA_CLIENT_ID", client_id, repo)
-        _set_secret("STRAVA_CLIENT_SECRET", client_secret, repo)
-        _set_secret("STRAVA_REFRESH_TOKEN", refresh_token, repo)
-        configured_secret_names.extend(
-            ["STRAVA_CLIENT_ID", "STRAVA_CLIENT_SECRET", "STRAVA_REFRESH_TOKEN"]
+            _set_secret("STRAVA_CLIENT_ID", client_id, repo)
+            _set_secret("STRAVA_CLIENT_SECRET", client_secret, repo)
+            _set_secret("STRAVA_REFRESH_TOKEN", refresh_token, repo)
+            configured_secret_names.extend(
+                ["STRAVA_CLIENT_ID", "STRAVA_CLIENT_SECRET", "STRAVA_REFRESH_TOKEN"]
+            )
+            strava_rotation_secret_ok, strava_rotation_secret_detail = _try_set_strava_secret_update_token(
+                repo
+            )
+            if strava_rotation_secret_ok:
+                configured_secret_names.append("STRAVA_SECRET_UPDATE_TOKEN")
+            athlete = tokens.get("athlete") or {}
+            athlete_name = " ".join(
+                [str(athlete.get("firstname", "")).strip(), str(athlete.get("lastname", "")).strip()]
+            ).strip()
+        else:
+            strava_rotation_secret_ok = False
+            strava_rotation_secret_detail = "Reusing existing Strava credentials from GitHub secrets."
+        strava_profile_url = _resolve_strava_profile_url(
+            args,
+            interactive and update_credentials,
+            repo,
+            tokens=tokens if update_credentials else {},
+            enabled_override=strava_profile_link_enabled_override,
+            prefilled_url=strava_profile_url_prefilled,
+            prompt_if_missing=False if strava_profile_link_enabled_override is not None else True,
         )
-        strava_rotation_secret_ok, strava_rotation_secret_detail = _try_set_strava_secret_update_token(
-            repo
-        )
-        if strava_rotation_secret_ok:
-            configured_secret_names.append("STRAVA_SECRET_UPDATE_TOKEN")
-        athlete = tokens.get("athlete") or {}
-        athlete_name = " ".join(
-            [str(athlete.get("firstname", "")).strip(), str(athlete.get("lastname", "")).strip()]
-        ).strip()
-        strava_profile_url = _resolve_strava_profile_url(args, interactive, repo, tokens=tokens)
     elif source == "garmin":
-        token_store_b64, garmin_email, garmin_password = _resolve_garmin_auth_values(args, interactive)
-        if token_store_b64:
-            _set_secret("GARMIN_TOKENS_B64", token_store_b64, repo)
-            configured_secret_names.append("GARMIN_TOKENS_B64")
-        if garmin_email and garmin_password:
-            _set_secret("GARMIN_EMAIL", garmin_email, repo)
-            _set_secret("GARMIN_PASSWORD", garmin_password, repo)
-            configured_secret_names.extend(["GARMIN_EMAIL", "GARMIN_PASSWORD"])
+        token_store_b64 = ""
+        garmin_email = ""
+        garmin_password = ""
+        if update_credentials:
+            token_store_b64, garmin_email, garmin_password = _resolve_garmin_auth_values(args, interactive)
+            if token_store_b64:
+                _set_secret("GARMIN_TOKENS_B64", token_store_b64, repo)
+                configured_secret_names.append("GARMIN_TOKENS_B64")
+            if garmin_email and garmin_password:
+                _set_secret("GARMIN_EMAIL", garmin_email, repo)
+                _set_secret("GARMIN_PASSWORD", garmin_password, repo)
+                configured_secret_names.extend(["GARMIN_EMAIL", "GARMIN_PASSWORD"])
+        garmin_profile_url = _resolve_garmin_profile_url(
+            args,
+            interactive and update_credentials,
+            repo,
+            token_store_b64=token_store_b64,
+            email=garmin_email,
+            password=garmin_password,
+            enabled_override=garmin_profile_link_enabled_override,
+            prefilled_url=garmin_profile_url_prefilled,
+            prompt_if_missing=False if garmin_profile_link_enabled_override is not None else True,
+        )
     else:
         raise RuntimeError(f"Unsupported source: {source}")
 
@@ -1515,19 +2885,48 @@ def main() -> int:
     print("Updating repository variables via gh...")
     variable_pairs = [
         ("DASHBOARD_SOURCE", source),
+        ("DASHBOARD_REPO", repo),
         ("DASHBOARD_DISTANCE_UNIT", distance_unit),
         ("DASHBOARD_ELEVATION_UNIT", elevation_unit),
+        ("DASHBOARD_WEEK_START", week_start),
     ]
     if source == "strava":
         variable_pairs.append(("DASHBOARD_STRAVA_PROFILE_URL", strava_profile_url))
+        variable_pairs.append(
+            ("DASHBOARD_STRAVA_ACTIVITY_LINKS", "true" if strava_activity_links_enabled else "")
+        )
+    elif source == "garmin":
+        variable_pairs.append(("DASHBOARD_GARMIN_PROFILE_URL", garmin_profile_url))
+        variable_pairs.append(
+            ("DASHBOARD_GARMIN_ACTIVITY_LINKS", "true" if garmin_activity_links_enabled else "")
+        )
     for name, value in variable_pairs:
         try:
-            if name == "DASHBOARD_STRAVA_PROFILE_URL" and not value:
+            if name in {
+                "DASHBOARD_STRAVA_PROFILE_URL",
+                "DASHBOARD_STRAVA_ACTIVITY_LINKS",
+                "DASHBOARD_GARMIN_PROFILE_URL",
+                "DASHBOARD_GARMIN_ACTIVITY_LINKS",
+            } and not value:
                 _clear_variable(name, repo)
             else:
                 _set_variable(name, value, repo)
         except RuntimeError as exc:
             variable_errors.append(str(exc))
+
+    variable_summary = (
+        f"DASHBOARD_SOURCE={source}, DASHBOARD_REPO={repo}, "
+        f"DASHBOARD_DISTANCE_UNIT={distance_unit}, DASHBOARD_ELEVATION_UNIT={elevation_unit}, "
+        f"DASHBOARD_WEEK_START={week_start}"
+    )
+    if source == "strava" and strava_profile_url:
+        variable_summary = f"{variable_summary}, DASHBOARD_STRAVA_PROFILE_URL={strava_profile_url}"
+    if source == "strava" and strava_activity_links_enabled:
+        variable_summary = f"{variable_summary}, DASHBOARD_STRAVA_ACTIVITY_LINKS=true"
+    if source == "garmin" and garmin_profile_url:
+        variable_summary = f"{variable_summary}, DASHBOARD_GARMIN_PROFILE_URL={garmin_profile_url}"
+    if source == "garmin" and garmin_activity_links_enabled:
+        variable_summary = f"{variable_summary}, DASHBOARD_GARMIN_ACTIVITY_LINKS=true"
 
     if variable_errors:
         _add_step(
@@ -1536,36 +2935,15 @@ def main() -> int:
             status=STATUS_MANUAL_REQUIRED,
             detail=f"Could not store one or more dashboard variables automatically: {variable_errors[0]}",
             manual_help=(
-                f"Open {variables_settings_url} and set DASHBOARD_SOURCE={source}, "
-                f"DASHBOARD_DISTANCE_UNIT={distance_unit} "
-                f"and DASHBOARD_ELEVATION_UNIT={elevation_unit}"
-                + (
-                    (
-                        ", DASHBOARD_STRAVA_PROFILE_URL="
-                        f"{strava_profile_url}"
-                    )
-                    if source == "strava" and strava_profile_url
-                    else "."
-                )
-                + ("." if source == "strava" and strava_profile_url else "")
+                f"Open {variables_settings_url} and set {variable_summary}."
             ),
         )
     else:
-        profile_suffix = (
-            f", DASHBOARD_STRAVA_PROFILE_URL={strava_profile_url}"
-            if source == "strava" and strava_profile_url
-            else ""
-        )
         _add_step(
             steps,
             name="Store dashboard variables",
             status=STATUS_OK,
-            detail=(
-                "Saved DASHBOARD_SOURCE="
-                f"{source}, DASHBOARD_DISTANCE_UNIT={distance_unit}, "
-                f"DASHBOARD_ELEVATION_UNIT={elevation_unit}"
-                f"{profile_suffix}."
-            ),
+            detail=f"Saved {variable_summary}.",
         )
     print("\nCredentials configured.")
     if athlete_name:
@@ -1574,17 +2952,7 @@ def main() -> int:
     if configured_secret_names:
         print(f"Secrets set: {', '.join(configured_secret_names)}")
     if not variable_errors:
-        profile_suffix = (
-            f", DASHBOARD_STRAVA_PROFILE_URL={strava_profile_url}"
-            if source == "strava" and strava_profile_url
-            else ""
-        )
-        print(
-            "Variables set: "
-            f"DASHBOARD_SOURCE={source}, DASHBOARD_DISTANCE_UNIT={distance_unit}, "
-            f"DASHBOARD_ELEVATION_UNIT={elevation_unit}"
-            f"{profile_suffix}"
-        )
+        print(f"Variables set: {variable_summary}")
 
     if args.no_auto_github:
         _add_step(
@@ -1604,7 +2972,24 @@ def main() -> int:
             manual_help=None if enabled else f"Open {actions_settings_url} and allow Actions/workflows.",
         )
 
-        workflows_enabled, workflow_detail = _try_enable_workflows(repo, ["sync.yml", "pages.yml"])
+        issues_enabled, issues_detail = _try_enable_repo_issues(repo)
+        _add_step(
+            steps,
+            name="Issues tab",
+            status=STATUS_OK if issues_enabled else STATUS_MANUAL_REQUIRED,
+            detail=issues_detail if issues_enabled else f"Could not configure automatically: {issues_detail}",
+            manual_help=(
+                None
+                if issues_enabled
+                else f"Open {repo_url}/settings and enable Issues under Features."
+            ),
+        )
+
+        workflows_enabled, workflow_detail = _try_enable_workflows(
+            repo,
+            ["sync.yml", "pages.yml"],
+            source_repo=template_repo,
+        )
         _add_step(
             steps,
             name="Enable workflows",
@@ -1621,6 +3006,26 @@ def main() -> int:
             detail=pages_detail if pages_configured else f"Could not configure automatically: {pages_detail}",
             manual_help=None if pages_configured else f"Open {pages_url} and set Source to 'GitHub Actions'.",
         )
+
+        if custom_domain_requested:
+            if custom_pages_domain:
+                domain_set, domain_detail = _try_set_pages_custom_domain(repo, custom_pages_domain)
+                _add_step(
+                    steps,
+                    name="GitHub Pages custom domain",
+                    status=STATUS_OK if domain_set else STATUS_MANUAL_REQUIRED,
+                    detail=domain_detail if domain_set else f"Could not configure automatically: {domain_detail}",
+                    manual_help=None if domain_set else f"Open {pages_url} and set Custom domain to {custom_pages_domain}.",
+                )
+            else:
+                domain_cleared, domain_detail = _try_clear_pages_custom_domain(repo)
+                _add_step(
+                    steps,
+                    name="GitHub Pages custom domain",
+                    status=STATUS_OK if domain_cleared else STATUS_MANUAL_REQUIRED,
+                    detail=domain_detail if domain_cleared else f"Could not configure automatically: {domain_detail}",
+                    manual_help=None if domain_cleared else f"Open {pages_url} and clear the Custom domain field.",
+                )
 
         dispatch_started_at = datetime.now(timezone.utc)
         dispatched, dispatch_detail = _try_dispatch_sync(
@@ -1801,7 +3206,7 @@ def main() -> int:
         if step.status == STATUS_MANUAL_REQUIRED and step.manual_help:
             print(f"  Manual: {step.manual_help}")
 
-    dashboard_url = _pages_url_from_slug(repo)
+    dashboard_url = _dashboard_url_from_pages_api(repo) or _pages_url_from_slug(repo)
     has_manual_steps = any(step.status == STATUS_MANUAL_REQUIRED for step in steps)
     if has_manual_steps:
         print("\nSetup completed with manual steps remaining.")

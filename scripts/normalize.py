@@ -3,16 +3,18 @@ import os
 from typing import Any, Dict, List
 
 from activity_types import canonicalize_activity_type, featured_types_from_config, normalize_activity_type
+from provider_fields import (
+    coalesce as _shared_coalesce,
+    get_nested as _shared_get_nested,
+    pick_duration_seconds as _shared_pick_duration_seconds,
+)
 from utils import ensure_dir, load_config, normalize_source, parse_iso_datetime, raw_activity_dir, read_json, write_json
 
 OUT_PATH = os.path.join("data", "activities_normalized.json")
 
 
 def _coalesce(*values: Any) -> Any:
-    for value in values:
-        if value not in (None, "", []):
-            return value
-    return None
+    return _shared_coalesce(*values)
 
 
 def _safe_float(value: Any) -> float:
@@ -23,20 +25,7 @@ def _safe_float(value: Any) -> float:
 
 
 def _pick_duration_seconds(*values: Any) -> float:
-    """Prefer a positive duration value when multiple provider fields are present."""
-    first_numeric = None
-    for value in values:
-        if value in (None, "", []):
-            continue
-        try:
-            number = float(value)
-        except (TypeError, ValueError):
-            continue
-        if first_numeric is None:
-            first_numeric = number
-        if number > 0:
-            return number
-    return first_numeric if first_numeric is not None else 0.0
+    return _shared_pick_duration_seconds(*values)
 
 
 def _duration_candidates(activity: Dict[str, Any]) -> List[Any]:
@@ -57,12 +46,7 @@ def _duration_candidates(activity: Dict[str, Any]) -> List[Any]:
 
 
 def _get_nested(payload: Dict[str, Any], keys: List[str]) -> Any:
-    value: Any = payload
-    for key in keys:
-        if not isinstance(value, dict):
-            return None
-        value = value.get(key)
-    return value
+    return _shared_get_nested(payload, keys)
 
 
 def _resolve_canonical_type(raw_value: str, source: str) -> str:
@@ -103,8 +87,9 @@ def _normalize_activity(activity: Dict, type_aliases: Dict[str, str], source: st
         activity.get("elevationGain"),
         activity.get("totalElevationGain"),
     )
+    activity_name = str(_coalesce(activity.get("name"), activity.get("activityName"), "") or "").strip()
 
-    return {
+    normalized = {
         "id": str(activity_id),
         "start_date_local": str(start_date_local).replace(" ", "T"),
         "date": date_str,
@@ -117,6 +102,9 @@ def _normalize_activity(activity: Dict, type_aliases: Dict[str, str], source: st
         "moving_time": _safe_float(moving_time),
         "elevation_gain": _safe_float(elevation_gain),
     }
+    if activity_name:
+        normalized["name"] = activity_name
+    return normalized
 
 
 def _load_existing() -> Dict[str, Dict]:

@@ -8,8 +8,17 @@ import sys
 from datetime import datetime, timedelta, timezone
 from typing import Any, Dict, List, Optional, Tuple
 
-from activity_types import featured_types_from_config
 from garmin_token_store import decode_token_store_b64, write_token_store_bytes
+from provider_fields import (
+    coalesce as _shared_coalesce,
+    get_nested as _shared_get_nested,
+    pick_duration_seconds as _shared_pick_duration_seconds,
+)
+from sync_scope import (
+    activity_scope_from_config,
+    activity_start_ts as _shared_activity_start_ts,
+    start_after_ts as _shared_start_after_ts,
+)
 from utils import ensure_dir, load_config, raw_activity_dir, read_json, utc_now, write_json
 
 RAW_DIR = raw_activity_dir("garmin")
@@ -52,10 +61,7 @@ def _safe_int(value: Any) -> Optional[int]:
 
 
 def _coalesce(*values: Any) -> Any:
-    for value in values:
-        if value not in (None, "", []):
-            return value
-    return None
+    return _shared_coalesce(*values)
 
 
 def _duration_candidates(payload: Dict[str, Any]) -> List[Any]:
@@ -75,29 +81,11 @@ def _duration_candidates(payload: Dict[str, Any]) -> List[Any]:
 
 
 def _pick_duration_seconds(*values: Any) -> float:
-    """Prefer the first positive duration; otherwise fall back to first numeric value."""
-    first_numeric: Optional[float] = None
-    for value in values:
-        if value in (None, "", []):
-            continue
-        try:
-            number = float(value)
-        except (TypeError, ValueError):
-            continue
-        if first_numeric is None:
-            first_numeric = number
-        if number > 0:
-            return number
-    return first_numeric if first_numeric is not None else 0.0
+    return _shared_pick_duration_seconds(*values)
 
 
 def _get_nested(payload: Dict[str, Any], keys: List[str]) -> Any:
-    value: Any = payload
-    for key in keys:
-        if not isinstance(value, dict):
-            return None
-        value = value.get(key)
-    return value
+    return _shared_get_nested(payload, keys)
 
 
 def _activity_type_key(activity: Dict[str, Any]) -> str:
@@ -135,6 +123,15 @@ def _normalize_activity(activity: Dict[str, Any]) -> Dict[str, Any]:
         activity.get("total_elevation_gain"),
     )
     distance = _coalesce(activity.get("distance"), activity.get("totalDistance"), 0.0)
+    activity_name = str(
+        _coalesce(
+            activity.get("activityName"),
+            activity.get("activity_name"),
+            activity.get("name"),
+            _get_nested(activity, ["summaryDTO", "activityName"]),
+        )
+        or ""
+    ).strip()
 
     normalized = {
         "id": str(activity_id),
@@ -154,6 +151,8 @@ def _normalize_activity(activity: Dict[str, Any]) -> Dict[str, Any]:
         "total_elevation_gain": _safe_float(elevation_gain, 0.0),
         "provider": "garmin",
     }
+    if activity_name:
+        normalized["name"] = activity_name
     return normalized
 
 
@@ -201,69 +200,15 @@ def _enrich_missing_duration(
 
 
 def _activity_start_ts(activity: Dict[str, Any]) -> Optional[int]:
-    value = activity.get("start_date") or activity.get("start_date_local")
-    if not value:
-        return None
-    value_str = str(value)
-    if value_str.endswith("Z"):
-        value_str = value_str[:-1] + "+00:00"
-    try:
-        return int(datetime.fromisoformat(value_str).timestamp())
-    except ValueError:
-        return None
-
-
-def _lookback_after_ts(years: int) -> int:
-    now = datetime.now(timezone.utc)
-    try:
-        start = now.replace(year=now.year - years)
-    except ValueError:
-        start = now.replace(month=2, day=28, year=now.year - years)
-    return int(start.timestamp())
+    return _shared_activity_start_ts(activity)
 
 
 def _start_after_ts(config: Dict[str, Any]) -> int:
-    sync_cfg = config.get("sync", {})
-    start_date = sync_cfg.get("start_date")
-    if start_date:
-        dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        return int(dt.timestamp())
-    lookback_years = sync_cfg.get("lookback_years")
-    if lookback_years in (None, ""):
-        return 0
-    return _lookback_after_ts(int(lookback_years))
+    return _shared_start_after_ts(config)
 
 
 def _activity_scope(config: Dict[str, Any]) -> Dict[str, Any]:
-    activities_cfg = config.get("activities", {}) or {}
-    include_all_types = bool(activities_cfg.get("include_all_types", True))
-    exclude_types = sorted({str(item) for item in (activities_cfg.get("exclude_types", []) or [])})
-    scope: Dict[str, Any] = {
-        "include_all_types": include_all_types,
-        "exclude_types": exclude_types,
-    }
-    if include_all_types:
-        return scope
-
-    featured_types = sorted({str(item) for item in featured_types_from_config(activities_cfg)})
-    type_aliases = {
-        str(source): str(target)
-        for source, target in (activities_cfg.get("type_aliases", {}) or {}).items()
-    }
-    group_aliases = {
-        str(source): str(target)
-        for source, target in (activities_cfg.get("group_aliases", {}) or {}).items()
-    }
-    scope.update(
-        {
-            "featured_types": featured_types,
-            "group_other_types": bool(activities_cfg.get("group_other_types", True)),
-            "other_bucket": str(activities_cfg.get("other_bucket", "OtherSports")),
-            "type_aliases": dict(sorted(type_aliases.items())),
-            "group_aliases": dict(sorted(group_aliases.items())),
-        }
-    )
-    return scope
+    return activity_scope_from_config(config)
 
 
 def _load_state() -> Dict[str, Any]:

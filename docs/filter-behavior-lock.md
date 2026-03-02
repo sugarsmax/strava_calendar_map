@@ -28,16 +28,16 @@ Refactors should preserve these behaviors exactly unless a deliberate product ch
 
 ### Type dropdown (`toggleTypeMenu`)
 
-1. Clicking `all` in the open menu updates the type draft state to all mode and clears draft explicit selections.
-2. Mobile special case: if already in all mode, clicking `all` toggles to non-all mode with an empty set.
+1. Clicking `all` in the open menu from a partial draft selection updates the type draft state to all mode and clears draft explicit selections.
+2. Clicking `all` while already in all mode (or while explicit-all is selected) toggles to non-all mode with an empty set.
 3. Clicking a specific type while in all mode exits all mode and draft-selects all types except the clicked type.
 4. Clicking a selected type removes it from the draft; clicking an unselected type adds it to the draft.
 5. Invalid types are ignored.
 
 ### Year dropdown (`toggleYearMenu`)
 
-1. Clicking `all` in the open menu updates the year draft state to all mode and clears draft explicit selections.
-2. Mobile special case: if already in all mode, clicking `all` toggles to non-all mode with an empty set.
+1. Clicking `all` in the open menu from a partial draft selection updates the year draft state to all mode and clears draft explicit selections.
+2. Clicking `all` while already in all mode (or while explicit-all is selected) toggles to non-all mode with an empty set.
 3. Clicking a specific year while in all mode exits all mode and draft-selects all visible years except the clicked year.
 4. Clicking a selected year removes it from the draft; clicking an unselected year adds it to the draft.
 5. Invalid/non-visible years are ignored.

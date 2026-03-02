@@ -17,7 +17,7 @@ class SiteAppearanceContractTests(unittest.TestCase):
         self.assertIn("Space+Grotesk", self.html)
         self.assertIn("JetBrains+Mono", self.html)
         self.assertIn('font-family: "Space Grotesk", system-ui, sans-serif;', self.html)
-        self.assertIn("background: radial-gradient(circle at top left, #1e293b, var(--bg))", self.html)
+        self.assertIn("background: #1e293b;", self.html)
 
     def test_required_css_variables_exist(self) -> None:
         required_vars = [
@@ -45,10 +45,10 @@ class SiteAppearanceContractTests(unittest.TestCase):
     def test_core_dashboard_mount_points_and_controls_exist(self) -> None:
         expected_ids = [
             "dashboardTitle",
-            "updated",
             "summary",
             "heatmaps",
             "tooltip",
+            "headerMeta",
             "typeButtons",
             "yearButtons",
             "typeMenu",
@@ -56,12 +56,24 @@ class SiteAppearanceContractTests(unittest.TestCase):
             "typeClearButton",
             "yearClearButton",
             "resetAllButton",
+            "footerHostedPrefix",
+            "footerHostedLink",
+            "footerPoweredLabel",
+            "footerPoweredLink",
         ]
         for element_id in expected_ids:
             self.assertRegex(self.html, rf'id="{re.escape(element_id)}"')
 
+        self.assertNotIn('id="updated"', self.html)
+
         self.assertIn('class="header-link repo-link"', self.html)
-        self.assertIn('class="header-link strava-profile-link"', self.html)
+        self.assertRegex(
+            self.html,
+            r'class="[^"]*header-link[^"]*strava-profile-link[^"]*"',
+        )
+        self.assertIn('id="footerPoweredLabel"', self.html)
+        self.assertIn(">powered<", self.html)
+        self.assertIn("aspain/git-sweaty", self.html)
         self.assertIn('<script src="app.js?v=__APP_VERSION__"></script>', self.html)
 
 

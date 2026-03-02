@@ -1,11 +1,19 @@
 import argparse
+import json
 import os
 import re
 import subprocess
+import urllib.request
 from typing import Optional
 
 from aggregate import aggregate as aggregate_func
 from normalize import normalize as normalize_func
+from repo_helpers import (
+    choose_repo_slug_from_env,
+    normalize_dashboard_url,
+    normalize_repo_slug,
+    pages_url_from_slug,
+)
 from sync_garmin import sync_garmin
 from sync_strava import sync_strava
 from utils import ensure_dir, load_config, normalize_source, write_json
@@ -38,7 +46,7 @@ SOURCE_HINT_STRAVA = "strava"
 SOURCE_HINT_GARMIN = "garmin"
 SOURCE_HINT_MIXED = "mixed"
 README_LIVE_SITE_RE = re.compile(
-    r"(?im)^(-\s*(?:Live site:\s*\[Interactive Heatmaps\]|View the Interactive \[Activity Dashboard\])\()https?://[^)]+(\)\s*)$",
+    r"(?im)^([ \t]*(?:-\s*)?(?:Live site:\s*\[Interactive Heatmaps\]|View the Interactive \[Activity Dashboard\])\()https?://[^)]+(\)[ \t]*\.?[ \t]*)$",
     re.IGNORECASE,
 )
 
@@ -54,8 +62,12 @@ def _write_aggregates(payload):
 
 
 def _repo_slug_from_git() -> Optional[str]:
-    env_slug = os.environ.get("GITHUB_REPOSITORY", "").strip()
-    if env_slug and "/" in env_slug:
+    env_slug = choose_repo_slug_from_env(
+        dashboard_repo=os.environ.get("DASHBOARD_REPO", ""),
+        github_repository=os.environ.get("GITHUB_REPOSITORY", ""),
+        github_actions=os.environ.get("GITHUB_ACTIONS", ""),
+    )
+    if env_slug:
         return env_slug
 
     try:
@@ -68,21 +80,52 @@ def _repo_slug_from_git() -> Optional[str]:
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 
-    url = result.stdout.strip()
-    # Handles:
-    # - https://github.com/owner/repo.git
-    # - git@github.com:owner/repo.git
-    m = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/.]+)(?:\.git)?$", url)
-    if not m:
-        return None
-    return f"{m.group('owner')}/{m.group('repo')}"
+    return normalize_repo_slug(result.stdout.strip())
 
 
 def _pages_url_from_slug(slug: str) -> str:
-    owner, repo = slug.split("/", 1)
-    if repo.lower() == f"{owner.lower()}.github.io":
-        return f"https://{owner}.github.io/"
-    return f"https://{owner}.github.io/{repo}/"
+    return pages_url_from_slug(slug)
+
+
+def _normalize_dashboard_url(value: str) -> str:
+    return normalize_dashboard_url(value)
+
+
+def _dashboard_url_from_pages_api(repo_slug: str) -> Optional[str]:
+    slug = str(repo_slug or "").strip()
+    if not slug or "/" not in slug:
+        return None
+
+    token = str(os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN") or "").strip()
+    if not token:
+        return None
+
+    request = urllib.request.Request(
+        f"https://api.github.com/repos/{slug}/pages",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "X-GitHub-Api-Version": "2022-11-28",
+            "User-Agent": "git-sweaty-run-pipeline",
+        },
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            payload = json.loads(response.read().decode("utf-8"))
+    except Exception:
+        return None
+    if not isinstance(payload, dict):
+        return None
+
+    custom_url = _normalize_dashboard_url(payload.get("cname", ""))
+    if custom_url:
+        return custom_url
+
+    html_url = _normalize_dashboard_url(payload.get("html_url", ""))
+    if html_url:
+        return html_url
+    return None
 
 
 def _update_readme_live_site_link() -> None:
@@ -93,7 +136,7 @@ def _update_readme_live_site_link() -> None:
     if not slug:
         return
 
-    target_url = _pages_url_from_slug(slug)
+    target_url = _dashboard_url_from_pages_api(slug) or _pages_url_from_slug(slug)
     with open(README_MD, "r", encoding="utf-8") as f:
         content = f.read()
 

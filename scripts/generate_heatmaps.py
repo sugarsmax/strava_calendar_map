@@ -7,6 +7,7 @@ from datetime import date, timedelta
 from typing import Callable, Dict, List, Optional
 
 from activity_types import build_type_meta, featured_types_from_config, ordered_types
+from repo_helpers import choose_repo_slug_from_env, normalize_repo_slug
 from utils import (
     ensure_dir,
     format_distance,
@@ -41,8 +42,14 @@ LABEL_COLOR = "#f1f5f9"
 BG_COLOR = "#0f172a"
 GRID_BG_COLOR = "rgba(15, 23, 42, 0.8)"
 LABEL_FONT = "JetBrains Mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
-REPO_SLUG_RE = re.compile(r"^[^/\s]+/[^/\s]+$")
+DEFAULT_WEEK_START = "sunday"
+WEEK_START_CHOICES = {"sunday", "monday"}
+DAY_LABELS_BY_WEEK_START = {
+    "sunday": ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+    "monday": ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+}
 STRAVA_HOST_RE = re.compile(r"(^|\.)strava\.com$", re.IGNORECASE)
+GARMIN_CONNECT_HOST_RE = re.compile(r"(^|\.)connect\.garmin\.com$", re.IGNORECASE)
 
 
 def _year_range_from_config(config: Dict, aggregate_years: Dict) -> List[int]:
@@ -69,12 +76,32 @@ def _year_range_from_config(config: Dict, aggregate_years: Dict) -> List[int]:
     return list(range(start_year, current_year + 1))
 
 
-def _sunday_on_or_before(d: date) -> date:
-    return d - timedelta(days=(d.weekday() + 1) % 7)
+def _normalize_week_start(value: object) -> str:
+    normalized = str(value or "").strip().lower()
+    aliases = {
+        "sun": "sunday",
+        "sunday": "sunday",
+        "mon": "monday",
+        "monday": "monday",
+    }
+    resolved = aliases.get(normalized)
+    if resolved:
+        return resolved
+    return DEFAULT_WEEK_START
 
 
-def _saturday_on_or_after(d: date) -> date:
-    return d + timedelta(days=(5 - d.weekday()) % 7)
+def _day_row_index(d: date, week_start: str) -> int:
+    if week_start == "monday":
+        return d.weekday()  # Monday=0
+    return (d.weekday() + 1) % 7  # Sunday=0
+
+
+def _week_start_on_or_before(d: date, week_start: str) -> date:
+    return d - timedelta(days=_day_row_index(d, week_start))
+
+
+def _week_end_on_or_after(d: date, week_start: str) -> date:
+    return d + timedelta(days=(6 - _day_row_index(d, week_start)))
 
 
 def _level(count: int) -> int:
@@ -100,7 +127,13 @@ def _color_scale(accent: str) -> List[str]:
     return [DEFAULT_COLORS[0], DEFAULT_COLORS[1], DEFAULT_COLORS[2], DEFAULT_COLORS[3], accent]
 
 
-def _load_activities() -> List[Dict]:
+def _load_activities(
+    *,
+    source: str = "strava",
+    include_activity_urls: bool = False,
+    include_strava_activity_urls: bool = False,
+    include_garmin_activity_urls: bool = False,
+) -> List[Dict]:
     if not os.path.exists(ACTIVITIES_PATH):
         return []
     items = read_json(ACTIVITIES_PATH) or []
@@ -116,20 +149,30 @@ def _load_activities() -> List[Dict]:
         if not date_str or year is None or not activity_type or not subtype or not start_date_local:
             continue
         try:
-            dt = parse_iso_datetime(start_date_local)
-            hour = dt.hour
-            minute = dt.minute
+            hour = parse_iso_datetime(start_date_local).hour
         except Exception:
             hour = None
-            minute = None
-        activities.append({
+        activity = {
             "date": date_str,
             "year": int(year),
             "type": activity_type,
             "subtype": str(subtype),
             "hour": hour,
-            "minute": minute,
-        })
+        }
+        include_provider_activity_urls = include_activity_urls
+        if source == "strava" and include_strava_activity_urls:
+            include_provider_activity_urls = True
+        if source == "garmin" and include_garmin_activity_urls:
+            include_provider_activity_urls = True
+
+        if include_provider_activity_urls:
+            url = _activity_url_from_id(source, item.get("id"))
+            if url:
+                activity["url"] = url
+                activity_name = str(item.get("name") or "").strip()
+                if activity_name:
+                    activity["name"] = activity_name
+        activities.append(activity)
     return activities
 
 
@@ -146,8 +189,12 @@ def _type_totals(aggregates_years: Dict) -> Dict[str, int]:
 
 
 def _repo_slug_from_git() -> Optional[str]:
-    env_slug = os.environ.get("GITHUB_REPOSITORY", "").strip()
-    if env_slug and REPO_SLUG_RE.match(env_slug):
+    env_slug = choose_repo_slug_from_env(
+        dashboard_repo=os.environ.get("DASHBOARD_REPO", ""),
+        github_repository=os.environ.get("GITHUB_REPOSITORY", ""),
+        github_actions=os.environ.get("GITHUB_ACTIONS", ""),
+    )
+    if env_slug:
         return env_slug
 
     try:
@@ -160,39 +207,84 @@ def _repo_slug_from_git() -> Optional[str]:
     except (subprocess.CalledProcessError, FileNotFoundError):
         return None
 
-    url = result.stdout.strip()
-    # Handles:
-    # - https://github.com/owner/repo.git
-    # - git@github.com:owner/repo.git
-    match = re.search(r"github\.com[:/](?P<owner>[^/]+)/(?P<repo>[^/.]+)(?:\.git)?$", url)
-    if not match:
-        return None
-    return f"{match.group('owner')}/{match.group('repo')}"
+    return normalize_repo_slug(result.stdout.strip())
 
 
-def _strava_profile_url_from_config(config: Dict) -> Optional[str]:
-    raw = str((config.get("strava", {}) or {}).get("profile_url", "")).strip()
+def _host_regex_for_source(source: str) -> Optional[re.Pattern]:
+    if source == "strava":
+        return STRAVA_HOST_RE
+    if source == "garmin":
+        return GARMIN_CONNECT_HOST_RE
+    return None
+
+
+def _profile_url_from_config(config: Dict, source: str) -> Optional[str]:
+    raw = str((config.get(source, {}) or {}).get("profile_url", "")).strip()
     if not raw:
         return None
     if not re.match(r"^https?://", raw, flags=re.IGNORECASE):
         raw = f"https://{raw.lstrip('/')}"
     parsed = urllib.parse.urlparse(raw)
     host = str(parsed.hostname or "").lower()
-    if not host or not STRAVA_HOST_RE.search(host):
+    host_regex = _host_regex_for_source(source)
+    if not host or host_regex is None or not host_regex.search(host):
         return None
-    path = str(parsed.path or "").strip().rstrip("/")
-    if not path:
-        return None
+    if source == "garmin":
+        path = str(parsed.path or "").strip()
+        match = re.match(r"^/(?:modern/)?profile/([^/]+)(?:/.*)?$", path, flags=re.IGNORECASE)
+        if not match:
+            return None
+        normalized_path = f"/modern/profile/{match.group(1)}"
+    else:
+        normalized_path = str(parsed.path or "").strip().rstrip("/")
+        if not normalized_path:
+            return None
     return urllib.parse.urlunparse(
         (
             parsed.scheme or "https",
             parsed.netloc,
-            path,
+            normalized_path,
             "",
             parsed.query,
             "",
         )
     )
+
+
+def _activity_links_enabled_from_config(config: Dict, source: str) -> bool:
+    value = (config.get(source, {}) or {}).get("include_activity_urls", False)
+    if isinstance(value, bool):
+        return value
+    normalized = str(value or "").strip().lower()
+    return normalized in {"1", "true", "yes", "y", "on"}
+
+
+def _activity_url_from_id(source: str, activity_id: object) -> Optional[str]:
+    raw = str(activity_id or "").strip()
+    if not raw:
+        return None
+    if "/" in raw or "\\" in raw:
+        return None
+    encoded = urllib.parse.quote(raw, safe="")
+    if not encoded:
+        return None
+    if source == "strava":
+        return f"https://www.strava.com/activities/{encoded}"
+    if source == "garmin":
+        return f"https://connect.garmin.com/modern/activity/{encoded}"
+    return None
+
+
+def _strava_profile_url_from_config(config: Dict) -> Optional[str]:
+    return _profile_url_from_config(config, "strava")
+
+
+def _strava_activity_links_enabled_from_config(config: Dict) -> bool:
+    return _activity_links_enabled_from_config(config, "strava")
+
+
+def _strava_activity_url_from_id(activity_id: object) -> Optional[str]:
+    return _activity_url_from_id("strava", activity_id)
 
 
 def _svg_for_year(
@@ -201,9 +293,11 @@ def _svg_for_year(
     units: Dict[str, str],
     colors: List[str],
     color_for_entry: Optional[Callable[[Dict], str]] = None,
+    week_start: str = DEFAULT_WEEK_START,
 ) -> str:
-    start = _sunday_on_or_before(date(year, 1, 1))
-    end = _saturday_on_or_after(date(year, 12, 31))
+    normalized_week_start = _normalize_week_start(week_start)
+    start = _week_start_on_or_before(date(year, 1, 1), normalized_week_start)
+    end = _week_end_on_or_after(date(year, 12, 31), normalized_week_start)
 
     weeks = ((end - start).days // 7) + 1
     grid_rows = 7
@@ -251,7 +345,7 @@ def _svg_for_year(
             f'font-family="{LABEL_FONT}" dominant-baseline="hanging">{month_labels[month - 1]}</text>'
         )
 
-    day_labels = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    day_labels = DAY_LABELS_BY_WEEK_START[normalized_week_start]
     for row, label in enumerate(day_labels):
         y = day_col_y + row * (CELL + GAP) + (CELL / 2)
         x = day_col_x
@@ -267,7 +361,7 @@ def _svg_for_year(
     current = start
     while current <= end:
         week_index = (current - start).days // 7
-        row = (current.weekday() + 1) % 7  # Sunday=0
+        row = _day_row_index(current, normalized_week_start)
         x = week_index * (CELL + GAP)
         y = row * (CELL + GAP)
 
@@ -317,6 +411,8 @@ def generate(write_svgs: bool = True):
     activities_cfg = config.get("activities", {}) or {}
     featured_types = featured_types_from_config(activities_cfg)
     other_bucket = str(activities_cfg.get("other_bucket", "OtherSports"))
+    heatmaps_cfg = config.get("heatmaps", {}) or {}
+    week_start = _normalize_week_start(heatmaps_cfg.get("week_start") or config.get("week_start"))
 
     units = config.get("units", {})
     units = {
@@ -350,12 +446,19 @@ def generate(write_svgs: bool = True):
                     year_entries,
                     units,
                     type_colors.get(activity_type, DEFAULT_COLORS),
+                    week_start=week_start,
                 )
                 path = os.path.join(type_dir, f"{year}.svg")
                 with open(path, "w", encoding="utf-8") as f:
                     f.write(svg)
 
     source = normalize_source(config.get("source", "strava"))
+    include_activity_urls = _activity_links_enabled_from_config(config, source)
+    load_activities_kwargs = {"source": source}
+    if source == "strava":
+        load_activities_kwargs["include_strava_activity_urls"] = include_activity_urls
+    elif source == "garmin":
+        load_activities_kwargs["include_garmin_activity_urls"] = include_activity_urls
     site_payload = {
         "source": source,
         "generated_at": utc_now().isoformat(),
@@ -365,11 +468,16 @@ def generate(write_svgs: bool = True):
         "type_meta": type_meta,
         "aggregates": aggregate_years,
         "units": units,
-        "activities": _load_activities(),
+        "week_start": week_start,
+        "activities": _load_activities(**load_activities_kwargs),
     }
-    strava_profile_url = _strava_profile_url_from_config(config)
-    if source == "strava" and strava_profile_url:
-        site_payload["strava_profile_url"] = strava_profile_url
+    profile_url = _profile_url_from_config(config, source)
+    if profile_url:
+        site_payload["profile_url"] = profile_url
+        if source == "strava":
+            site_payload["strava_profile_url"] = profile_url
+        elif source == "garmin":
+            site_payload["garmin_profile_url"] = profile_url
     repo_slug = _repo_slug_from_git()
     if repo_slug:
         site_payload["repo"] = repo_slug

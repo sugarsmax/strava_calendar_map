@@ -7,11 +7,15 @@ import shutil
 import sys
 import time
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import requests
 
-from activity_types import featured_types_from_config
+from sync_scope import (
+    activity_scope_from_config,
+    activity_start_ts,
+    start_after_ts,
+)
 from utils import ensure_dir, load_config, raw_activity_dir, read_json, utc_now, write_json
 
 TOKEN_CACHE = ".strava_token.json"
@@ -100,6 +104,12 @@ def _request_json_with_retry(
     if last_exc:
         raise last_exc
     raise RuntimeError(f"Request failed after {MAX_REQUEST_ATTEMPTS} attempts: {url}")
+
+
+def _http_error_status(exc: Exception) -> Optional[int]:
+    if isinstance(exc, requests.HTTPError) and exc.response is not None:
+        return exc.response.status_code
+    return None
 
 
 class RateLimiter:
@@ -268,7 +278,9 @@ def _athlete_fingerprint(athlete_id: int, secret: str) -> str:
     return hmac.new(key, msg, hashlib.sha256).hexdigest()
 
 
-def _get_access_token(config: Dict, limiter: Optional[RateLimiter]) -> str:
+def _get_access_token(
+    config: Dict, limiter: Optional[RateLimiter], force_refresh: bool = False
+) -> str:
     strava = config.get("strava", {})
     client_id = strava.get("client_id")
     client_secret = strava.get("client_secret")
@@ -282,7 +294,7 @@ def _get_access_token(config: Dict, limiter: Optional[RateLimiter]) -> str:
     expires_at = cache.get("expires_at", 0)
     cached_refresh_token = cache.get("refresh_token")
 
-    if access_token and expires_at - 60 > now:
+    if access_token and expires_at - 60 > now and not force_refresh:
         return access_token
 
     refresh_candidates: List[str] = []
@@ -331,6 +343,26 @@ def _get_access_token(config: Dict, limiter: Optional[RateLimiter]) -> str:
     return payload["access_token"]
 
 
+def _run_with_token_refresh(
+    config: Dict,
+    token: str,
+    limiter: Optional[RateLimiter],
+    request_label: str,
+    call: Callable[[str], Any],
+) -> Tuple[Any, str]:
+    try:
+        return call(token), token
+    except requests.HTTPError as exc:
+        if _http_error_status(exc) != 401:
+            raise
+        print(
+            f"Strava API returned 401 during {request_label}; "
+            "refreshing access token and retrying once."
+        )
+        refreshed_token = _get_access_token(config, limiter, force_refresh=True)
+        return call(refreshed_token), refreshed_token
+
+
 def _fetch_athlete(token: str, limiter: Optional[RateLimiter]) -> Dict:
     return _request_json_with_retry(
         "GET",
@@ -341,71 +373,17 @@ def _fetch_athlete(token: str, limiter: Optional[RateLimiter]) -> Dict:
     )
 
 
-def _lookback_after_ts(years: int) -> int:
-    now = datetime.now(timezone.utc)
-    try:
-        start = now.replace(year=now.year - years)
-    except ValueError:
-        # handle Feb 29
-        start = now.replace(month=2, day=28, year=now.year - years)
-    return int(start.timestamp())
-
-
 def _start_after_ts(config: Dict) -> int:
-    sync_cfg = config.get("sync", {})
-    start_date = sync_cfg.get("start_date")
-    if start_date:
-        dt = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        return int(dt.timestamp())
-    lookback_years = sync_cfg.get("lookback_years")
-    if lookback_years in (None, ""):
-        # Default: no lower bound, so Strava backfill can reach all available history.
-        return 0
-    return _lookback_after_ts(int(lookback_years))
+    # Default behavior remains "no lower bound" when lookback/start are unset.
+    return start_after_ts(config)
 
 
 def _activity_scope(config: Dict) -> Dict:
-    activities_cfg = config.get("activities", {}) or {}
-    include_all_types = bool(activities_cfg.get("include_all_types", True))
-    exclude_types = sorted({str(item) for item in (activities_cfg.get("exclude_types", []) or [])})
-    scope = {
-        "include_all_types": include_all_types,
-        "exclude_types": exclude_types,
-    }
-    if include_all_types:
-        return scope
-
-    featured_types = sorted({str(item) for item in featured_types_from_config(activities_cfg)})
-    type_aliases = {
-        str(source): str(target)
-        for source, target in (activities_cfg.get("type_aliases", {}) or {}).items()
-    }
-    group_aliases = {
-        str(source): str(target)
-        for source, target in (activities_cfg.get("group_aliases", {}) or {}).items()
-    }
-    scope.update(
-        {
-            "featured_types": featured_types,
-            "group_other_types": bool(activities_cfg.get("group_other_types", True)),
-            "other_bucket": str(activities_cfg.get("other_bucket", "OtherSports")),
-            "type_aliases": dict(sorted(type_aliases.items())),
-            "group_aliases": dict(sorted(group_aliases.items())),
-        }
-    )
-    return scope
+    return activity_scope_from_config(config)
 
 
 def _activity_start_ts(activity: Dict) -> Optional[int]:
-    value = activity.get("start_date") or activity.get("start_date_local")
-    if not value:
-        return None
-    if value.endswith("Z"):
-        value = value[:-1] + "+00:00"
-    try:
-        return int(datetime.fromisoformat(value).timestamp())
-    except ValueError:
-        return None
+    return activity_start_ts(activity)
 
 
 def _fetch_page(
@@ -491,67 +469,82 @@ def _reset_persisted_data() -> None:
 
 
 def _fetch_recent_activity_ids(
-    token: str, per_page: int, limiter: Optional[RateLimiter]
-) -> Optional[List[str]]:
+    config: Dict, token: str, per_page: int, limiter: Optional[RateLimiter]
+) -> Tuple[Optional[List[str]], str]:
     try:
-        activities = _fetch_page(token, min(per_page, 50), 1, 0, None, limiter)
+        activities, token = _run_with_token_refresh(
+            config,
+            token,
+            limiter,
+            "recent activity overlap check",
+            lambda access_token: _fetch_page(
+                access_token, min(per_page, 50), 1, 0, None, limiter
+            ),
+        )
     except Exception:
-        return None
+        return None, token
     activity_ids = []
     for activity in activities or []:
         activity_id = activity.get("id")
         if activity_id:
             activity_ids.append(str(activity_id))
-    return activity_ids
+    return activity_ids, token
 
 
 def _maybe_reset_for_new_athlete(
     config: Dict, token: str, per_page: int, limiter: Optional[RateLimiter]
-) -> None:
+) -> str:
     strava = config.get("strava", {}) or {}
     secret = strava.get("client_secret") or strava.get("refresh_token") or ""
     if not secret:
-        return
+        return token
 
     try:
-        athlete = _fetch_athlete(token, limiter)
+        athlete, token = _run_with_token_refresh(
+            config,
+            token,
+            limiter,
+            "athlete profile lookup",
+            lambda access_token: _fetch_athlete(access_token, limiter),
+        )
     except Exception as exc:
         print(f"Warning: unable to fetch athlete profile; skipping reset ({exc})")
-        return
+        return token
     athlete_id = athlete.get("id")
     if athlete_id is None:
         print("Warning: athlete profile missing id; skipping reset")
-        return
+        return token
 
     current_fingerprint = _athlete_fingerprint(int(athlete_id), secret)
     stored_fingerprint = _load_athlete_fingerprint()
 
     if stored_fingerprint and stored_fingerprint == current_fingerprint:
-        return
+        return token
 
     if stored_fingerprint and stored_fingerprint != current_fingerprint:
         print("Detected different athlete; resetting persisted data.")
         _reset_persisted_data()
         _write_athlete_fingerprint(current_fingerprint)
-        return
+        return token
 
     if not _has_existing_data():
         _write_athlete_fingerprint(current_fingerprint)
-        return
+        return token
 
-    recent_ids = _fetch_recent_activity_ids(token, per_page, limiter)
+    recent_ids, token = _fetch_recent_activity_ids(config, token, per_page, limiter)
     if recent_ids is None:
         print("Warning: unable to verify recent activity overlap; skipping reset")
-        return
+        return token
 
     existing_ids = _load_existing_activity_ids()
     if recent_ids and any(activity_id in existing_ids for activity_id in recent_ids):
         _write_athlete_fingerprint(current_fingerprint)
-        return
+        return token
 
     print("No athlete fingerprint found and data does not match; resetting persisted data.")
     _reset_persisted_data()
     _write_athlete_fingerprint(current_fingerprint)
+    return token
 
 
 def _write_activity(activity: Dict) -> bool:
@@ -597,21 +590,25 @@ def _save_state(state: Dict) -> None:
 
 
 def _sync_recent(
+    config: Dict,
     token: str,
     per_page: int,
     recent_days: int,
     limiter: RateLimiter,
     dry_run: bool,
-) -> Dict:
+) -> Tuple[Dict, str]:
     if recent_days <= 0:
-        return {
-            "fetched": 0,
-            "new_or_updated": 0,
-            "oldest_ts": None,
-            "newest_ts": None,
-            "rate_limited": False,
-            "rate_limit_message": "",
-        }
+        return (
+            {
+                "fetched": 0,
+                "new_or_updated": 0,
+                "oldest_ts": None,
+                "newest_ts": None,
+                "rate_limited": False,
+                "rate_limit_message": "",
+            },
+            token,
+        )
 
     after = int((utc_now() - timedelta(days=recent_days)).timestamp())
     page = 1
@@ -625,7 +622,15 @@ def _sync_recent(
 
     while True:
         try:
-            activities = _fetch_page(token, per_page, page, after, None, limiter)
+            activities, token = _run_with_token_refresh(
+                config,
+                token,
+                limiter,
+                "recent activity sync",
+                lambda access_token: _fetch_page(
+                    access_token, per_page, page, after, None, limiter
+                ),
+            )
         except RateLimitExceeded as exc:
             rate_limited = True
             rate_limit_message = str(exc)
@@ -647,15 +652,18 @@ def _sync_recent(
                 new_or_updated += 1
         page += 1
 
-    return {
-        "fetched": total,
-        "new_or_updated": new_or_updated,
-        "oldest_ts": oldest_ts,
-        "newest_ts": newest_ts,
-        "rate_limited": rate_limited,
-        "rate_limit_message": rate_limit_message,
-        "activity_ids": sorted(activity_ids),
-    }
+    return (
+        {
+            "fetched": total,
+            "new_or_updated": new_or_updated,
+            "oldest_ts": oldest_ts,
+            "newest_ts": newest_ts,
+            "rate_limited": rate_limited,
+            "rate_limit_message": rate_limit_message,
+            "activity_ids": sorted(activity_ids),
+        },
+        token,
+    )
 
 
 def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
@@ -677,11 +685,13 @@ def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
 
     token = _get_access_token(config, limiter)
     if not dry_run:
-        _maybe_reset_for_new_athlete(config, token, per_page, limiter)
+        token = _maybe_reset_for_new_athlete(config, token, per_page, limiter)
 
     ensure_dir(RAW_DIR)
 
-    recent_summary = _sync_recent(token, per_page, recent_days, limiter, dry_run)
+    recent_summary, token = _sync_recent(
+        config, token, per_page, recent_days, limiter, dry_run
+    )
 
     page = 1
     total = 0
@@ -732,7 +742,15 @@ def sync_strava(dry_run: bool, prune_deleted: bool) -> Dict:
     if not rate_limited and not skip_backfill:
         while True:
             try:
-                activities = _fetch_page(token, per_page, page, after, before, limiter)
+                activities, token = _run_with_token_refresh(
+                    config,
+                    token,
+                    limiter,
+                    "historical backfill sync",
+                    lambda access_token: _fetch_page(
+                        access_token, per_page, page, after, before, limiter
+                    ),
+                )
             except RateLimitExceeded as exc:
                 rate_limited = True
                 rate_limit_message = str(exc)
