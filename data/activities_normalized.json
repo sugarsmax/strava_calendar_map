@@ -32357,5 +32357,19 @@
     "start_date_local": "2026-03-03T18:14:25Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-03-05",
+    "distance": 4999.6,
+    "elevation_gain": 0.0,
+    "id": "17620441981",
+    "is_commute": false,
+    "moving_time": 1606.0,
+    "name": "5000m row",
+    "raw_activity_type": "Rowing",
+    "raw_type": "Rowing",
+    "start_date_local": "2026-03-05T18:28:14Z",
+    "type": "Rowing",
+    "year": 2026
   }
 ]

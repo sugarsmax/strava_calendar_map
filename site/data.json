@@ -17457,6 +17457,13 @@
       "subtype": "Ride",
       "type": "Commute",
       "year": 2026
+    },
+    {
+      "date": "2026-03-05",
+      "hour": 18,
+      "subtype": "Rowing",
+      "type": "Rowing",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -36253,6 +36260,15 @@
           "distance": 6886.0,
           "elevation_gain": 0.0,
           "moving_time": 2153.0
+        },
+        "2026-03-05": {
+          "activity_ids": [
+            "17620441981"
+          ],
+          "count": 1,
+          "distance": 4999.6,
+          "elevation_gain": 0.0,
+          "moving_time": 1606.0
         }
       },
       "Snowboard": {
@@ -36443,7 +36459,7 @@
       }
     }
   },
-  "generated_at": "2026-03-05T15:41:13.570656+00:00",
+  "generated_at": "2026-03-06T15:27:43.921225+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
