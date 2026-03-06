@@ -625,7 +625,7 @@
           weekMap.get(weekKey).push(activity);
         });
 
-        const sortedWeeks = Array.from(weekMap.keys()).sort().reverse().slice(0, 52).reverse();
+        const sortedWeeks = Array.from(weekMap.keys()).sort().reverse().slice(0, 52);
         
         if (sortedWeeks.length === 0) return;
 
@@ -737,25 +737,39 @@
 
           // Draw horizontal grid lines (weeks) and week labels (only on first panel)
           if (panelIdx === 0) {
-            timeBandsCtx.strokeStyle = 'rgba(148, 163, 184, 0.05)';
-            timeBandsCtx.fillStyle = '#94a3b8';
-            timeBandsCtx.font = '9px Space Grotesk';
-            timeBandsCtx.textAlign = 'right';
             timeBandsCtx.textBaseline = 'middle';
             
             sortedWeeks.forEach((weekKey, weekIdx) => {
               const y = padding.top + (weekIdx * rowHeight);
-              
-              // Draw grid line
+              const date = new Date(weekKey);
+              const year = date.getFullYear();
+              const prevYear = weekIdx > 0 ? new Date(sortedWeeks[weekIdx - 1]).getFullYear() : year;
+              const isYearBoundary = year !== prevYear;
+
+              // Draw grid line — brighter at year boundaries
+              timeBandsCtx.strokeStyle = isYearBoundary
+                ? 'rgba(148, 163, 184, 0.3)'
+                : 'rgba(148, 163, 184, 0.05)';
+              timeBandsCtx.lineWidth = isYearBoundary ? 1 : 1;
               timeBandsCtx.beginPath();
               timeBandsCtx.moveTo(padding.left, y);
               timeBandsCtx.lineTo(padding.left + (panelWidth + panelGap) * 5, y);
               timeBandsCtx.stroke();
-              
-              // Draw week label (date)
-              const date = new Date(weekKey);
+
+              // Draw week date label
+              timeBandsCtx.fillStyle = '#94a3b8';
+              timeBandsCtx.font = '9px Space Grotesk';
+              timeBandsCtx.textAlign = 'right';
               const label = `${String(date.getMonth() + 1).padStart(2, '0')}.${String(date.getDate()).padStart(2, '0')}`;
               timeBandsCtx.fillText(label, padding.left - 10, y + rowHeight / 2);
+
+              // Draw year label at year boundaries
+              if (isYearBoundary) {
+                timeBandsCtx.fillStyle = '#e5e7eb';
+                timeBandsCtx.font = 'bold 9px Space Grotesk';
+                timeBandsCtx.textAlign = 'right';
+                timeBandsCtx.fillText(String(year), padding.left - 42, y + rowHeight / 2);
+              }
             });
           }
 
