@@ -32413,5 +32413,19 @@
     "start_date_local": "2026-03-08T19:24:31Z",
     "type": "RockClimbing",
     "year": 2026
+  },
+  {
+    "date": "2026-03-10",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "17680516944",
+    "is_commute": false,
+    "moving_time": 1524.0,
+    "name": "Evening Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-03-10T19:07:57Z",
+    "type": "Elliptical",
+    "year": 2026
   }
 ]
