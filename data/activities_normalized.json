@@ -32511,5 +32511,19 @@
     "start_date_local": "2026-03-19T19:16:46Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-03-22",
+    "distance": 6575.3,
+    "elevation_gain": 221.1,
+    "id": "17821014119",
+    "is_commute": false,
+    "moving_time": 5240.0,
+    "name": "SLO - Bob Jones trail",
+    "raw_activity_type": "Hike",
+    "raw_type": "Hike",
+    "start_date_local": "2026-03-22T11:01:13Z",
+    "type": "Hike",
+    "year": 2026
   }
 ]

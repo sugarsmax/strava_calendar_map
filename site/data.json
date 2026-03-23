@@ -17534,6 +17534,13 @@
       "subtype": "Elliptical",
       "type": "Elliptical",
       "year": 2026
+    },
+    {
+      "date": "2026-03-22",
+      "hour": 11,
+      "subtype": "Hike",
+      "type": "Hike",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -36270,6 +36277,17 @@
           "moving_time": 1481.0
         }
       },
+      "Hike": {
+        "2026-03-22": {
+          "activity_ids": [
+            "17821014119"
+          ],
+          "count": 1,
+          "distance": 6575.3,
+          "elevation_gain": 221.1,
+          "moving_time": 5240.0
+        }
+      },
       "Ride": {
         "2026-01-18": {
           "activity_ids": [
@@ -36611,7 +36629,7 @@
       }
     }
   },
-  "generated_at": "2026-03-22T15:17:22.473441+00:00",
+  "generated_at": "2026-03-23T15:52:20.619355+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
