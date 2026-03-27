@@ -32581,5 +32581,19 @@
     "start_date_local": "2026-03-25T15:44:03Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-03-26",
+    "distance": 527.0,
+    "elevation_gain": 0.0,
+    "id": "17870546817",
+    "is_commute": false,
+    "moving_time": 342.0,
+    "name": "Afternoon Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-03-26T14:53:57Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
