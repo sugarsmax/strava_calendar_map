@@ -743,10 +743,7 @@ try {
     Write-Info "Setup summary:"
     Write-Info "- Mode: Recommended (Online-only)"
     Write-Info "- Target repository: $targetRepo"
-    if (-not (Read-YesNo "Proceed?" "Y")) {
-        Write-Info "Skipped setup."
-        exit 0
-    }
+    Write-Info "Continuing with setup..."
 
     $status = Invoke-OnlineSetup -GhPath $ghPath -PythonRuntime $pythonRuntime -UpstreamRepo $UpstreamRepo -TargetRepo $targetRepo -SetupArgs $SetupArgs
     exit $status

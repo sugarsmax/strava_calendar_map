@@ -156,12 +156,22 @@ class BootstrapWindowsWrapperTests(unittest.TestCase):
         gh_index = wrapper.index("$ghPath = Ensure-GhPath")
         auth_index = wrapper.index("Ensure-GhAuthenticated $ghPath")
         target_index = wrapper.index("$targetRepo = Resolve-TargetRepository")
+        continue_index = wrapper.index('Write-Info "Continuing with setup..."')
         launch_index = wrapper.index("$status = Invoke-OnlineSetup")
 
         self.assertLess(python_index, gh_index)
         self.assertLess(gh_index, auth_index)
         self.assertLess(auth_index, target_index)
+        self.assertLess(target_index, continue_index)
+        self.assertLess(continue_index, launch_index)
         self.assertLess(target_index, launch_index)
+
+    def test_windows_wrapper_does_not_pause_for_a_second_confirmation_prompt(self) -> None:
+        wrapper = self._read_wrapper()
+
+        self.assertIn('Write-Info "Continuing with setup..."', wrapper)
+        self.assertNotIn('Read-YesNo "Proceed?" "Y"', wrapper)
+        self.assertNotIn('Write-Info "Skipped setup."', wrapper)
 
     def test_readme_points_windows_quick_start_to_powershell_wrapper(self) -> None:
         with open(README_PATH, "r", encoding="utf-8") as f:
