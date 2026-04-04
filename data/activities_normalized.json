@@ -32745,5 +32745,19 @@
     "start_date_local": "2026-04-01T18:51:46Z",
     "type": "WeightTraining",
     "year": 2026
+  },
+  {
+    "date": "2026-04-03",
+    "distance": 22442.4,
+    "elevation_gain": 0.0,
+    "id": "17966659444",
+    "is_commute": false,
+    "moving_time": 5236.0,
+    "name": "Meadows w Mitchell",
+    "raw_activity_type": "Snowboard",
+    "raw_type": "Snowboard",
+    "start_date_local": "2026-04-03T09:20:08Z",
+    "type": "Snowboard",
+    "year": 2026
   }
 ]
