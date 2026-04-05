@@ -32759,5 +32759,19 @@
     "start_date_local": "2026-04-03T09:20:08Z",
     "type": "Snowboard",
     "year": 2026
+  },
+  {
+    "date": "2026-04-04",
+    "distance": 31559.3,
+    "elevation_gain": 294.6,
+    "id": "17980912834",
+    "is_commute": false,
+    "moving_time": 5645.0,
+    "name": "Afternoon Ride w M",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-04-04T14:36:55Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
