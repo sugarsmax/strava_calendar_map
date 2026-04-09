@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-04-08T18:39:12.628329+00:00",
+  "generated_at": "2026-04-09T16:12:41.306380+00:00",
   "years": {
     "1994": {
       "Ride": {
@@ -18682,12 +18682,13 @@
         },
         "2026-04-08": {
           "activity_ids": [
-            "18028709964"
+            "18028709964",
+            "18035426381"
           ],
-          "count": 1,
-          "distance": 4373.7,
-          "elevation_gain": 11.9,
-          "moving_time": 641.0
+          "count": 2,
+          "distance": 9031.599999999999,
+          "elevation_gain": 60.9,
+          "moving_time": 1443.0
         }
       },
       "Elliptical": {
