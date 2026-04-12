@@ -32843,5 +32843,19 @@
     "start_date_local": "2026-04-08T18:28:48Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-04-11",
+    "distance": 814.3,
+    "elevation_gain": 0.0,
+    "id": "18069460990",
+    "is_commute": false,
+    "moving_time": 632.0,
+    "name": "Morning Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-04-11T09:32:41Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
