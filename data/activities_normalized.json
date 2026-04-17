@@ -32885,5 +32885,19 @@
     "start_date_local": "2026-04-16T08:03:08Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-04-16",
+    "distance": 4652.4,
+    "elevation_gain": 39.4,
+    "id": "18140089983",
+    "is_commute": true,
+    "moving_time": 834.0,
+    "name": "Evening Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-04-16T19:33:09Z",
+    "type": "Commute",
+    "year": 2026
   }
 ]
