@@ -189,6 +189,26 @@
         color: var(--muted);
       }
 
+      .legend-item.year-toggle {
+        cursor: pointer;
+        user-select: none;
+        transition: opacity 0.2s;
+        border-radius: 6px;
+        padding: 3px 6px;
+      }
+
+      .legend-item.year-toggle:hover {
+        background: rgba(255, 255, 255, 0.05);
+      }
+
+      .legend-item.year-toggle.hidden-year {
+        opacity: 0.35;
+      }
+
+      .legend-item.year-toggle.hidden-year span {
+        text-decoration: line-through;
+      }
+
       .legend-color {
         width: 16px;
         height: 16px;
@@ -307,6 +327,7 @@
           <canvas id="cumulativeCanvas"></canvas>
         </div>
         <div class="legend" id="yearLegend"></div>
+        <p class="chart-subtitle" style="text-align:center;margin-top:6px;">Click a year to show/hide it</p>
         <div class="stats-grid" id="cumulativeStats"></div>
       </div>
 
@@ -351,6 +372,7 @@
       // State
       let data = null;
       let currentUnits = 'mi';
+      let hiddenYears = new Set();
 
       // DOM Elements
       const miButton = document.getElementById('miButton');
@@ -481,10 +503,11 @@
           yearData[year] = points;
         });
 
-        // Find max values for scaling
+        // Find max values for scaling (only visible years)
         let maxDay = 365;
         let maxDistance = 0;
-        Object.values(yearData).forEach(points => {
+        Object.entries(yearData).forEach(([year, points]) => {
+          if (hiddenYears.has(year)) return;
           points.forEach(p => {
             maxDistance = Math.max(maxDistance, p.cumulative);
           });
@@ -538,6 +561,7 @@
         // Draw lines for each year
         Object.entries(yearData).forEach(([year, points], idx) => {
           if (points.length === 0) return;
+          if (hiddenYears.has(year)) return;
 
           const color = YEAR_COLORS[idx % YEAR_COLORS.length];
           cumulativeCtx.strokeStyle = color;
@@ -582,8 +606,9 @@
           const color = YEAR_COLORS[idx % YEAR_COLORS.length];
           const points = yearData[year];
           const total = points.length > 0 ? points[points.length - 1].cumulative : 0;
+          const isHidden = hiddenYears.has(year);
           html += `
-            <div class="legend-item">
+            <div class="legend-item year-toggle${isHidden ? ' hidden-year' : ''}" data-year="${year}">
               <div class="legend-color" style="background: ${color};"></div>
               <span>${year} (${Math.round(total).toLocaleString()} ${getUnitLabel()})</span>
             </div>
@@ -591,6 +616,18 @@
         });
 
         legendContainer.innerHTML = html;
+
+        legendContainer.querySelectorAll('.year-toggle').forEach(el => {
+          el.addEventListener('click', () => {
+            const year = el.dataset.year;
+            if (hiddenYears.has(year)) {
+              hiddenYears.delete(year);
+            } else {
+              hiddenYears.add(year);
+            }
+            renderCumulativeChart();
+          });
+        });
       }
 
       function renderTimeBandsChart() {
