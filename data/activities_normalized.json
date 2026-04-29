@@ -32955,5 +32955,47 @@
     "start_date_local": "2026-04-26T15:08:02Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-04-27",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "18299758106",
+    "is_commute": false,
+    "moving_time": 3660.0,
+    "name": "Yard work",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-04-27T12:17:00Z",
+    "type": "WeightTraining",
+    "year": 2026
+  },
+  {
+    "date": "2026-04-28",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "18299717120",
+    "is_commute": false,
+    "moving_time": 1881.0,
+    "name": "Afternoon Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-04-28T16:41:53Z",
+    "type": "Elliptical",
+    "year": 2026
+  },
+  {
+    "date": "2026-04-28",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "18299986679",
+    "is_commute": false,
+    "moving_time": 856.0,
+    "name": "Afternoon Weight Training",
+    "raw_activity_type": "WeightTraining",
+    "raw_type": "WeightTraining",
+    "start_date_local": "2026-04-28T17:29:33Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
