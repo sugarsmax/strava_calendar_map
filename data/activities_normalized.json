@@ -33025,5 +33025,19 @@
     "start_date_local": "2026-04-29T18:14:09Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-04-30",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "18325245643",
+    "is_commute": false,
+    "moving_time": 3600.0,
+    "name": "Yard work",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-04-30T15:20:00Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
