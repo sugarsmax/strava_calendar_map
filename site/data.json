@@ -17800,6 +17800,13 @@
       "subtype": "Workout",
       "type": "WeightTraining",
       "year": 2026
+    },
+    {
+      "date": "2026-05-02",
+      "hour": 12,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37018,6 +37025,15 @@
           "distance": 3571.4,
           "elevation_gain": 30.5,
           "moving_time": 2683.0
+        },
+        "2026-05-02": {
+          "activity_ids": [
+            "18351490908"
+          ],
+          "count": 1,
+          "distance": 4412.8,
+          "elevation_gain": 15.6,
+          "moving_time": 3264.0
         }
       },
       "WeightTraining": {
@@ -37141,7 +37157,7 @@
       }
     }
   },
-  "generated_at": "2026-05-02T15:37:51.238735+00:00",
+  "generated_at": "2026-05-03T15:37:42.361914+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
