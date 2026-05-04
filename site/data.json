@@ -17807,6 +17807,27 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-05-02",
+      "hour": 11,
+      "subtype": "Workout",
+      "type": "WeightTraining",
+      "year": 2026
+    },
+    {
+      "date": "2026-05-03",
+      "hour": 18,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-05-03",
+      "hour": 19,
+      "subtype": "RockClimbing",
+      "type": "RockClimbing",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -36706,6 +36727,15 @@
           "distance": 31559.3,
           "elevation_gain": 294.6,
           "moving_time": 5645.0
+        },
+        "2026-05-03": {
+          "activity_ids": [
+            "18366872645"
+          ],
+          "count": 1,
+          "distance": 12364.8,
+          "elevation_gain": 97.0,
+          "moving_time": 1946.0
         }
       },
       "RockClimbing": {
@@ -36744,6 +36774,15 @@
           "distance": 14.2,
           "elevation_gain": 0.0,
           "moving_time": 18.0
+        },
+        "2026-05-03": {
+          "activity_ids": [
+            "18372058311"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 6600.0
         }
       },
       "Rowing": {
@@ -37153,11 +37192,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 3600.0
+        },
+        "2026-05-02": {
+          "activity_ids": [
+            "18362867873"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 7260.0
         }
       }
     }
   },
-  "generated_at": "2026-05-03T15:37:42.361914+00:00",
+  "generated_at": "2026-05-04T16:25:40.112164+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
