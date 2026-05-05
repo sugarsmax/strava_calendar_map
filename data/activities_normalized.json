@@ -33095,5 +33095,47 @@
     "start_date_local": "2026-05-03T19:00:00Z",
     "type": "RockClimbing",
     "year": 2026
+  },
+  {
+    "date": "2026-05-04",
+    "distance": 4362.8,
+    "elevation_gain": 7.6,
+    "id": "18374439895",
+    "is_commute": true,
+    "moving_time": 635.0,
+    "name": "Morning Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-04T09:48:38Z",
+    "type": "Commute",
+    "year": 2026
+  },
+  {
+    "date": "2026-05-04",
+    "distance": 4656.7,
+    "elevation_gain": 38.8,
+    "id": "18379544149",
+    "is_commute": true,
+    "moving_time": 801.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-04T17:59:50Z",
+    "type": "Commute",
+    "year": 2026
+  },
+  {
+    "date": "2026-05-04",
+    "distance": 1563.0,
+    "elevation_gain": 3.9,
+    "id": "18380261927",
+    "is_commute": false,
+    "moving_time": 1334.0,
+    "name": "Evening Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-05-04T19:57:35Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
