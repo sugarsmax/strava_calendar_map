@@ -33179,5 +33179,19 @@
     "start_date_local": "2026-05-09T09:42:20Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-05-10",
+    "distance": 8395.2,
+    "elevation_gain": 169.1,
+    "id": "18459516528",
+    "is_commute": false,
+    "moving_time": 440.0,
+    "name": "Evening Rock Climb",
+    "raw_activity_type": "RockClimbing",
+    "raw_type": "RockClimbing",
+    "start_date_local": "2026-05-10T19:30:34Z",
+    "type": "RockClimbing",
+    "year": 2026
   }
 ]
