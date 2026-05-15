@@ -33207,5 +33207,19 @@
     "start_date_local": "2026-05-10T19:00:00Z",
     "type": "RockClimbing",
     "year": 2026
+  },
+  {
+    "date": "2026-05-14",
+    "distance": 6258.7,
+    "elevation_gain": 78.0,
+    "id": "18510931279",
+    "is_commute": false,
+    "moving_time": 4647.0,
+    "name": "Afternoon Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-05-14T15:10:19Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
