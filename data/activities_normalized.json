@@ -33263,5 +33263,47 @@
     "start_date_local": "2026-05-27T08:06:11Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-05-27",
+    "distance": 4192.9,
+    "elevation_gain": 22.6,
+    "id": "18683171846",
+    "is_commute": false,
+    "moving_time": 734.0,
+    "name": "Evening Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-27T18:07:11Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-05-27",
+    "distance": 7788.6,
+    "elevation_gain": 45.4,
+    "id": "18683513273",
+    "is_commute": false,
+    "moving_time": 1387.0,
+    "name": "Evening Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-27T18:46:09Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-05-28",
+    "distance": 4364.1,
+    "elevation_gain": 7.6,
+    "id": "18691792141",
+    "is_commute": true,
+    "moving_time": 625.0,
+    "name": "Morning Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-28T10:12:55Z",
+    "type": "Commute",
+    "year": 2026
   }
 ]
