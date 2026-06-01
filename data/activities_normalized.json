@@ -33333,5 +33333,33 @@
     "start_date_local": "2026-05-30T09:14:57Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-05-31",
+    "distance": 15875.4,
+    "elevation_gain": 195.0,
+    "id": "18734977336",
+    "is_commute": false,
+    "moving_time": 2764.0,
+    "name": "Mt Tabor",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-05-31T13:32:50Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-01",
+    "distance": 4355.2,
+    "elevation_gain": 7.6,
+    "id": "18742988079",
+    "is_commute": true,
+    "moving_time": 656.0,
+    "name": "Morning Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-06-01T08:11:47Z",
+    "type": "Commute",
+    "year": 2026
   }
 ]
