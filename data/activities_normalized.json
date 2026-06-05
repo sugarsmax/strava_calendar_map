@@ -33389,5 +33389,33 @@
     "start_date_local": "2026-06-03T18:06:00Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-06-05",
+    "distance": 1022.7,
+    "elevation_gain": 9.5,
+    "id": "18797843351",
+    "is_commute": false,
+    "moving_time": 721.0,
+    "name": "Morning Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-06-05T10:06:47Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-05",
+    "distance": 1699.0,
+    "elevation_gain": 19.4,
+    "id": "18798677054",
+    "is_commute": false,
+    "moving_time": 1361.0,
+    "name": "Lunch Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-06-05T11:45:53Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
