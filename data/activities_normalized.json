@@ -33417,5 +33417,47 @@
     "start_date_local": "2026-06-05T11:45:53Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-06-08",
+    "distance": 5616.8,
+    "elevation_gain": 34.1,
+    "id": "18857419819",
+    "is_commute": false,
+    "moving_time": 2669.0,
+    "name": "Afternoon Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-06-08T15:31:46Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-09",
+    "distance": 4055.9,
+    "elevation_gain": 2.9,
+    "id": "18857374542",
+    "is_commute": false,
+    "moving_time": 864.0,
+    "name": "Toronto e-bike",
+    "raw_activity_type": "EBikeRide",
+    "raw_type": "EBikeRide",
+    "start_date_local": "2026-06-09T18:26:50Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-09",
+    "distance": 5533.6,
+    "elevation_gain": 19.5,
+    "id": "18859304134",
+    "is_commute": false,
+    "moving_time": 1275.0,
+    "name": "Night Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-06-09T21:56:51Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
