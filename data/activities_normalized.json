@@ -33487,5 +33487,19 @@
     "start_date_local": "2026-06-13T08:05:25Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-06-14",
+    "distance": 20697.9,
+    "elevation_gain": 289.0,
+    "id": "18920557117",
+    "is_commute": false,
+    "moving_time": 4223.0,
+    "name": "Rocky Butte w/ J",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-06-14T09:05:50Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
