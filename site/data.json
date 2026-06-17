@@ -18038,6 +18038,20 @@
       "subtype": "Ride",
       "type": "Commute",
       "year": 2026
+    },
+    {
+      "date": "2026-06-16",
+      "hour": 18,
+      "subtype": "Ride",
+      "type": "Commute",
+      "year": 2026
+    },
+    {
+      "date": "2026-06-17",
+      "hour": 8,
+      "subtype": "Ride",
+      "type": "Commute",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -36801,12 +36815,22 @@
         },
         "2026-06-16": {
           "activity_ids": [
-            "18945203962"
+            "18945203962",
+            "18951887654"
+          ],
+          "count": 2,
+          "distance": 9034.2,
+          "elevation_gain": 46.7,
+          "moving_time": 1438.0
+        },
+        "2026-06-17": {
+          "activity_ids": [
+            "18959192188"
           ],
           "count": 1,
-          "distance": 4358.7,
+          "distance": 4361.9,
           "elevation_gain": 7.6,
-          "moving_time": 645.0
+          "moving_time": 642.0
         }
       },
       "Elliptical": {
@@ -37621,7 +37645,7 @@
       }
     }
   },
-  "generated_at": "2026-06-16T18:51:10.614853+00:00",
+  "generated_at": "2026-06-17T17:44:14.054704+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
