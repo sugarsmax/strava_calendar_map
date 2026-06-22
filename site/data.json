@@ -18066,6 +18066,13 @@
       "subtype": "Ride",
       "type": "Ride",
       "year": 2026
+    },
+    {
+      "date": "2026-06-21",
+      "hour": 20,
+      "subtype": "RockClimbing",
+      "type": "RockClimbing",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37174,6 +37181,15 @@
           "distance": 8395.2,
           "elevation_gain": 169.1,
           "moving_time": 6740.0
+        },
+        "2026-06-21": {
+          "activity_ids": [
+            "19017666993"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 3600.0
         }
       },
       "Rowing": {
@@ -37669,7 +37685,7 @@
       }
     }
   },
-  "generated_at": "2026-06-21T16:25:09.188115+00:00",
+  "generated_at": "2026-06-22T18:39:34.557301+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

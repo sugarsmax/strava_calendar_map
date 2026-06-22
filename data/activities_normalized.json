@@ -33571,5 +33571,19 @@
     "start_date_local": "2026-06-18T17:06:14Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-06-21",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "19017666993",
+    "is_commute": false,
+    "moving_time": 3600.0,
+    "name": "Climbing",
+    "raw_activity_type": "RockClimbing",
+    "raw_type": "RockClimbing",
+    "start_date_local": "2026-06-21T20:47:18Z",
+    "type": "RockClimbing",
+    "year": 2026
   }
 ]
