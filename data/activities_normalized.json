@@ -33627,5 +33627,19 @@
     "start_date_local": "2026-06-24T14:32:24Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-06-25",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "19075753809",
+    "is_commute": false,
+    "moving_time": 7200.0,
+    "name": "Workout - river rock",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-06-25T13:00:00Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]

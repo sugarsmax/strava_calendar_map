@@ -18094,6 +18094,13 @@
       "subtype": "Ride",
       "type": "Commute",
       "year": 2026
+    },
+    {
+      "date": "2026-06-25",
+      "hour": 13,
+      "subtype": "Workout",
+      "type": "WeightTraining",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37713,11 +37720,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 7260.0
+        },
+        "2026-06-25": {
+          "activity_ids": [
+            "19075753809"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 7200.0
         }
       }
     }
   },
-  "generated_at": "2026-06-26T16:55:30.064055+00:00",
+  "generated_at": "2026-06-27T15:58:40.090378+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
