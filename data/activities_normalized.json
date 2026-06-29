@@ -33641,5 +33641,33 @@
     "start_date_local": "2026-06-25T13:00:00Z",
     "type": "WeightTraining",
     "year": 2026
+  },
+  {
+    "date": "2026-06-27",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "19102384778",
+    "is_commute": false,
+    "moving_time": 7200.0,
+    "name": "River rock Sat",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-06-27T16:00:00Z",
+    "type": "WeightTraining",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-28",
+    "distance": 17667.6,
+    "elevation_gain": 201.0,
+    "id": "19104833332",
+    "is_commute": false,
+    "moving_time": 3393.0,
+    "name": "Mt Tabor w J",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-06-28T16:12:21Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
