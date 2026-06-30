@@ -33669,5 +33669,33 @@
     "start_date_local": "2026-06-28T16:12:21Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-06-28",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "19116824214",
+    "is_commute": false,
+    "moving_time": 5400.0,
+    "name": "Evening Rock Climb",
+    "raw_activity_type": "RockClimbing",
+    "raw_type": "RockClimbing",
+    "start_date_local": "2026-06-28T19:00:00Z",
+    "type": "RockClimbing",
+    "year": 2026
+  },
+  {
+    "date": "2026-06-30",
+    "distance": 4393.5,
+    "elevation_gain": 7.6,
+    "id": "19125264066",
+    "is_commute": true,
+    "moving_time": 666.0,
+    "name": "Morning Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-06-30T08:31:26Z",
+    "type": "Commute",
+    "year": 2026
   }
 ]
