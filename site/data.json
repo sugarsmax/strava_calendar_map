@@ -18185,6 +18185,13 @@
       "subtype": "Ride",
       "type": "Commute",
       "year": 2026
+    },
+    {
+      "date": "2026-07-08",
+      "hour": 16,
+      "subtype": "Ride",
+      "type": "Commute",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37003,6 +37010,15 @@
           "distance": 4427.4,
           "elevation_gain": 7.6,
           "moving_time": 634.0
+        },
+        "2026-07-08": {
+          "activity_ids": [
+            "19235915352"
+          ],
+          "count": 1,
+          "distance": 4656.9,
+          "elevation_gain": 39.3,
+          "moving_time": 784.0
         }
       },
       "Elliptical": {
@@ -37909,7 +37925,7 @@
       }
     }
   },
-  "generated_at": "2026-07-08T16:24:41.909717+00:00",
+  "generated_at": "2026-07-09T17:11:34.922372+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
