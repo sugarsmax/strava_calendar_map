@@ -33893,5 +33893,19 @@
     "start_date_local": "2026-07-12T13:40:20Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-07-15",
+    "distance": 2574.7,
+    "elevation_gain": 0.0,
+    "id": "19329785334",
+    "is_commute": false,
+    "moving_time": 2695.0,
+    "name": "Stow mowing",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-07-15T18:20:39Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
