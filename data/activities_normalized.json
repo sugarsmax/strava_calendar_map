@@ -33921,5 +33921,19 @@
     "start_date_local": "2026-07-17T14:29:36Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-07-19",
+    "distance": 31460.2,
+    "elevation_gain": 236.2,
+    "id": "19379181005",
+    "is_commute": false,
+    "moving_time": 5378.0,
+    "name": "Stow Bolton w Dad",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-07-19T10:39:53Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
