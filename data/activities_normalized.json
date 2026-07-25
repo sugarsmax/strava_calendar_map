@@ -33935,5 +33935,33 @@
     "start_date_local": "2026-07-19T10:39:53Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-07-24",
+    "distance": 8162.5,
+    "elevation_gain": 188.3,
+    "id": "19445831997",
+    "is_commute": false,
+    "moving_time": 6386.0,
+    "name": "Sardinia loop",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-07-24T07:59:43Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-07-25",
+    "distance": 7846.5,
+    "elevation_gain": 187.7,
+    "id": "19459325594",
+    "is_commute": false,
+    "moving_time": 6663.0,
+    "name": "Sardinia loop day 2",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-07-25T07:47:06Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
