@@ -33991,5 +33991,19 @@
     "start_date_local": "2026-07-27T04:59:08Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-07-27",
+    "distance": 710.3,
+    "elevation_gain": 15.2,
+    "id": "19491379436",
+    "is_commute": false,
+    "moving_time": 539.0,
+    "name": "Creek",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-07-27T16:52:49Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
