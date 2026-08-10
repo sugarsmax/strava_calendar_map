@@ -18304,6 +18304,27 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-08-09",
+      "hour": 7,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-08-09",
+      "hour": 13,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
+    },
+    {
+      "date": "2026-08-09",
+      "hour": 19,
+      "subtype": "Workout",
+      "type": "WeightTraining",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37440,6 +37461,15 @@
           "distance": 31460.2,
           "elevation_gain": 236.2,
           "moving_time": 5378.0
+        },
+        "2026-08-09": {
+          "activity_ids": [
+            "19672446308"
+          ],
+          "count": 1,
+          "distance": 31764.7,
+          "elevation_gain": 273.0,
+          "moving_time": 6124.0
         }
       },
       "RockClimbing": {
@@ -37998,6 +38028,15 @@
           "distance": 8706.9,
           "elevation_gain": 44.0,
           "moving_time": 6558.0
+        },
+        "2026-08-09": {
+          "activity_ids": [
+            "19674325052"
+          ],
+          "count": 1,
+          "distance": 3361.3,
+          "elevation_gain": 27.5,
+          "moving_time": 2608.0
         }
       },
       "WeightTraining": {
@@ -38153,11 +38192,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 10800.0
+        },
+        "2026-08-09": {
+          "activity_ids": [
+            "19676056465"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 4127.0
         }
       }
     }
   },
-  "generated_at": "2026-08-09T15:20:36.885334+00:00",
+  "generated_at": "2026-08-10T15:49:39.546313+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

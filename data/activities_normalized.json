@@ -34047,5 +34047,47 @@
     "start_date_local": "2026-07-31T14:27:57Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-08-09",
+    "distance": 31764.7,
+    "elevation_gain": 273.0,
+    "id": "19672446308",
+    "is_commute": false,
+    "moving_time": 6124.0,
+    "name": "Bridge Pedal 2026",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-08-09T07:45:52Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-08-09",
+    "distance": 3361.3,
+    "elevation_gain": 27.5,
+    "id": "19674325052",
+    "is_commute": false,
+    "moving_time": 2608.0,
+    "name": "Afternoon Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-08-09T13:35:32Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-08-09",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "19676056465",
+    "is_commute": false,
+    "moving_time": 4127.0,
+    "name": "Evening Workout",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-08-09T19:37:52Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
