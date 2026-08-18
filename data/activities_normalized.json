@@ -34103,5 +34103,19 @@
     "start_date_local": "2026-08-16T10:50:57Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-08-17",
+    "distance": 15943.5,
+    "elevation_gain": 79.0,
+    "id": "19787502947",
+    "is_commute": false,
+    "moving_time": 2570.0,
+    "name": "Afternoon Ride - Cully",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-08-17T17:33:43Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
