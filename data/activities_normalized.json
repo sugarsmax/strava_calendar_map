@@ -34145,5 +34145,33 @@
     "start_date_local": "2026-08-18T18:02:29Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-08-22",
+    "distance": 32188.6,
+    "elevation_gain": 184.0,
+    "id": "19853558390",
+    "is_commute": false,
+    "moving_time": 5002.0,
+    "name": "North Portland loop",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-08-22T07:32:46Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-08-22",
+    "distance": 6541.9,
+    "elevation_gain": 36.3,
+    "id": "19856968830",
+    "is_commute": false,
+    "moving_time": 5406.0,
+    "name": "Afternoon Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-08-22T14:03:39Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
