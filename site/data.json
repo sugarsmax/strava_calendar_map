@@ -18416,6 +18416,20 @@
       "subtype": "Elliptical",
       "type": "Elliptical",
       "year": 2026
+    },
+    {
+      "date": "2026-08-30",
+      "hour": 16,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-08-30",
+      "hour": 16,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37618,6 +37632,16 @@
           "distance": 32188.6,
           "elevation_gain": 184.0,
           "moving_time": 5002.0
+        },
+        "2026-08-30": {
+          "activity_ids": [
+            "19970143303",
+            "19970156591"
+          ],
+          "count": 2,
+          "distance": 33724.3,
+          "elevation_gain": 388.5,
+          "moving_time": 6704.0
         }
       },
       "RockClimbing": {
@@ -38389,7 +38413,7 @@
       }
     }
   },
-  "generated_at": "2026-08-30T18:14:52.589172+00:00",
+  "generated_at": "2026-08-31T20:28:06.221931+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

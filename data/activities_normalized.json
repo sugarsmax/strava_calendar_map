@@ -34271,5 +34271,33 @@
     "start_date_local": "2026-08-28T18:02:36Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-08-30",
+    "distance": 17019.3,
+    "elevation_gain": 194.5,
+    "id": "19970143303",
+    "is_commute": false,
+    "moving_time": 3344.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-08-30T16:32:15Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-08-30",
+    "distance": 16705.0,
+    "elevation_gain": 194.0,
+    "id": "19970156591",
+    "is_commute": false,
+    "moving_time": 3360.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-08-30T16:32:09Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
