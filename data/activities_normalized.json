@@ -34313,5 +34313,19 @@
     "start_date_local": "2026-08-31T18:29:11Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-09-03",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20027770618",
+    "is_commute": false,
+    "moving_time": 2056.0,
+    "name": "Afternoon Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-09-03T17:45:57Z",
+    "type": "Elliptical",
+    "year": 2026
   }
 ]

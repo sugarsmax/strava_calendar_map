@@ -18437,6 +18437,13 @@
       "subtype": "Elliptical",
       "type": "Elliptical",
       "year": 2026
+    },
+    {
+      "date": "2026-09-03",
+      "hour": 17,
+      "subtype": "Elliptical",
+      "type": "Elliptical",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37422,6 +37429,15 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 1291.0
+        },
+        "2026-09-03": {
+          "activity_ids": [
+            "20027770618"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 2056.0
         }
       },
       "Hike": {
@@ -38429,7 +38445,7 @@
       }
     }
   },
-  "generated_at": "2026-09-03T18:13:23.424250+00:00",
+  "generated_at": "2026-09-04T17:53:34.518284+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
