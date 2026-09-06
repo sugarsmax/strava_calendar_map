@@ -34327,5 +34327,19 @@
     "start_date_local": "2026-09-03T17:45:57Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-09-05",
+    "distance": 4346.6,
+    "elevation_gain": 137.7,
+    "id": "20053239009",
+    "is_commute": false,
+    "moving_time": 4196.0,
+    "name": "Silver Falls short loop",
+    "raw_activity_type": "Hike",
+    "raw_type": "Hike",
+    "start_date_local": "2026-09-05T14:54:15Z",
+    "type": "Hike",
+    "year": 2026
   }
 ]
