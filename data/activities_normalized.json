@@ -34355,5 +34355,19 @@
     "start_date_local": "2026-09-07T13:38:22Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-09-09",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20110710938",
+    "is_commute": false,
+    "moving_time": 1541.0,
+    "name": "Afternoon Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-09-09T17:41:44Z",
+    "type": "Elliptical",
+    "year": 2026
   }
 ]
