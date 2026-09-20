@@ -34481,5 +34481,19 @@
     "start_date_local": "2026-09-18T12:48:36Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-09-19",
+    "distance": 44569.3,
+    "elevation_gain": 443.6,
+    "id": "20247259851",
+    "is_commute": false,
+    "moving_time": 6589.0,
+    "name": "Hagg Lake",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-09-19T09:06:14Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
