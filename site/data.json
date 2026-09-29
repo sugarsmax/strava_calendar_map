@@ -18556,6 +18556,20 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-09-28",
+      "hour": 18,
+      "subtype": "Elliptical",
+      "type": "Elliptical",
+      "year": 2026
+    },
+    {
+      "date": "2026-09-29",
+      "hour": 8,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37598,6 +37612,15 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 1541.0
+        },
+        "2026-09-28": {
+          "activity_ids": [
+            "20380013219"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 49960.0
         }
       },
       "Hike": {
@@ -37861,6 +37884,15 @@
           "distance": 44569.3,
           "elevation_gain": 443.6,
           "moving_time": 6589.0
+        },
+        "2026-09-29": {
+          "activity_ids": [
+            "20380013159"
+          ],
+          "count": 1,
+          "distance": 4342.0,
+          "elevation_gain": 0.0,
+          "moving_time": 686.0
         }
       },
       "RockClimbing": {
@@ -38677,7 +38709,7 @@
       }
     }
   },
-  "generated_at": "2026-09-28T20:55:33.306365+00:00",
+  "generated_at": "2026-09-29T19:42:41.852469+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
