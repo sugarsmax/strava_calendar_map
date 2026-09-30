@@ -18565,8 +18565,22 @@
       "year": 2026
     },
     {
+      "date": "2026-09-28",
+      "hour": 18,
+      "subtype": "Elliptical",
+      "type": "Elliptical",
+      "year": 2026
+    },
+    {
       "date": "2026-09-29",
       "hour": 8,
+      "subtype": "Ride",
+      "type": "Commute",
+      "year": 2026
+    },
+    {
+      "date": "2026-09-29",
+      "hour": 17,
       "subtype": "Ride",
       "type": "Ride",
       "year": 2026
@@ -37466,6 +37480,15 @@
           "distance": 8804.0,
           "elevation_gain": 48.8,
           "moving_time": 1409.0
+        },
+        "2026-09-29": {
+          "activity_ids": [
+            "20380013159"
+          ],
+          "count": 1,
+          "distance": 4342.0,
+          "elevation_gain": 0.0,
+          "moving_time": 685.0
         }
       },
       "Elliptical": {
@@ -37615,12 +37638,13 @@
         },
         "2026-09-28": {
           "activity_ids": [
-            "20380013219"
+            "20380013219",
+            "20384435816"
           ],
-          "count": 1,
+          "count": 2,
           "distance": 0.0,
           "elevation_gain": 0.0,
-          "moving_time": 49960.0
+          "moving_time": 53711.0
         }
       },
       "Hike": {
@@ -37887,12 +37911,12 @@
         },
         "2026-09-29": {
           "activity_ids": [
-            "20380013159"
+            "20386687925"
           ],
           "count": 1,
-          "distance": 4342.0,
-          "elevation_gain": 0.0,
-          "moving_time": 686.0
+          "distance": 4696.0,
+          "elevation_gain": 44.5,
+          "moving_time": 824.0
         }
       },
       "RockClimbing": {
@@ -38709,7 +38733,7 @@
       }
     }
   },
-  "generated_at": "2026-09-29T19:42:41.852469+00:00",
+  "generated_at": "2026-09-30T19:44:02.772047+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

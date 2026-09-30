@@ -34567,16 +34567,44 @@
     "year": 2026
   },
   {
+    "date": "2026-09-28",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20384435816",
+    "is_commute": false,
+    "moving_time": 3751.0,
+    "name": "Evening Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-09-28T18:48:30Z",
+    "type": "Elliptical",
+    "year": 2026
+  },
+  {
     "date": "2026-09-29",
     "distance": 4342.0,
     "elevation_gain": 0.0,
     "id": "20380013159",
-    "is_commute": false,
-    "moving_time": 686.0,
+    "is_commute": true,
+    "moving_time": 685.0,
     "name": "Morning Ride",
     "raw_activity_type": "Ride",
     "raw_type": "Ride",
     "start_date_local": "2026-09-29T08:41:24Z",
+    "type": "Commute",
+    "year": 2026
+  },
+  {
+    "date": "2026-09-29",
+    "distance": 4696.0,
+    "elevation_gain": 44.5,
+    "id": "20386687925",
+    "is_commute": false,
+    "moving_time": 824.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-09-29T17:44:15Z",
     "type": "Ride",
     "year": 2026
   }
