@@ -34663,5 +34663,19 @@
     "start_date_local": "2026-10-04T15:46:06Z",
     "type": "Ride",
     "year": 2026
+  },
+  {
+    "date": "2026-10-06",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20483047578",
+    "is_commute": false,
+    "moving_time": 1871.0,
+    "name": "Evening Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-10-06T18:14:00Z",
+    "type": "Elliptical",
+    "year": 2026
   }
 ]
