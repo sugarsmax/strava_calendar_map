@@ -18633,6 +18633,13 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-10-11",
+      "hour": 19,
+      "subtype": "RockClimbing",
+      "type": "RockClimbing",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -38068,6 +38075,15 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 5400.0
+        },
+        "2026-10-11": {
+          "activity_ids": [
+            "20557620674"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 5400.0
         }
       },
       "Rowing": {
@@ -38837,7 +38853,7 @@
       }
     }
   },
-  "generated_at": "2026-10-11T19:16:08.649093+00:00",
+  "generated_at": "2026-10-12T22:18:37.105699+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

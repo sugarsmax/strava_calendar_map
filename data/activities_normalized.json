@@ -34705,5 +34705,19 @@
     "start_date_local": "2026-10-11T11:07:15Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-10-11",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20557620674",
+    "is_commute": false,
+    "moving_time": 5400.0,
+    "name": "Climbing",
+    "raw_activity_type": "RockClimbing",
+    "raw_type": "RockClimbing",
+    "start_date_local": "2026-10-11T19:15:00Z",
+    "type": "RockClimbing",
+    "year": 2026
   }
 ]
