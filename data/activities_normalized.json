@@ -34719,5 +34719,19 @@
     "start_date_local": "2026-10-11T19:15:00Z",
     "type": "RockClimbing",
     "year": 2026
+  },
+  {
+    "date": "2026-10-14",
+    "distance": 4371.6,
+    "elevation_gain": 7.5,
+    "id": "20583693424",
+    "is_commute": true,
+    "moving_time": 682.0,
+    "name": "Morning Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-10-14T08:45:00Z",
+    "type": "Commute",
+    "year": 2026
   }
 ]
