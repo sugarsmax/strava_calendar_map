@@ -18661,6 +18661,34 @@
       "subtype": "Ride",
       "type": "Commute",
       "year": 2026
+    },
+    {
+      "date": "2026-10-17",
+      "hour": 10,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
+    },
+    {
+      "date": "2026-10-17",
+      "hour": 17,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-10-17",
+      "hour": 16,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
+    },
+    {
+      "date": "2026-10-18",
+      "hour": 9,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -38040,6 +38068,16 @@
           "distance": 16117.5,
           "elevation_gain": 188.4,
           "moving_time": 2842.0
+        },
+        "2026-10-17": {
+          "activity_ids": [
+            "20628432127",
+            "20628435930"
+          ],
+          "count": 2,
+          "distance": 32261.2,
+          "elevation_gain": 378.2,
+          "moving_time": 6491.0
         }
       },
       "RockClimbing": {
@@ -38725,6 +38763,24 @@
           "distance": 3608.6,
           "elevation_gain": 15.9,
           "moving_time": 2741.0
+        },
+        "2026-10-17": {
+          "activity_ids": [
+            "20625954976"
+          ],
+          "count": 1,
+          "distance": 5510.1,
+          "elevation_gain": 42.0,
+          "moving_time": 4150.0
+        },
+        "2026-10-18": {
+          "activity_ids": [
+            "20638706355"
+          ],
+          "count": 1,
+          "distance": 3359.2,
+          "elevation_gain": 8.2,
+          "moving_time": 2511.0
         }
       },
       "WeightTraining": {
@@ -38893,7 +38949,7 @@
       }
     }
   },
-  "generated_at": "2026-10-17T17:37:03.316905+00:00",
+  "generated_at": "2026-10-18T17:39:27.607151+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

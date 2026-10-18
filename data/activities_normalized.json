@@ -34761,5 +34761,61 @@
     "start_date_local": "2026-10-15T09:44:34Z",
     "type": "Commute",
     "year": 2026
+  },
+  {
+    "date": "2026-10-17",
+    "distance": 5510.1,
+    "elevation_gain": 42.0,
+    "id": "20625954976",
+    "is_commute": false,
+    "moving_time": 4150.0,
+    "name": "Morning Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-10-17T10:51:31Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-10-17",
+    "distance": 16038.1,
+    "elevation_gain": 188.2,
+    "id": "20628432127",
+    "is_commute": false,
+    "moving_time": 3235.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-10-17T17:09:23Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-10-17",
+    "distance": 16223.1,
+    "elevation_gain": 190.0,
+    "id": "20628435930",
+    "is_commute": false,
+    "moving_time": 3256.0,
+    "name": "Afternoon Ride",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-10-17T16:56:37Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
+    "date": "2026-10-18",
+    "distance": 3359.2,
+    "elevation_gain": 8.2,
+    "id": "20638706355",
+    "is_commute": false,
+    "moving_time": 2511.0,
+    "name": "Morning Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-10-18T09:09:39Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
