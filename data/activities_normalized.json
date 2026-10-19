@@ -34805,6 +34805,20 @@
     "year": 2026
   },
   {
+    "date": "2026-10-17",
+    "distance": 16268.9,
+    "elevation_gain": 188.8,
+    "id": "20641751480",
+    "is_commute": false,
+    "moving_time": 3271.0,
+    "name": "Mt Tabor",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-10-17T16:56:37Z",
+    "type": "Ride",
+    "year": 2026
+  },
+  {
     "date": "2026-10-18",
     "distance": 3359.2,
     "elevation_gain": 8.2,
@@ -34816,6 +34830,20 @@
     "raw_type": "Walk",
     "start_date_local": "2026-10-18T09:09:39Z",
     "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-10-18",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20642012181",
+    "is_commute": false,
+    "moving_time": 1433.0,
+    "name": "Afternoon Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-10-18T17:46:06Z",
+    "type": "Elliptical",
     "year": 2026
   }
 ]
