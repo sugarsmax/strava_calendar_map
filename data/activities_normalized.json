@@ -34845,5 +34845,33 @@
     "start_date_local": "2026-10-18T17:46:06Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-10-19",
+    "distance": 3247.0,
+    "elevation_gain": 5.2,
+    "id": "20695381652",
+    "is_commute": false,
+    "moving_time": 2740.0,
+    "name": "Santa Rosa",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-10-19T13:24:45Z",
+    "type": "Walk",
+    "year": 2026
+  },
+  {
+    "date": "2026-10-22",
+    "distance": 2609.7,
+    "elevation_gain": 29.8,
+    "id": "20695606987",
+    "is_commute": false,
+    "moving_time": 1944.0,
+    "name": "Evening Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-10-22T18:05:19Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
