@@ -34887,5 +34887,19 @@
     "start_date_local": "2026-10-25T15:45:36Z",
     "type": "Elliptical",
     "year": 2026
+  },
+  {
+    "date": "2026-10-28",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "20763169559",
+    "is_commute": false,
+    "moving_time": 1232.0,
+    "name": "Morning Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-10-28T06:44:30Z",
+    "type": "Elliptical",
+    "year": 2026
   }
 ]
