@@ -18745,6 +18745,20 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-10-31",
+      "hour": 10,
+      "subtype": "Elliptical",
+      "type": "Elliptical",
+      "year": 2026
+    },
+    {
+      "date": "2026-10-31",
+      "hour": 11,
+      "subtype": "WeightTraining",
+      "type": "WeightTraining",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -37879,6 +37893,15 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 917.0
+        },
+        "2026-10-31": {
+          "activity_ids": [
+            "20808033422"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 1839.0
         }
       },
       "Hike": {
@@ -39065,11 +39088,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 4127.0
+        },
+        "2026-10-31": {
+          "activity_ids": [
+            "20808219942"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 1123.0
         }
       }
     }
   },
-  "generated_at": "2026-10-30T19:46:40.237984+00:00",
+  "generated_at": "2026-10-31T18:54:35.053336+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
