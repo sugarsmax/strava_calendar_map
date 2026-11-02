@@ -34971,5 +34971,19 @@
     "start_date_local": "2026-10-31T17:01:06Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-11-01",
+    "distance": 32349.0,
+    "elevation_gain": 315.6,
+    "id": "20822986876",
+    "is_commute": false,
+    "moving_time": 5475.0,
+    "name": "Portland Loop",
+    "raw_activity_type": "Ride",
+    "raw_type": "Ride",
+    "start_date_local": "2026-11-01T12:06:08Z",
+    "type": "Ride",
+    "year": 2026
   }
 ]
