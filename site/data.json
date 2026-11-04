@@ -18773,6 +18773,13 @@
       "subtype": "Ride",
       "type": "Ride",
       "year": 2026
+    },
+    {
+      "date": "2026-11-04",
+      "hour": 10,
+      "subtype": "Ride",
+      "type": "Ride",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -38217,6 +38224,15 @@
           "distance": 32349.0,
           "elevation_gain": 315.6,
           "moving_time": 5475.0
+        },
+        "2026-11-04": {
+          "activity_ids": [
+            "20860150270"
+          ],
+          "count": 1,
+          "distance": 4373.2,
+          "elevation_gain": 7.4,
+          "moving_time": 697.0
         }
       },
       "RockClimbing": {
@@ -39133,7 +39149,7 @@
       }
     }
   },
-  "generated_at": "2026-11-03T20:42:26.190119+00:00",
+  "generated_at": "2026-11-04T20:59:19.197224+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
