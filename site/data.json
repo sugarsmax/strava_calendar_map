@@ -18780,6 +18780,13 @@
       "subtype": "Ride",
       "type": "Ride",
       "year": 2026
+    },
+    {
+      "date": "2026-11-08",
+      "hour": 8,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -38972,6 +38979,15 @@
           "distance": 2083.2,
           "elevation_gain": 29.5,
           "moving_time": 1677.0
+        },
+        "2026-11-08": {
+          "activity_ids": [
+            "20912416685"
+          ],
+          "count": 1,
+          "distance": 5292.8,
+          "elevation_gain": 33.7,
+          "moving_time": 3958.0
         }
       },
       "WeightTraining": {
@@ -39149,7 +39165,7 @@
       }
     }
   },
-  "generated_at": "2026-11-07T19:10:51.376685+00:00",
+  "generated_at": "2026-11-08T19:14:26.255869+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
