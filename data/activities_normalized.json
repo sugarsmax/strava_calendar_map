@@ -35069,5 +35069,33 @@
     "start_date_local": "2026-11-14T10:37:38Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-11-17",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "21029778805",
+    "is_commute": false,
+    "moving_time": 1287.0,
+    "name": "Evening Elliptical",
+    "raw_activity_type": "Elliptical",
+    "raw_type": "Elliptical",
+    "start_date_local": "2026-11-17T19:02:35Z",
+    "type": "Elliptical",
+    "year": 2026
+  },
+  {
+    "date": "2026-11-17",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "21029839531",
+    "is_commute": false,
+    "moving_time": 749.0,
+    "name": "Evening Weight Training",
+    "raw_activity_type": "WeightTraining",
+    "raw_type": "WeightTraining",
+    "start_date_local": "2026-11-17T19:25:26Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
