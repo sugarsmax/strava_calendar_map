@@ -18836,6 +18836,20 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-11-21",
+      "hour": 15,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
+    },
+    {
+      "date": "2026-11-22",
+      "hour": 14,
+      "subtype": "Walk",
+      "type": "Walk",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -39082,6 +39096,24 @@
           "distance": 4034.6,
           "elevation_gain": 30.5,
           "moving_time": 3008.0
+        },
+        "2026-11-21": {
+          "activity_ids": [
+            "21075798580"
+          ],
+          "count": 1,
+          "distance": 1855.4,
+          "elevation_gain": 48.6,
+          "moving_time": 1489.0
+        },
+        "2026-11-22": {
+          "activity_ids": [
+            "21088273471"
+          ],
+          "count": 1,
+          "distance": 11559.2,
+          "elevation_gain": 140.1,
+          "moving_time": 1525.0
         }
       },
       "WeightTraining": {
@@ -39277,7 +39309,7 @@
       }
     }
   },
-  "generated_at": "2026-11-21T20:42:33.523629+00:00",
+  "generated_at": "2026-11-22T20:52:55.293924+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
