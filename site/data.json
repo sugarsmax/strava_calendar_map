@@ -39111,9 +39111,9 @@
             "21088273471"
           ],
           "count": 1,
-          "distance": 11559.2,
-          "elevation_gain": 140.1,
-          "moving_time": 1525.0
+          "distance": 941.4,
+          "elevation_gain": 7.3,
+          "moving_time": 441.0
         }
       },
       "WeightTraining": {
@@ -39309,7 +39309,7 @@
       }
     }
   },
-  "generated_at": "2026-11-22T20:52:55.293924+00:00",
+  "generated_at": "2026-11-24T01:57:14.243749+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",
