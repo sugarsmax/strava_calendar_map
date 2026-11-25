@@ -35139,5 +35139,19 @@
     "start_date_local": "2026-11-22T14:59:40Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-11-25",
+    "distance": 2277.0,
+    "elevation_gain": 25.6,
+    "id": "21122660323",
+    "is_commute": false,
+    "moving_time": 1759.0,
+    "name": "Lunch Walk",
+    "raw_activity_type": "Walk",
+    "raw_type": "Walk",
+    "start_date_local": "2026-11-25T12:39:46Z",
+    "type": "Walk",
+    "year": 2026
   }
 ]
