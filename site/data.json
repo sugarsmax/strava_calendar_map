@@ -18857,6 +18857,13 @@
       "subtype": "Walk",
       "type": "Walk",
       "year": 2026
+    },
+    {
+      "date": "2026-11-27",
+      "hour": 13,
+      "subtype": "Workout",
+      "type": "WeightTraining",
+      "year": 2026
     }
   ],
   "aggregates": {
@@ -39321,11 +39328,20 @@
           "distance": 0.0,
           "elevation_gain": 0.0,
           "moving_time": 749.0
+        },
+        "2026-11-27": {
+          "activity_ids": [
+            "21147715615"
+          ],
+          "count": 1,
+          "distance": 0.0,
+          "elevation_gain": 0.0,
+          "moving_time": 3600.0
         }
       }
     }
   },
-  "generated_at": "2026-11-26T23:24:28.475465+00:00",
+  "generated_at": "2026-11-27T23:03:44.517210+00:00",
   "other_bucket": "OtherSports",
   "repo": "sugarsmax/strava_calendar_map",
   "source": "strava",

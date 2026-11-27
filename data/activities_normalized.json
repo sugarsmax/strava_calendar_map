@@ -35153,5 +35153,19 @@
     "start_date_local": "2026-11-25T12:39:46Z",
     "type": "Walk",
     "year": 2026
+  },
+  {
+    "date": "2026-11-27",
+    "distance": 0.0,
+    "elevation_gain": 0.0,
+    "id": "21147715615",
+    "is_commute": false,
+    "moving_time": 3600.0,
+    "name": "Raking",
+    "raw_activity_type": "Workout",
+    "raw_type": "Workout",
+    "start_date_local": "2026-11-27T13:57:53Z",
+    "type": "WeightTraining",
+    "year": 2026
   }
 ]
